@@ -2,719 +2,1129 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#70c5ce">
-<meta name="apple-mobile-web-app-title" content="Flappy Beans">
-<title>Flappy Beans 🫘</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2a1f3d">
+<title>Monday Night Simulator 🌙</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* ============================================================= *
+   *  Monday Night Simulator — a cozy little hangout for three.    *
+   *  Jas · Aqsa · Adam. One room, tended every Monday night.      *
+   *  All vanilla HTML/CSS/JS. No backend. Open index.html & go.   *
+   * ============================================================= */
+
+  :root {
+    --wall-top: #4a3a63;
+    --wall-bot: #6b5184;
+    --floor: #8a6a4f;
+    --floor-dark: #74573f;
+    --warm: #ffd9a0;
+    --warm-glow: rgba(255, 198, 120, 0.55);
+    --coin: #ffcf5c;
+    --ink: #2a2036;
+    --panel: #fff7ec;
+    --panel-edge: #e6d3b3;
+    --accent: #d98a6a;
+    --jas: #e98aa8;     /* TODO(personalise): Jas's colour */
+    --aqsa: #7fbfb0;    /* TODO(personalise): Aqsa's colour */
+    --adam: #f0c067;    /* TODO(personalise): Adam's colour */
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
   html, body {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
+    background: #1b1428;
+    color: var(--ink);
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
     overflow: hidden;
-    background: #70c5ce;
-    -webkit-user-select: none;
     user-select: none;
-    -webkit-touch-callout: none;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: none;
-    overscroll-behavior: none;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
-  #game {
-    display: block;
-    width: 100%;
-    height: 100%;
-    touch-action: none;
+
+  #app {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
   }
+
+  /* ---- Top bar (HUD) ---------------------------------------------------- */
+  #hud {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
+    background: linear-gradient(180deg, #241a36, #2f2342);
+    color: #f3e9ff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    z-index: 30;
+    flex-wrap: wrap;
+  }
+  #hud .brand { font-weight: 700; font-size: 16px; letter-spacing: .3px; white-space: nowrap; }
+  #hud .brand .moon { filter: drop-shadow(0 0 6px var(--warm-glow)); }
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; white-space: nowrap;
+  }
+  .chip.coins { color: var(--coin); }
+  #hud .spacer { flex: 1 1 auto; }
+  .btn {
+    cursor: pointer; border: none; border-radius: 10px;
+    padding: 7px 12px; font-size: 13px; font-weight: 700;
+    background: #f3e3c6; color: #5a3d2a;
+    box-shadow: 0 2px 0 #cbb088; transition: transform .06s, box-shadow .06s;
+    white-space: nowrap;
+  }
+  .btn:active { transform: translateY(2px); box-shadow: 0 0 0 #cbb088; }
+  .btn.primary { background: linear-gradient(180deg, #ffd089, #ffb866); color: #5a3315; box-shadow: 0 2px 0 #d98f4a; }
+  .btn.ghost { background: rgba(255,255,255,0.10); color: #f3e9ff; box-shadow: none; border: 1px solid rgba(255,255,255,0.18); }
+  .btn.small { padding: 5px 9px; font-size: 12px; }
+
+  /* ---- The room stage --------------------------------------------------- */
+  #stage {
+    flex: 1 1 auto; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  /* The room keeps a fixed virtual size and is scaled to fit. */
+  #room {
+    position: absolute;
+    width: 800px; height: 520px;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+    transform-origin: center center;
+    background: linear-gradient(180deg, var(--wall-top), var(--wall-bot) 68%);
+  }
+  /* Wall / floor split */
+  #room .floor {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 32%;
+    background: linear-gradient(180deg, var(--floor), var(--floor-dark));
+  }
+  #room .floor::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0.06) 0 2px, transparent 2px 60px);
+    opacity: .6;
+  }
+  #room .skirting {
+    position: absolute; left: 0; right: 0; bottom: 32%; height: 8px;
+    background: #5a4636;
+  }
+  /* Warm ambient glow that grows as the room gets cosier */
+  #room .ambient {
+    position: absolute; inset: -20%;
+    background: radial-gradient(circle at 50% 60%, var(--warm-glow), transparent 60%);
+    opacity: 0; transition: opacity 1.2s ease; pointer-events: none; mix-blend-mode: screen;
+  }
+
+  /* Window with seasonal view */
+  .window {
+    position: absolute; top: 36px; left: 50%; transform: translateX(-50%);
+    width: 150px; height: 130px; border-radius: 10px 10px 4px 4px;
+    background: #20304a; border: 7px solid #efe3cf;
+    box-shadow: inset 0 0 0 2px #cdbb9c, 0 6px 14px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  .window .sky { position: absolute; inset: 0; transition: background 1s; }
+  .window .mullion-v { position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #efe3cf; transform: translateX(-50%); }
+  .window .mullion-h { position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #efe3cf; transform: translateY(-50%); }
+  .window .celest { position: absolute; width: 34px; height: 34px; border-radius: 50%; top: 16px; left: 22px; }
+  .window .scene-emoji { position: absolute; bottom: 6px; left: 0; right: 0; text-align: center; font-size: 20px; }
+
+  /* Three nooks: labels float along the floor */
+  .nook-label {
+    position: absolute; bottom: 4px; font-size: 11px; font-weight: 700;
+    color: rgba(255,255,255,0.7); text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    pointer-events: none;
+  }
+
+  /* Avatars */
+  .avatar {
+    position: absolute; bottom: 12%; width: 56px; text-align: center;
+    pointer-events: none; transition: transform .3s; z-index: 5;
+  }
+  .avatar .body {
+    width: 42px; height: 48px; margin: 0 auto;
+    border-radius: 22px 22px 16px 16px;
+    position: relative;
+    box-shadow: inset 0 -6px 0 rgba(0,0,0,0.12);
+  }
+  .avatar .face {
+    position: absolute; top: 12px; left: 0; right: 0; font-size: 16px; text-align: center;
+  }
+  .avatar .name {
+    margin-top: 2px; font-size: 11px; font-weight: 700; color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+  .avatar.bob { animation: bob 2.4s ease-in-out infinite; }
+  @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+
+  /* Placed items */
+  .item {
+    position: absolute; transform: translate(-50%, -50%);
+    font-size: 38px; line-height: 1; cursor: grab;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.35));
+    z-index: 4; touch-action: none;
+    transition: filter .15s;
+  }
+  .item:active { cursor: grabbing; }
+  .item.selected { filter: drop-shadow(0 0 8px var(--coin)) drop-shadow(0 4px 4px rgba(0,0,0,0.35)); }
+  .item .del {
+    position: absolute; top: -10px; right: -12px; width: 20px; height: 20px;
+    border-radius: 50%; background: #e2574c; color: #fff; font-size: 13px; font-weight: 800;
+    display: none; align-items: center; justify-content: center; cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+  .item.selected .del { display: flex; }
+
+  /* Hidden-object sparkle targets */
+  .hidden-target {
+    position: absolute; transform: translate(-50%,-50%);
+    font-size: 26px; cursor: pointer; z-index: 8;
+    animation: twinkle 1.6s ease-in-out infinite;
+  }
+  .hidden-target.found { animation: none; }
+  @keyframes twinkle { 0%,100%{opacity:.85; transform:translate(-50%,-50%) scale(1)} 50%{opacity:1; transform:translate(-50%,-50%) scale(1.12)} }
+
+  /* Place-mode banner */
+  #placeHint {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.65); color: #fff; padding: 6px 14px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; z-index: 20; display: none; white-space: nowrap;
+  }
+
+  /* ---- Bottom action bar ------------------------------------------------ */
+  #actionbar {
+    flex: 0 0 auto; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    padding: 10px; background: linear-gradient(0deg, #241a36, #2f2342);
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.4); z-index: 30;
+  }
+
+  /* ---- Panels / modals -------------------------------------------------- */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(15,10,24,0.66);
+    display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px;
+    backdrop-filter: blur(2px);
+  }
+  .overlay.show { display: flex; }
+  .panel {
+    background: var(--panel); color: var(--ink); border-radius: 18px;
+    width: min(560px, 96vw); max-height: 88vh; overflow: hidden;
+    border: 3px solid var(--panel-edge); box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column;
+    animation: pop .18s ease;
+  }
+  @keyframes pop { from{ transform: scale(.94); opacity:0 } to{ transform: scale(1); opacity:1 } }
+  .panel header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px; background: linear-gradient(180deg, #fff3df, #ffe9cc);
+    border-bottom: 2px solid var(--panel-edge);
+  }
+  .panel header h2 { font-size: 18px; margin: 0; }
+  .panel header .x { margin-left: auto; cursor: pointer; font-size: 20px; font-weight: 800; color: #a98a63; padding: 2px 8px; }
+  .panel .body { padding: 16px 18px; overflow-y: auto; }
+  .panel .foot { padding: 12px 18px; border-top: 2px solid var(--panel-edge); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+  .muted { color: #8a7560; font-size: 13px; }
+
+  /* Shop grid */
+  .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px,1fr)); gap: 10px; }
+  .shop-card {
+    background: #fffdf8; border: 2px solid #eaddc4; border-radius: 14px;
+    padding: 10px 8px; text-align: center; cursor: pointer; transition: transform .08s, border-color .1s;
+    position: relative;
+  }
+  .shop-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .shop-card .ic { font-size: 34px; }
+  .shop-card .nm { font-size: 12px; font-weight: 700; margin-top: 4px; }
+  .shop-card .pr { font-size: 12px; color: #b07a2a; font-weight: 800; margin-top: 3px; }
+  .shop-card.locked { opacity: .55; cursor: not-allowed; }
+  .shop-card.cant { opacity: .7; }
+  .shop-card .lock { position:absolute; top:6px; right:8px; font-size:13px; }
+  .shop-card .tag { position:absolute; top:6px; left:8px; font-size:10px; background:#f3e3c6; padding:1px 5px; border-radius:6px; color:#7a5a2a; font-weight:700; }
+  .section-title { font-size: 13px; font-weight: 800; color: #9a7a52; text-transform: uppercase; letter-spacing: .5px; margin: 14px 0 8px; }
+  .section-title:first-child { margin-top: 0; }
+
+  /* Memory cards */
+  .memory { background:#fffdf8; border:2px solid #eaddc4; border-radius:12px; padding:10px 12px; margin-bottom:10px; display:flex; gap:10px; align-items:flex-start; }
+  .memory .me { font-size: 26px; }
+  .memory .mt { font-size: 14px; }
+  .memory .mw { font-size: 11px; color:#9a7a52; font-weight:700; }
+
+  textarea, input[type=text] {
+    width: 100%; border: 2px solid #e0cfae; border-radius: 10px; padding: 8px 10px;
+    font-family: inherit; font-size: 14px; resize: vertical; background: #fffdf8;
+  }
+
+  /* Mini-game memory match board */
+  #matchBoard { display: grid; gap: 8px; justify-content: center; }
+  .mcard {
+    width: 64px; height: 64px; border-radius: 12px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 30px;
+    background: linear-gradient(180deg,#b98ad0,#9a6dc0); color: transparent;
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15); transition: transform .15s;
+  }
+  .mcard.flip { background: #fffdf8; color: #2a2036; }
+  .mcard.matched { background: #cdeccd; color: #2a2036; box-shadow: none; }
+
+  /* End-of-night card */
+  .nightcard { text-align: center; }
+  .nightcard .big { font-size: 26px; font-weight: 800; color: #7a4fa0; }
+  .nightcard .row { display: flex; justify-content: space-between; padding: 8px 4px; border-bottom: 1px dashed #e0cfae; font-size: 14px; }
+  .nightcard .row:last-child { border-bottom: none; }
+
+  .toast {
+    position: fixed; bottom: 86px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #2a2036; color: #fff; padding: 9px 18px; border-radius: 999px;
+    font-size: 14px; font-weight: 600; opacity: 0; transition: opacity .25s, transform .25s; z-index: 60;
+    pointer-events: none; box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .arrive .ava-row { display:flex; gap:14px; justify-content:center; margin: 6px 0 14px; }
+  .arrive .ava-row .a { text-align:center; }
+  .arrive .ava-row .dot { width:46px; height:46px; border-radius:50%; margin:0 auto 4px; box-shadow: inset 0 -6px 0 rgba(0,0,0,0.12); display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .arrive .ava-row .nm { font-size:12px; font-weight:700; }
+
+  .hint-line { font-size:13px; color:#8a7560; margin-top:6px; }
+  kbd { background:#efe3cf; border:1px solid #d9c39c; border-radius:5px; padding:1px 6px; font-size:12px; font-weight:700; }
 </style>
 </head>
 <body>
-<canvas id="game"></canvas>
+<div id="app">
+  <!-- ===== HUD ===== -->
+  <div id="hud">
+    <div class="brand"><span class="moon">🌙</span> Monday Night Simulator</div>
+    <span class="chip" id="weekChip">Week 1</span>
+    <span class="chip" id="seasonChip">🌸 Spring</span>
+    <span class="chip coins" id="coinChip">🪙 0</span>
+    <span class="spacer"></span>
+    <button class="btn ghost small" id="btnMemory">📖 Memories</button>
+    <button class="btn ghost small" id="btnSave">💾 Save</button>
+  </div>
+
+  <!-- ===== Room stage ===== -->
+  <div id="stage">
+    <div id="room">
+      <div class="ambient" id="ambient"></div>
+      <!-- Window -->
+      <div class="window">
+        <div class="sky" id="winSky"></div>
+        <div class="celest" id="winCelest"></div>
+        <div class="mullion-v"></div>
+        <div class="mullion-h"></div>
+        <div class="scene-emoji" id="winScene">🌷</div>
+      </div>
+      <div class="skirting"></div>
+      <div class="floor"></div>
+
+      <!-- Nook labels (TODO(personalise): rename / restyle each nook) -->
+      <div class="nook-label" style="left:8%">🛏️ Jas</div>
+      <div class="nook-label" style="left:46%">🫘 Aqsa</div>
+      <div class="nook-label" style="left:82%">📚 Adam</div>
+
+      <!-- Avatars -->
+      <div class="avatar bob" id="avJas" style="left:6%">
+        <div class="body" style="background:var(--jas)"><div class="face">^‿^</div></div>
+        <div class="name">Jas</div>
+      </div>
+      <div class="avatar bob" id="avAqsa" style="left:44%; animation-delay:.5s">
+        <div class="body" style="background:var(--aqsa)"><div class="face">◕‿◕</div></div>
+        <div class="name">Aqsa</div>
+      </div>
+      <div class="avatar bob" id="avAdam" style="left:80%; animation-delay:1s">
+        <div class="body" style="background:var(--adam)"><div class="face">•ᴗ•</div></div>
+        <div class="name">Adam</div>
+      </div>
+
+      <!-- Placed items get injected here -->
+      <div id="placeHint">✋ Drag to move · tap empty floor to drop</div>
+    </div>
+  </div>
+
+  <!-- ===== Action bar ===== -->
+  <div id="actionbar">
+    <button class="btn primary" id="btnNight">🌙 Start Monday Night</button>
+    <button class="btn" id="btnPlay">🎲 Mini-games</button>
+    <button class="btn" id="btnShop">🛍️ Shop</button>
+    <button class="btn" id="btnPlant">🌱 Tend</button>
+    <button class="btn ghost" id="btnEnd">✨ Sign off</button>
+  </div>
+</div>
+
+<!-- ===== Overlays ===== -->
+<div class="overlay" id="ovGeneric">
+  <div class="panel">
+    <header><h2 id="gTitle">Title</h2><span class="x" data-close>✕</span></header>
+    <div class="body" id="gBody"></div>
+    <div class="foot" id="gFoot"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
 (function () {
   "use strict";
 
-  var canvas = document.getElementById("game");
-  var ctx = canvas.getContext("2d");
+  // =====================================================================
+  //  CONFIG — the three friends. TODO(personalise): tweak freely.
+  // =====================================================================
+  var FRIENDS = [
+    { id: "jas",  name: "Jas",  color: "var(--jas)",  face: "^‿^" },
+    { id: "aqsa", name: "Aqsa", color: "var(--aqsa)", face: "◕‿◕" },
+    { id: "adam", name: "Adam", color: "var(--adam)", face: "•ᴗ•" }
+  ];
 
-  // ---- Display sizing (Retina-crisp, portrait) -------------------------------
-  // Internal coordinate space is a fixed virtual size; we scale to fit the
-  // screen so the game looks identical on every phone.
-  var VW = 360;            // virtual width
-  var VH = 640;            // virtual height
-  var scale = 1;
-  var offsetX = 0;
-  var offsetY = 0;
-  var dpr = 1;
+  // =====================================================================
+  //  CATALOGUE — cozy things to buy. unlockAt = Mondays needed to appear.
+  //  TODO(personalise): add your in-joke items in the IN-JOKES set below.
+  // =====================================================================
+  var CATALOGUE = [
+    // --- Starter cosies (available from night 1) ---
+    { id: "rug",      name: "Cozy Rug",     ic: "🟫", price: 8,  unlockAt: 0, set: "Starter" },
+    { id: "plantpot", name: "Little Plant", ic: "🪴", price: 10, unlockAt: 0, set: "Starter" },
+    { id: "lamp",     name: "Warm Lamp",    ic: "💡", price: 12, unlockAt: 0, set: "Starter" },
+    { id: "beanbag",  name: "Bean Bag",     ic: "🛋️", price: 14, unlockAt: 0, set: "Starter" },
+    { id: "books",    name: "Book Stack",   ic: "📚", price: 9,  unlockAt: 0, set: "Starter" },
+    { id: "candle",   name: "Candle",       ic: "🕯️", price: 7,  unlockAt: 0, set: "Starter" },
 
-  function resize() {
-    dpr = window.devicePixelRatio || 1;
-    var cssW = window.innerWidth;
-    var cssH = window.innerHeight;
-    canvas.width = Math.floor(cssW * dpr);
-    canvas.height = Math.floor(cssH * dpr);
-    canvas.style.width = cssW + "px";
-    canvas.style.height = cssH + "px";
+    // --- Unlocks at 3 Mondays ---
+    { id: "lava",     name: "Lava Lamp",    ic: "🔮", price: 18, unlockAt: 3, set: "Glow Up" },
+    { id: "string",   name: "String Lights",ic: "🎐", price: 16, unlockAt: 3, set: "Glow Up" },
+    { id: "poster",   name: "Poster",       ic: "🖼️", price: 13, unlockAt: 3, set: "Glow Up" },
+    { id: "guitar",   name: "Guitar",       ic: "🎸", price: 22, unlockAt: 3, set: "Glow Up" },
 
-    // Fit the virtual canvas inside the screen, keeping aspect ratio.
-    scale = Math.max(cssW / VW, cssH / VH); // cover the whole screen
-    offsetX = (cssW - VW * scale) / 2;
-    offsetY = (cssH - VH * scale) / 2;
-  }
-  window.addEventListener("resize", resize);
-  window.addEventListener("orientationchange", resize);
-  resize();
+    // --- Unlocks at 6 Mondays ---
+    { id: "cat",      name: "Cozy Cat",     ic: "🐱", price: 30, unlockAt: 6, set: "Friends" },
+    { id: "tea",      name: "Pot of Tea",   ic: "🫖", price: 11, unlockAt: 6, set: "Friends" },
+    { id: "cake",     name: "Snack Cake",   ic: "🍰", price: 12, unlockAt: 6, set: "Friends" },
+    { id: "vinyl",    name: "Record Player",ic: "📻", price: 24, unlockAt: 6, set: "Friends" },
 
-  // ---- Game constants --------------------------------------------------------
-  var GRAVITY = 0.45;
-  var FLAP = -7.6;
-  var MAX_FALL = 11;
-  var PIPE_W = 60;
-  var GAP = 165;            // gap between top and bottom obstacle
-  var PIPE_SPEED = 2.4;
-  var PIPE_SPACING = 220;   // horizontal distance between pipe pairs
-  var GROUND_H = 90;
-  var BEAN_R = 17;          // collision radius (a touch forgiving)
-  var BEAN_X = VW * 0.30;
+    // --- Unlocks at 10 Mondays ---
+    { id: "fairy",    name: "Fairy Window", ic: "✨", price: 28, unlockAt: 10, set: "Twinkle" },
+    { id: "balloon",  name: "Party Balloon",ic: "🎈", price: 15, unlockAt: 10, set: "Twinkle" },
+    { id: "mirror",   name: "Round Mirror", ic: "🪞", price: 20, unlockAt: 10, set: "Twinkle" },
+    { id: "clock",    name: "Wall Clock",   ic: "🕰️", price: 17, unlockAt: 10, set: "Twinkle" },
 
-  // ---- Game state ------------------------------------------------------------
-  var STATE_READY = 0, STATE_PLAY = 1, STATE_OVER = 2;
-  var state = STATE_READY;
+    // --- Unlocks at 15 Mondays ---
+    { id: "fish",     name: "Fish Tank",    ic: "🐠", price: 40, unlockAt: 15, set: "Deluxe" },
+    { id: "piano",    name: "Tiny Piano",   ic: "🎹", price: 45, unlockAt: 15, set: "Deluxe" },
+    { id: "disco",    name: "Disco Ball",   ic: "🪩", price: 38, unlockAt: 15, set: "Deluxe" },
 
-  var bean = { y: VH / 2, vy: 0, rot: 0 };
-  var pipes = [];
-  var score = 0;
-  var best = 0;
-  try { best = parseInt(localStorage.getItem("flappyBeansBest") || "0", 10) || 0; } catch (e) {}
+    // --- IN-JOKES (TODO(personalise): swap these for your real in-jokes!) ---
+    { id: "joke1",    name: "Beans (!!)",   ic: "🫘", price: 6,  unlockAt: 0, set: "In-Jokes", joke: true },
+    { id: "joke2",    name: "Fave Snack",   ic: "🍫", price: 9,  unlockAt: 0, set: "In-Jokes", joke: true },
+    { id: "joke3",    name: "The Poster",   ic: "🎬", price: 14, unlockAt: 3, set: "In-Jokes", joke: true }
+  ];
 
-  var groundScroll = 0;
-  var bgScroll = 0;
-  var frame = 0;
-  var flashAlpha = 0;       // white flash on hit
-  var overTimer = 0;        // small delay before retry allowed
+  // Mini-games unlock over time too.
+  var MINIGAMES = [
+    { id: "hidden", name: "Spot the Cozy Object", ic: "🔍", unlockAt: 0, desc: "Find the twinkling things hidden in the room. Call them out together!" },
+    { id: "match",  name: "Memory Match",         ic: "🃏", unlockAt: 0, desc: "Flip cards to find matching pairs of your stuff." },
+    { id: "tidy",   name: "Tidy the Room",        ic: "🧹", unlockAt: 6, desc: "Tap the scattered mess before the timer runs out." }
+  ];
 
-  // ---- Laser eyes ------------------------------------------------------------
-  var LASER_HOLD = 75;      // frames the beam must stay on a stalk to vaporize it (~1.2s).
-                            // Tuned below 2s because a stalk is only in front of the bean
-                            // ~1.5s as it approaches, so a longer hold is impossible to land.
-  var lasersOn = false;
-  try { lasersOn = localStorage.getItem("flappyBeansLaser") === "1"; } catch (e) {}
-  var laserHitPipe = null;  // pipe the beam is currently touching (for drawing the impact)
-  var laserImpact = { x: 0, y: 0, hit: false };
-  var particles = [];       // vaporize burst particles
-  var pendingFlap = null;   // timer id used to debounce single- vs two-finger touch
+  // New room areas unlock at milestones (purely cosmetic + a callback line).
+  var AREAS = [
+    { at: 6,  name: "the reading corner", emoji: "📖" },
+    { at: 12, name: "the little balcony", emoji: "🪟" },
+    { at: 20, name: "the music nook",     emoji: "🎶" }
+  ];
 
-  function toggleLasers() {
-    lasersOn = !lasersOn;
-    try { localStorage.setItem("flappyBeansLaser", lasersOn ? "1" : "0"); } catch (e) {}
-    if (lasersOn) sndLaserToggle();
-    else sndLaserOff();
-  }
+  // =====================================================================
+  //  STATE + SAVE/LOAD
+  // =====================================================================
+  var SAVE_KEY = "mondayNightSim.v1";
+  var DEFAULT_STATE = {
+    version: 1,
+    sessions: 0,            // total Mondays played (the heart of continuity)
+    coins: 20,             // a little starter pocket money
+    placed: [],            // [{uid, itemId, x, y}]  x,y as % of room
+    plant: 0,              // plant growth stages
+    unlockedGames: ["hidden", "match"],
+    seenAreas: [],         // area milestones already celebrated
+    memories: [],          // [{week, emoji, text}]
+    lastItem: null,        // for the "Last Monday you added…" callback
+    nights: [],            // log of each night for end-cards / history
+    createdAt: null,
+    updatedAt: null
+  };
 
-  function resetGame() {
-    bean.y = VH / 2;
-    bean.vy = 0;
-    bean.rot = 0;
-    pipes = [];
-    particles = [];
-    score = 0;
-    frame = 0;
-    flashAlpha = 0;
-    // seed first pipes off-screen to the right
-    for (var i = 0; i < 3; i++) {
-      spawnPipe(VW + 60 + i * PIPE_SPACING);
-    }
-  }
+  var state = load();
 
-  function spawnPipe(x) {
-    var margin = 70;
-    var minTop = margin;
-    var maxTop = VH - GROUND_H - GAP - margin;
-    var topH = minTop + Math.random() * (maxTop - minTop);
-    pipes.push({ x: x, top: topH, passed: false, charge: 0, destroyed: false });
-  }
-
-  // ---- Sound (WebAudio, generated — no files) --------------------------------
-  var audioCtx = null;
-  function initAudio() {
-    if (audioCtx) return;
+  function load() {
     try {
-      var AC = window.AudioContext || window.webkitAudioContext;
-      if (AC) audioCtx = new AC();
-    } catch (e) {}
-  }
-  function beep(freq, dur, type, vol) {
-    if (!audioCtx) return;
-    try {
-      var t = audioCtx.currentTime;
-      var osc = audioCtx.createOscillator();
-      var gain = audioCtx.createGain();
-      osc.type = type || "square";
-      osc.frequency.setValueAtTime(freq, t);
-      gain.gain.setValueAtTime(vol || 0.08, t);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(t);
-      osc.stop(t + dur);
-    } catch (e) {}
-  }
-  function sndFlap() { beep(620, 0.09, "square", 0.06); }
-  function sndScore() { beep(880, 0.10, "sine", 0.09); beep(1320, 0.10, "sine", 0.05); }
-  function sndHit() { beep(180, 0.20, "sawtooth", 0.10); beep(90, 0.30, "sawtooth", 0.08); }
-  function sndLaserToggle() { beep(440, 0.08, "sawtooth", 0.06); beep(1200, 0.12, "sawtooth", 0.05); }
-  function sndLaserOff() { beep(700, 0.08, "sine", 0.05); beep(300, 0.10, "sine", 0.05); }
-  function sndZap() { beep(140, 0.30, "sawtooth", 0.12); beep(70, 0.40, "square", 0.08); beep(900, 0.08, "sawtooth", 0.05); }
-
-  // ---- Input -----------------------------------------------------------------
-  function flap() {
-    initAudio();
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-
-    if (state === STATE_READY) {
-      state = STATE_PLAY;
-      bean.vy = FLAP;
-      sndFlap();
-    } else if (state === STATE_PLAY) {
-      bean.vy = FLAP;
-      sndFlap();
-    } else if (state === STATE_OVER) {
-      if (overTimer <= 0) {
-        resetGame();
-        state = STATE_READY;
+      var raw = localStorage.getItem(SAVE_KEY);
+      if (raw) {
+        var s = JSON.parse(raw);
+        // shallow-merge onto defaults so older saves keep working
+        return Object.assign({}, clone(DEFAULT_STATE), s);
       }
-    }
+    } catch (e) { console.warn("load failed", e); }
+    var fresh = clone(DEFAULT_STATE);
+    fresh.createdAt = Date.now();
+    return fresh;
+  }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+  function save() {
+    state.updatedAt = Date.now();
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }
+    catch (e) { console.warn("save failed", e); }
   }
 
-  function onTouchStart(e) {
-    if (e.cancelable) e.preventDefault();
-    initAudio();
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  // =====================================================================
+  //  ELEMENT REFS + tiny helpers
+  // =====================================================================
+  var $ = function (id) { return document.getElementById(id); };
+  var room = $("room");
+  var coinChip = $("coinChip"), weekChip = $("weekChip"), seasonChip = $("seasonChip");
+  var toastEl = $("toast"), toastTimer = null;
 
-    if (e.touches && e.touches.length >= 2) {
-      // Two fingers down: this is a laser toggle, not a flap.
-      if (pendingFlap) { clearTimeout(pendingFlap); pendingFlap = null; }
-      toggleLasers();
-      return;
-    }
-    // One finger: wait a tiny moment in case a second finger is landing.
-    if (pendingFlap) clearTimeout(pendingFlap);
-    pendingFlap = setTimeout(function () { pendingFlap = null; flap(); }, 70);
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 1900);
   }
 
-  function onMouseDown(e) {
-    if (e.cancelable) e.preventDefault();
-    flap();
+  function setCoins(n) { state.coins = Math.max(0, Math.round(n)); coinChip.textContent = "🪙 " + state.coins; }
+  function addCoins(n) { setCoins(state.coins + n); }
+
+  // =====================================================================
+  //  ROOM SCALING — keep the 800×520 room fitting the stage.
+  // =====================================================================
+  function fitRoom() {
+    var stage = $("stage");
+    var pad = 24;
+    var sw = stage.clientWidth - pad, sh = stage.clientHeight - pad;
+    var scale = Math.min(sw / 800, sh / 520);
+    scale = Math.max(0.35, Math.min(scale, 1.4));
+    room.style.transform = "scale(" + scale + ")";
+    roomScale = scale;
+  }
+  var roomScale = 1;
+  window.addEventListener("resize", fitRoom);
+
+  // =====================================================================
+  //  SEASON / WINDOW — derived from the real date for a gentle touch.
+  // =====================================================================
+  function currentSeason() {
+    var m = new Date().getMonth(); // 0=Jan
+    // Northern-hemisphere-ish; tweak if you like.
+    if (m === 11 || m <= 1) return { key: "winter", label: "❄️ Winter", scene: "⛄",
+      sky: "linear-gradient(180deg,#2a3a5a,#3d5277)", celest: "radial-gradient(circle,#fff,#d8e6ff)", celestNight: true };
+    if (m <= 4) return { key: "spring", label: "🌸 Spring", scene: "🌷",
+      sky: "linear-gradient(180deg,#9fd0ff,#cfeeff)", celest: "radial-gradient(circle,#fff6c0,#ffd76b)" };
+    if (m <= 7) return { key: "summer", label: "☀️ Summer", scene: "🌻",
+      sky: "linear-gradient(180deg,#7fc7ff,#bfeaff)", celest: "radial-gradient(circle,#fff2a0,#ffcf3b)" };
+    return { key: "autumn", label: "🍂 Autumn", scene: "🍁",
+      sky: "linear-gradient(180deg,#b98a5a,#e9c188)", celest: "radial-gradient(circle,#ffe0a0,#ff9d4b)" };
+  }
+  function renderSeason() {
+    var s = currentSeason();
+    seasonChip.textContent = s.label;
+    // It's Monday *night* — give the window a dusky tint regardless of season.
+    $("winSky").style.background = "linear-gradient(180deg,#1f2740,#3a3357)";
+    $("winCelest").style.background = "radial-gradient(circle,#fffdf0,#ffe9a8)"; // the moon
+    $("winScene").textContent = s.scene;
+    return s;
   }
 
-  canvas.addEventListener("touchstart", onTouchStart, { passive: false });
-  canvas.addEventListener("mousedown", onMouseDown);
-  window.addEventListener("keydown", function (e) {
-    if (e.code === "Space" || e.key === " " || e.code === "ArrowUp") {
+  // =====================================================================
+  //  RENDER: placed items + ambient cosiness
+  // =====================================================================
+  var selectedUid = null;
+
+  function renderRoom() {
+    // remove existing item nodes
+    Array.prototype.slice.call(room.querySelectorAll(".item")).forEach(function (n) { n.remove(); });
+    state.placed.forEach(function (p) {
+      var def = itemDef(p.itemId);
+      if (!def) return;
+      var el = document.createElement("div");
+      el.className = "item" + (p.uid === selectedUid ? " selected" : "");
+      el.dataset.uid = p.uid;
+      el.style.left = p.x + "%";
+      el.style.top = p.y + "%";
+      el.textContent = def.ic;
+      var del = document.createElement("div");
+      del.className = "del"; del.textContent = "×";
+      del.addEventListener("click", function (ev) { ev.stopPropagation(); removeItem(p.uid); });
+      el.appendChild(del);
+      attachDrag(el, p);
+      room.appendChild(el);
+    });
+    updateAmbient();
+    updateHud();
+  }
+
+  function updateAmbient() {
+    // The more (and warmer) the stuff, the cosier the glow.
+    var n = state.placed.length;
+    var glow = Math.min(0.85, n * 0.06);
+    $("ambient").style.opacity = glow;
+  }
+
+  function updateHud() {
+    weekChip.textContent = "Week " + Math.max(1, state.sessions || 1);
+    setCoins(state.coins);
+  }
+
+  function itemDef(id) {
+    for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) return CATALOGUE[i];
+    return null;
+  }
+
+  function removeItem(uid) {
+    state.placed = state.placed.filter(function (p) { return p.uid !== uid; });
+    if (selectedUid === uid) selectedUid = null;
+    save(); renderRoom();
+    toast("Put it away.");
+  }
+
+  // =====================================================================
+  //  DRAG to move placed items (mouse + touch)
+  // =====================================================================
+  function attachDrag(el, p) {
+    var dragging = false, moved = false;
+
+    function down(e) {
       e.preventDefault();
-      flap();
-    } else if (e.key === "l" || e.key === "L") {
-      e.preventDefault();
-      initAudio();
-      if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-      toggleLasers();
+      dragging = true; moved = false;
+      selectedUid = p.uid;
+      // refresh selection highlight without full re-render
+      Array.prototype.slice.call(room.querySelectorAll(".item")).forEach(function (n) {
+        n.classList.toggle("selected", n.dataset.uid === p.uid);
+      });
+      window.addEventListener("mousemove", move);
+      window.addEventListener("touchmove", move, { passive: false });
+      window.addEventListener("mouseup", up);
+      window.addEventListener("touchend", up);
+    }
+    function move(e) {
+      if (!dragging) return;
+      e.preventDefault(); moved = true;
+      var pt = e.touches ? e.touches[0] : e;
+      var rect = room.getBoundingClientRect();
+      var x = ((pt.clientX - rect.left) / rect.width) * 100;
+      var y = ((pt.clientY - rect.top) / rect.height) * 100;
+      x = Math.max(3, Math.min(97, x));
+      y = Math.max(10, Math.min(95, y));
+      p.x = x; p.y = y;
+      el.style.left = x + "%"; el.style.top = y + "%";
+    }
+    function up() {
+      if (!dragging) return;
+      dragging = false;
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("touchmove", move);
+      window.removeEventListener("mouseup", up);
+      window.removeEventListener("touchend", up);
+      if (moved) save();
+    }
+    el.addEventListener("mousedown", down);
+    el.addEventListener("touchstart", down, { passive: false });
+  }
+
+  // tap empty floor to deselect
+  room.addEventListener("click", function (e) {
+    if (e.target === room || e.target.classList.contains("floor")) {
+      selectedUid = null;
+      Array.prototype.slice.call(room.querySelectorAll(".item")).forEach(function (n) { n.classList.remove("selected"); });
     }
   });
 
-  // ---- Laser geometry --------------------------------------------------------
-  // World position of the bean's visible eye (matches drawBean()).
-  function eyeWorld() {
-    var r = BEAN_R + 2;
-    var lx = r * 0.45, ly = -r * 0.35;
-    var c = Math.cos(bean.rot), s = Math.sin(bean.rot);
-    return { x: BEAN_X + lx * c - ly * s, y: bean.y + lx * s + ly * c, ang: bean.rot };
+  // =====================================================================
+  //  GENERIC PANEL helper
+  // =====================================================================
+  var ov = $("ovGeneric");
+  function openPanel(title, bodyHtml, footButtons) {
+    $("gTitle").textContent = title;
+    $("gBody").innerHTML = bodyHtml;
+    var foot = $("gFoot"); foot.innerHTML = "";
+    (footButtons || []).forEach(function (b) {
+      var btn = document.createElement("button");
+      btn.className = "btn " + (b.cls || "");
+      btn.textContent = b.label;
+      btn.addEventListener("click", b.onClick);
+      foot.appendChild(btn);
+    });
+    ov.classList.add("show");
   }
+  function closePanel() { ov.classList.remove("show"); }
+  ov.addEventListener("click", function (e) { if (e.target === ov) closePanel(); });
+  Array.prototype.slice.call(document.querySelectorAll("[data-close]")).forEach(function (x) {
+    x.addEventListener("click", closePanel);
+  });
 
-  // Cast the eye-ray to the right; find the first solid stalk it lands on.
-  // Beam passes through gaps and already-destroyed pipes. Updates laserImpact.
-  function computeLaser() {
-    var e = eyeWorld();
-    var c = Math.cos(e.ang), s = Math.sin(e.ang);
-    if (c < 0.05) c = 0.05; // beam always travels rightward
-    laserHitPipe = null;
-    for (var i = 0; i < pipes.length; i++) {
-      var p = pipes[i];
-      if (p.destroyed) continue;
-      if (p.x <= e.x) continue;            // only stalks ahead of the eye
-      var yAt = e.y + (p.x - e.x) * (s / c);
-      if (yAt < p.top || yAt > p.top + GAP) {
-        laserHitPipe = p;
-        laserImpact.x = p.x;
-        laserImpact.y = Math.max(0, Math.min(VH, yAt));
-        laserImpact.hit = true;
-        return;
-      }
-    }
-    // No stalk hit — beam exits the right edge of the screen.
-    laserImpact.x = VW;
-    laserImpact.y = e.y + (VW - e.x) * (s / c);
-    laserImpact.hit = false;
-  }
-
-  function spawnBurst(x, y) {
-    for (var i = 0; i < 16; i++) {
-      var a = Math.random() * Math.PI * 2;
-      var sp = 1 + Math.random() * 4;
-      particles.push({
-        x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1,
-        life: 1, color: Math.random() < 0.5 ? "#ff5a3c" : "#ffd23c"
+  // =====================================================================
+  //  SHOP
+  // =====================================================================
+  function openShop() {
+    var sets = {};
+    CATALOGUE.forEach(function (it) { (sets[it.set] = sets[it.set] || []).push(it); });
+    var html = '<p class="muted">Tap an item to buy it, then drag it anywhere in the room. New sets unlock as your Mondays add up.</p>';
+    Object.keys(sets).forEach(function (setName) {
+      html += '<div class="section-title">' + setName + '</div><div class="shop-grid">';
+      sets[setName].forEach(function (it) {
+        var unlocked = state.sessions >= it.unlockAt;
+        var canAfford = state.coins >= it.price;
+        var cls = "shop-card" + (!unlocked ? " locked" : (!canAfford ? " cant" : ""));
+        html += '<div class="' + cls + '" data-buy="' + it.id + '" data-ok="' + (unlocked && canAfford) + '">';
+        if (it.joke) html += '<span class="tag">in-joke</span>';
+        if (!unlocked) html += '<span class="lock">🔒</span>';
+        html += '<div class="ic">' + it.ic + '</div><div class="nm">' + it.name + '</div>';
+        html += unlocked ? '<div class="pr">🪙 ' + it.price + '</div>'
+                         : '<div class="pr">Wk ' + (it.unlockAt + 1) + '</div>';
+        html += '</div>';
       });
-    }
-  }
+      html += '</div>';
+    });
+    openPanel("🛍️ Cozy Shop", html, [{ label: "Done", cls: "primary", onClick: closePanel }]);
 
-  function updateParticles() {
-    for (var i = particles.length - 1; i >= 0; i--) {
-      var p = particles[i];
-      p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life -= 0.03;
-      if (p.life <= 0) particles.splice(i, 1);
-    }
-  }
-
-  // ---- Update ----------------------------------------------------------------
-  function update() {
-    frame++;
-    if (overTimer > 0) overTimer--;
-    if (flashAlpha > 0) flashAlpha -= 0.06;
-
-    // backgrounds always drift a little for life
-    bgScroll = (bgScroll + 0.3) % VW;
-    updateParticles();
-
-    if (state === STATE_READY) {
-      // gentle bobbing while waiting
-      bean.y = VH / 2 + Math.sin(frame / 18) * 8;
-      bean.rot = Math.sin(frame / 18) * 0.12;
-      groundScroll = (groundScroll + PIPE_SPEED) % 24;
-      if (lasersOn) computeLaser(); else laserHitPipe = null;
-      return;
-    }
-
-    if (state === STATE_PLAY) {
-      bean.vy += GRAVITY;
-      if (bean.vy > MAX_FALL) bean.vy = MAX_FALL;
-      bean.y += bean.vy;
-
-      // rotation follows velocity
-      var target = bean.vy < 0 ? -0.5 : Math.min(1.4, bean.vy / 10);
-      bean.rot += (target - bean.rot) * 0.18;
-
-      groundScroll = (groundScroll + PIPE_SPEED) % 24;
-
-      // move pipes
-      for (var i = 0; i < pipes.length; i++) {
-        pipes[i].x -= PIPE_SPEED;
-        if (!pipes[i].passed && pipes[i].x + PIPE_W < BEAN_X - BEAN_R) {
-          pipes[i].passed = true;
-          score++;
-          sndScore();
+    Array.prototype.slice.call($("gBody").querySelectorAll("[data-buy]")).forEach(function (card) {
+      card.addEventListener("click", function () {
+        if (card.dataset.ok !== "true") {
+          var it = itemDef(card.dataset.buy);
+          if (state.sessions < it.unlockAt) toast("Unlocks on Week " + (it.unlockAt + 1) + " 🔒");
+          else toast("Not enough coins yet 🪙");
+          return;
         }
-      }
-      // recycle / spawn
-      if (pipes.length && pipes[0].x + PIPE_W < -10) pipes.shift();
-      var last = pipes[pipes.length - 1];
-      if (!last || last.x < VW - PIPE_SPACING) {
-        spawnPipe((last ? last.x : VW) + PIPE_SPACING);
-      }
+        buyItem(card.dataset.buy);
+      });
+    });
+  }
 
-      // lasers: hold the beam on a stalk for ~2s to vaporize it
-      if (lasersOn) {
-        computeLaser();
-        for (var j = 0; j < pipes.length; j++) {
-          var pp = pipes[j];
-          if (pp === laserHitPipe) {
-            pp.charge++;
-            if (pp.charge >= LASER_HOLD && !pp.destroyed) {
-              pp.destroyed = true;
-              spawnBurst(BEAN_X + (laserImpact.x - BEAN_X) * 0.5, laserImpact.y);
-              flashAlpha = 0.4;
-              sndZap();
-            }
-          } else if (pp.charge > 0) {
-            pp.charge -= 3;
-            if (pp.charge < 0) pp.charge = 0;
+  function buyItem(id) {
+    var it = itemDef(id);
+    if (!it || state.coins < it.price) return;
+    setCoins(state.coins - it.price);
+    var uid = "i" + Date.now() + Math.floor(Math.random() * 999);
+    // drop near the middle of the floor; player can drag it.
+    state.placed.push({ uid: uid, itemId: id, x: 35 + Math.random() * 30, y: 70 + Math.random() * 12 });
+    state.lastItem = it.name;
+    selectedUid = uid;
+    save(); renderRoom();
+    closePanel();
+    showPlaceHint();
+    toast("Bought " + it.name + "! Drag it where you like ✋");
+  }
+
+  var placeHintTimer = null;
+  function showPlaceHint() {
+    var h = $("placeHint"); h.style.display = "block";
+    clearTimeout(placeHintTimer);
+    placeHintTimer = setTimeout(function () { h.style.display = "none"; }, 3500);
+  }
+
+  // =====================================================================
+  //  MINI-GAMES menu
+  // =====================================================================
+  function openGames() {
+    var html = '<p class="muted">Quick co-op games for the three of you. Finishing earns cosiness coins 🪙</p>';
+    MINIGAMES.forEach(function (g) {
+      var unlocked = state.sessions >= g.unlockAt;
+      html += '<div class="shop-card" style="text-align:left; display:flex; gap:12px; align-items:center; margin-bottom:10px; cursor:' + (unlocked ? "pointer" : "not-allowed") + '; opacity:' + (unlocked ? 1 : .55) + '" data-game="' + (unlocked ? g.id : "") + '">';
+      html += '<div class="ic">' + g.ic + '</div><div style="flex:1"><div class="nm">' + g.name + (unlocked ? "" : " 🔒") + '</div><div class="muted" style="font-size:12px">' + (unlocked ? g.desc : "Unlocks on Week " + (g.unlockAt + 1)) + '</div></div></div>';
+    });
+    openPanel("🎲 Mini-games", html, [{ label: "Close", cls: "primary", onClick: closePanel }]);
+    Array.prototype.slice.call($("gBody").querySelectorAll("[data-game]")).forEach(function (c) {
+      c.addEventListener("click", function () {
+        var id = c.dataset.game; if (!id) return;
+        closePanel();
+        if (id === "hidden") startHiddenObject();
+        else if (id === "match") startMemoryMatch();
+        else if (id === "tidy") startTidy();
+      });
+    });
+  }
+
+  // ---- Mini-game 1: Spot the Cozy Object (the v1 hero game) -------------
+  var hiddenTargets = [];
+  function startHiddenObject() {
+    clearHiddenTargets();
+    var spots = ["🔑", "🧦", "🍪", "⭐", "🦋", "🐞"];
+    var count = 5;
+    var found = 0;
+    for (var i = 0; i < count; i++) {
+      var el = document.createElement("div");
+      el.className = "hidden-target";
+      el.textContent = spots[i % spots.length];
+      el.style.left = (8 + Math.random() * 84) + "%";
+      el.style.top = (18 + Math.random() * 70) + "%";
+      (function (node) {
+        node.addEventListener("click", function () {
+          if (node.classList.contains("found")) return;
+          node.classList.add("found");
+          node.style.opacity = ".25";
+          node.style.filter = "grayscale(1)";
+          found++;
+          addCoins(2);
+          updateHud();
+          toast("Found one! +2 🪙  (" + found + "/" + count + ")");
+          if (found >= count) {
+            setTimeout(function () {
+              clearHiddenTargets();
+              finishGame("Spot the Cozy Object", 6);
+            }, 500);
           }
+        });
+      })(el);
+      hiddenTargets.push(el);
+      room.appendChild(el);
+    }
+    toast("🔍 Find " + count + " twinkling things! Call them out together.");
+  }
+  function clearHiddenTargets() {
+    hiddenTargets.forEach(function (n) { if (n.parentNode) n.remove(); });
+    hiddenTargets = [];
+  }
+
+  // ---- Mini-game 2: Memory Match ---------------------------------------
+  function startMemoryMatch() {
+    var icons = ["🫘", "🌙", "🪴", "🕯️", "🎸", "🐱"];
+    var deck = icons.concat(icons);
+    shuffle(deck);
+    var cols = 4;
+    var first = null, lock = false, matched = 0;
+    var board = '<div id="matchBoard" style="grid-template-columns:repeat(' + cols + ',64px)">';
+    deck.forEach(function (ic, i) { board += '<div class="mcard" data-i="' + i + '" data-ic="' + ic + '"></div>'; });
+    board += '</div><p class="muted" style="text-align:center;margin-top:12px">Find all six pairs together.</p>';
+    openPanel("🃏 Memory Match", board, []);
+
+    var cards = Array.prototype.slice.call($("gBody").querySelectorAll(".mcard"));
+    cards.forEach(function (card) {
+      card.addEventListener("click", function () {
+        if (lock || card.classList.contains("flip") || card.classList.contains("matched")) return;
+        card.classList.add("flip"); card.textContent = card.dataset.ic;
+        if (!first) { first = card; return; }
+        lock = true;
+        if (first.dataset.ic === card.dataset.ic) {
+          setTimeout(function () {
+            first.classList.add("matched"); card.classList.add("matched");
+            first = null; lock = false; matched++;
+            addCoins(1); updateHud();
+            if (matched === icons.length) {
+              setTimeout(function () { closePanel(); finishGame("Memory Match", 6); }, 450);
+            }
+          }, 350);
+        } else {
+          setTimeout(function () {
+            first.classList.remove("flip"); first.textContent = "";
+            card.classList.remove("flip"); card.textContent = "";
+            first = null; lock = false;
+          }, 750);
         }
-      } else {
-        laserHitPipe = null;
-      }
+      });
+    });
+  }
 
-      // collisions
-      if (checkCollision()) {
-        die();
-      }
-    } else if (state === STATE_OVER) {
-      // bean falls to the ground
-      if (bean.y < VH - GROUND_H - BEAN_R) {
-        bean.vy += GRAVITY;
-        bean.y += bean.vy;
-        bean.rot += (1.5 - bean.rot) * 0.12;
-      } else {
-        bean.y = VH - GROUND_H - BEAN_R;
-      }
+  // ---- Mini-game 3: Tidy the Room (timed) ------------------------------
+  function startTidy() {
+    var mess = ["🧦", "🥤", "📄", "🧸", "🍌", "👕", "🎧"];
+    var nodes = [];
+    var cleared = 0;
+    var total = 7;
+    var timeLeft = 15;
+    for (var i = 0; i < total; i++) {
+      var el = document.createElement("div");
+      el.className = "hidden-target";
+      el.textContent = mess[i % mess.length];
+      el.style.left = (8 + Math.random() * 84) + "%";
+      el.style.top = (35 + Math.random() * 55) + "%";
+      el.style.animation = "none";
+      (function (node) {
+        node.addEventListener("click", function () {
+          if (node.dataset.done) return;
+          node.dataset.done = "1";
+          node.style.transition = "transform .3s, opacity .3s";
+          node.style.transform = "translate(-50%,-50%) scale(0)";
+          node.style.opacity = "0";
+          cleared++; addCoins(1); updateHud();
+          if (cleared >= total) endTidy(true);
+        });
+      })(el);
+      nodes.push(el); room.appendChild(el);
+    }
+    var done = false;
+    var timer = setInterval(function () {
+      timeLeft--;
+      toastEl.textContent = "🧹 Tidy up! " + cleared + "/" + total + " · " + timeLeft + "s";
+      toastEl.classList.add("show");
+      if (timeLeft <= 0) endTidy(cleared >= total);
+    }, 1000);
+    toast("🧹 Tidy up! " + total + " things · 15s");
+
+    function endTidy(win) {
+      if (done) return; done = true;
+      clearInterval(timer);
+      toastEl.classList.remove("show");
+      nodes.forEach(function (n) { if (n.parentNode) n.remove(); });
+      var bonus = win ? 6 : Math.max(2, cleared);
+      finishGame("Tidy the Room", bonus, win ? "Spotless! ✨" : "Nice effort — got most of it!");
     }
   }
 
-  function checkCollision() {
-    // ground / ceiling
-    if (bean.y + BEAN_R >= VH - GROUND_H) return true;
-    if (bean.y - BEAN_R <= 0) { bean.y = BEAN_R; bean.vy = 0; }
+  // Shared "you earned coins" closer for mini-games.
+  function finishGame(name, bonus, sub) {
+    addCoins(bonus);
+    save();
+    var html = '<div class="nightcard"><div style="font-size:40px">🎉</div>' +
+      '<div class="big">' + name + '</div>' +
+      '<p class="hint-line">' + (sub || "Lovely teamwork.") + '</p>' +
+      '<div class="row"><span>Bonus coins</span><b>+' + bonus + ' 🪙</b></div>' +
+      '<div class="row"><span>Pocket now</span><b>' + state.coins + ' 🪙</b></div>' +
+      '<p class="hint-line" style="margin-top:10px">Spend them in the 🛍️ Shop to grow your room.</p></div>';
+    openPanel("Coins earned!", html, [
+      { label: "🛍️ Open Shop", onClick: function () { closePanel(); openShop(); } },
+      { label: "Nice", cls: "primary", onClick: closePanel }
+    ]);
+  }
 
-    var bx = BEAN_X;
-    for (var i = 0; i < pipes.length; i++) {
-      var p = pipes[i];
-      if (p.destroyed) continue;
-      if (bx + BEAN_R > p.x && bx - BEAN_R < p.x + PIPE_W) {
-        var gapTop = p.top;
-        var gapBot = p.top + GAP;
-        if (bean.y - BEAN_R < gapTop || bean.y + BEAN_R > gapBot) {
-          return true;
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  // =====================================================================
+  //  TEND THE PLANT — a tiny recurring care game that visibly grows.
+  // =====================================================================
+  var PLANT_STAGES = ["🌱", "🌿", "🪴", "🌵", "🌳", "🌴"]; // grows over the weeks
+  function openPlant() {
+    var stage = Math.min(state.plant, PLANT_STAGES.length - 1);
+    var emoji = PLANT_STAGES[stage];
+    var maxed = state.plant >= PLANT_STAGES.length - 1;
+    var html = '<div class="nightcard">' +
+      '<div style="font-size:72px">' + emoji + '</div>' +
+      '<div class="big">Your plant</div>' +
+      '<p class="hint-line">Stage ' + (stage + 1) + ' of ' + PLANT_STAGES.length + '. Water it together each Monday to watch it grow over the months.</p>' +
+      '</div>';
+    var foot = [];
+    if (!maxed) foot.push({ label: "💧 Water it (+1 stage)", cls: "primary", onClick: function () {
+      state.plant++; addCoins(1); save();
+      toast("It grew a little! 🌿  +1 🪙");
+      closePanel(); openPlant();
+    }});
+    else foot.push({ label: "🌴 Fully grown!", onClick: closePanel });
+    foot.push({ label: "Close", onClick: closePanel });
+    openPanel("🌱 Tend the plant", html, foot);
+  }
+
+  // =====================================================================
+  //  MEMORY WALL — log one real moment from each call.
+  // =====================================================================
+  function openMemories() {
+    var emojis = ["💛", "😂", "🌟", "🎶", "🍕", "☕", "🐱", "🌈"];
+    var html = '';
+    html += '<p class="muted">Jot one real moment from tonight — it becomes a postcard on the wall. Months from now this is your scrapbook of Mondays.</p>';
+    html += '<div style="display:flex; gap:6px; flex-wrap:wrap; margin:10px 0">';
+    emojis.forEach(function (e, i) {
+      html += '<button class="btn ghost small memo-emoji" data-e="' + e + '" style="' + (i === 0 ? "outline:2px solid var(--accent)" : "") + '">' + e + '</button>';
+    });
+    html += '</div>';
+    html += '<textarea id="memoText" rows="2" placeholder="e.g. Adam fell asleep mid-game again 😴"></textarea>';
+    html += '<div style="margin-top:16px">';
+    if (state.memories.length === 0) html += '<p class="muted">No memories yet — add your first!</p>';
+    state.memories.slice().reverse().forEach(function (m) {
+      html += '<div class="memory"><div class="me">' + m.emoji + '</div><div><div class="mw">Week ' + m.week + '</div><div class="mt">' + escapeHtml(m.text) + '</div></div></div>';
+    });
+    html += '</div>';
+    openPanel("📖 Memory Wall", html, [
+      { label: "Add postcard", cls: "primary", onClick: addMemory },
+      { label: "Close", onClick: closePanel }
+    ]);
+
+    var chosen = { e: emojis[0] };
+    Array.prototype.slice.call($("gBody").querySelectorAll(".memo-emoji")).forEach(function (b) {
+      b.addEventListener("click", function () {
+        chosen.e = b.dataset.e;
+        $("gBody").querySelectorAll(".memo-emoji").forEach(function (x) { x.style.outline = "none"; });
+        b.style.outline = "2px solid var(--accent)";
+      });
+    });
+    openMemories._chosen = chosen;
+  }
+  function addMemory() {
+    var txt = ($("memoText").value || "").trim();
+    if (!txt) { toast("Write a little something first ✍️"); return; }
+    state.memories.push({ week: Math.max(1, state.sessions || 1), emoji: openMemories._chosen.e, text: txt });
+    save();
+    toast("Pinned to the wall 📌");
+    openMemories(); // refresh
+  }
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // =====================================================================
+  //  THE MONDAY LOOP — Arrive → play → decorate → sign off
+  // =====================================================================
+  function startNight() {
+    state.sessions = (state.sessions || 0) + 1;
+    // weekly stipend so there's always something to do
+    addCoins(5);
+    checkAreaUnlock();
+    save();
+    updateHud();
+
+    var week = state.sessions;
+    var avaRow = '<div class="ava-row">' + FRIENDS.map(function (f) {
+      return '<div class="a"><div class="dot" style="background:' + f.color + '">' + f.face + '</div><div class="nm">' + f.name + '</div></div>';
+    }).join("") + '</div>';
+
+    // Callback to last week (TODO(personalise): warmer, more specific copy).
+    var callback;
+    if (week === 1) callback = "Your very first Monday together. The room's a little bare — let's start making it yours. 💛";
+    else if (state.lastItem) callback = "Last Monday you added the " + state.lastItem + ". Welcome back!";
+    else callback = "Welcome back to Monday night — week " + week + " together.";
+
+    var s = currentSeason();
+    var html = '<div class="arrive nightcard">' +
+      '<div style="font-size:34px">🌙</div>' +
+      '<div class="big">Monday Night · Week ' + week + '</div>' +
+      avaRow +
+      '<p class="hint-line">' + callback + '</p>' +
+      '<p class="hint-line">Outside the window: a ' + s.label.toLowerCase().replace(/^[^ ]+ /, "") + ' evening ' + s.scene + ' · +5 🪙 just for showing up.</p>' +
+      '</div>';
+    openPanel("Welcome back 💛", html, [
+      { label: "🎲 Play a game", onClick: function () { closePanel(); openGames(); } },
+      { label: "Let's go", cls: "primary", onClick: closePanel }
+    ]);
+  }
+
+  function checkAreaUnlock() {
+    AREAS.forEach(function (a) {
+      if (state.sessions >= a.at && state.seenAreas.indexOf(a.at) === -1) {
+        state.seenAreas.push(a.at);
+        // queue a toast after the arrival panel
+        setTimeout(function () { toast("✨ New area unlocked: " + a.emoji + " " + a.name + "!"); }, 1200);
+      }
+    });
+    // Also surface any newly-available shop sets / minigames softly.
+    MINIGAMES.forEach(function (g) {
+      if (state.sessions === g.unlockAt) setTimeout(function () { toast("🎲 New mini-game: " + g.name + "!"); }, 2000);
+    });
+  }
+
+  // ---- Sign off: end-of-night card -------------------------------------
+  function signOff() {
+    save();
+    var week = Math.max(1, state.sessions || 1);
+    var itemsCount = state.placed.length;
+    var nextUnlock = nextUnlockInfo();
+    var html = '<div class="nightcard">' +
+      '<div style="font-size:34px">✨</div>' +
+      '<div class="big">That\'s a wrap, week ' + week + '</div>' +
+      '<div class="row"><span>Things in the room</span><b>' + itemsCount + '</b></div>' +
+      '<div class="row"><span>Coins in pocket</span><b>' + state.coins + ' 🪙</b></div>' +
+      '<div class="row"><span>Memories pinned</span><b>' + state.memories.length + '</b></div>' +
+      '<div class="row"><span>Plant stage</span><b>' + (Math.min(state.plant, PLANT_STAGES.length - 1) + 1) + '/' + PLANT_STAGES.length + ' ' + PLANT_STAGES[Math.min(state.plant, PLANT_STAGES.length - 1)] + '</b></div>' +
+      (nextUnlock ? '<p class="hint-line" style="margin-top:10px">' + nextUnlock + '</p>' : '') +
+      '<p class="hint-line">Saved automatically. See you next Monday. 🌙</p>' +
+      '</div>';
+    openPanel("Goodnight 🌙", html, [
+      { label: "📖 Add a memory", onClick: function () { closePanel(); openMemories(); } },
+      { label: "Goodnight", cls: "primary", onClick: closePanel }
+    ]);
+  }
+  function nextUnlockInfo() {
+    var soon = CATALOGUE.filter(function (it) { return it.unlockAt > state.sessions; })
+                        .sort(function (a, b) { return a.unlockAt - b.unlockAt; })[0];
+    if (!soon) return null;
+    return "Next unlock: the " + soon.set + " set on Week " + (soon.unlockAt + 1) + ".";
+  }
+
+  // =====================================================================
+  //  SAVE MENU — manual save + Export / Import JSON
+  // =====================================================================
+  function openSaveMenu() {
+    var when = state.updatedAt ? new Date(state.updatedAt).toLocaleString() : "never";
+    var html = '<p class="muted">Everything saves automatically to this browser. Use Export to back up your months of Mondays (or move them to another computer / a new host).</p>' +
+      '<div class="row" style="display:flex;justify-content:space-between;padding:10px 2px;border-bottom:1px dashed #e0cfae"><span>Weeks played</span><b>' + (state.sessions || 0) + '</b></div>' +
+      '<div class="row" style="display:flex;justify-content:space-between;padding:10px 2px;border-bottom:1px dashed #e0cfae"><span>Items placed</span><b>' + state.placed.length + '</b></div>' +
+      '<div class="row" style="display:flex;justify-content:space-between;padding:10px 2px"><span>Last saved</span><b style="font-size:12px">' + when + '</b></div>' +
+      '<p class="hint-line">Import expects a file exported from this game.</p>' +
+      '<input type="file" id="importFile" accept="application/json,.json" style="display:none">';
+    openPanel("💾 Save & Backup", html, [
+      { label: "⬇️ Export save", onClick: exportSave },
+      { label: "⬆️ Import save", onClick: function () { $("importFile").click(); } },
+      { label: "Done", cls: "primary", onClick: closePanel }
+    ]);
+    $("importFile").addEventListener("change", importSave);
+  }
+
+  function exportSave() {
+    save();
+    var data = JSON.stringify(state, null, 2);
+    var blob = new Blob([data], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var stamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = "monday-night-week" + (state.sessions || 0) + "-" + stamp + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    toast("Saved a backup file ⬇️");
+  }
+
+  function importSave(e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var incoming = JSON.parse(reader.result);
+        if (typeof incoming !== "object" || incoming === null || !("sessions" in incoming)) {
+          throw new Error("not a Monday Night save");
         }
+        if (!confirm("Load this save? It will replace the current room (week " + (state.sessions || 0) + ").")) return;
+        state = Object.assign({}, clone(DEFAULT_STATE), incoming);
+        selectedUid = null;
+        save(); renderRoom(); updateHud();
+        closePanel();
+        toast("Save loaded — welcome back to week " + (state.sessions || 0) + "! 💛");
+      } catch (err) {
+        toast("Hmm, that file didn't look right.");
+        console.warn(err);
       }
-    }
-    return false;
+    };
+    reader.readAsText(file);
   }
 
-  function die() {
-    state = STATE_OVER;
-    overTimer = 45;
-    flashAlpha = 0.8;
-    sndHit();
-    if (score > best) {
-      best = score;
-      try { localStorage.setItem("flappyBeansBest", String(best)); } catch (e) {}
+  // =====================================================================
+  //  WIRING
+  // =====================================================================
+  $("btnNight").addEventListener("click", startNight);
+  $("btnPlay").addEventListener("click", openGames);
+  $("btnShop").addEventListener("click", openShop);
+  $("btnPlant").addEventListener("click", openPlant);
+  $("btnEnd").addEventListener("click", signOff);
+  $("btnMemory").addEventListener("click", openMemories);
+  $("btnSave").addEventListener("click", openSaveMenu);
+
+  // =====================================================================
+  //  BOOT
+  // =====================================================================
+  function boot() {
+    renderSeason();
+    fitRoom();
+    renderRoom();
+    updateHud();
+    // Gentle first-time welcome.
+    if (!state.sessions) {
+      setTimeout(function () {
+        toast("Tap 🌙 Start Monday Night to begin your first night together.");
+      }, 600);
     }
   }
+  boot();
 
-  // ---- Drawing ---------------------------------------------------------------
-  function drawBackground() {
-    // sky gradient
-    var g = ctx.createLinearGradient(0, 0, 0, VH);
-    g.addColorStop(0, "#5fc6d6");
-    g.addColorStop(1, "#9fe3c0");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, VW, VH);
-
-    // soft clouds
-    ctx.fillStyle = "rgba(255,255,255,0.55)";
-    for (var i = 0; i < 4; i++) {
-      var cx = ((i * 130) - bgScroll * 0.5) % (VW + 120);
-      if (cx < -120) cx += VW + 120;
-      var cy = 90 + (i % 2) * 70;
-      cloud(cx, cy, 26 + (i % 2) * 8);
-    }
-
-    // distant hills
-    ctx.fillStyle = "rgba(255,255,255,0.18)";
-    var hy = VH - GROUND_H - 30;
-    for (var h = 0; h < 5; h++) {
-      var hx = ((h * 110) - bgScroll * 0.7) % (VW + 110);
-      if (hx < -110) hx += VW + 110;
-      ctx.beginPath();
-      ctx.arc(hx + 55, hy + 40, 70, Math.PI, 2 * Math.PI);
-      ctx.fill();
-    }
-  }
-
-  function cloud(x, y, r) {
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.arc(x + r, y + 4, r * 0.8, 0, Math.PI * 2);
-    ctx.arc(x - r, y + 6, r * 0.7, 0, Math.PI * 2);
-    ctx.arc(x + r * 0.4, y - r * 0.6, r * 0.7, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  function drawPipe(p) {
-    if (p.destroyed) return; // vaporized — only the burst particles remain
-    var gapTop = p.top;
-    var gapBot = p.top + GAP;
-    var x = p.x;
-
-    var grad = ctx.createLinearGradient(x, 0, x + PIPE_W, 0);
-    grad.addColorStop(0, "#5aa832");
-    grad.addColorStop(0.5, "#7bc843");
-    grad.addColorStop(1, "#4f9a2c");
-
-    // top stalk
-    ctx.fillStyle = grad;
-    ctx.fillRect(x, 0, PIPE_W, gapTop);
-    // bottom stalk
-    ctx.fillRect(x, gapBot, PIPE_W, VH - GROUND_H - gapBot);
-
-    // rims (lips)
-    ctx.fillStyle = "#3f7d22";
-    var lip = 16, over = 5;
-    ctx.fillRect(x - over, gapTop - lip, PIPE_W + over * 2, lip);
-    ctx.fillRect(x - over, gapBot, PIPE_W + over * 2, lip);
-
-    // highlight
-    ctx.fillStyle = "rgba(255,255,255,0.18)";
-    ctx.fillRect(x + 6, 0, 6, gapTop);
-    ctx.fillRect(x + 6, gapBot, 6, VH - GROUND_H - gapBot);
-
-    // "heating up" glow while a laser is charging on this stalk
-    if (p.charge > 0) {
-      var heat = Math.min(1, p.charge / LASER_HOLD);
-      ctx.fillStyle = "rgba(255,80,40," + (0.45 * heat) + ")";
-      ctx.fillRect(x, 0, PIPE_W, gapTop);
-      ctx.fillRect(x, gapBot, PIPE_W, VH - GROUND_H - gapBot);
-    }
-  }
-
-  function drawGround() {
-    var y = VH - GROUND_H;
-    ctx.fillStyle = "#ded895";
-    ctx.fillRect(0, y, VW, GROUND_H);
-    // grass strip
-    ctx.fillStyle = "#7bc843";
-    ctx.fillRect(0, y, VW, 14);
-    ctx.fillStyle = "#4f9a2c";
-    ctx.fillRect(0, y + 14, VW, 4);
-    // dirt texture stripes (scrolling)
-    ctx.fillStyle = "rgba(0,0,0,0.05)";
-    for (var x = -24 + (-groundScroll % 24); x < VW; x += 24) {
-      ctx.fillRect(x, y + 22, 12, GROUND_H - 22);
-    }
-  }
-
-  function drawBean() {
-    ctx.save();
-    ctx.translate(BEAN_X, bean.y);
-    ctx.rotate(bean.rot);
-
-    // body — kidney bean shape via two arcs + bezier
-    var r = BEAN_R + 2;
-    var grad = ctx.createLinearGradient(-r, -r, r, r);
-    grad.addColorStop(0, "#d98a4e");
-    grad.addColorStop(1, "#a85d2a");
-
-    ctx.fillStyle = grad;
-    ctx.strokeStyle = "#7c4318";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    // a plump kidney-bean outline
-    ctx.moveTo(-r * 0.2, -r);
-    ctx.bezierCurveTo(r, -r * 1.1, r * 1.15, r * 0.4, r * 0.3, r);
-    ctx.bezierCurveTo(-r * 0.2, r * 1.15, -r * 1.05, r * 0.7, -r, 0);
-    ctx.bezierCurveTo(-r * 1.15, -r * 0.7, -r * 0.7, -r * 1.05, -r * 0.2, -r);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // seam line
-    ctx.strokeStyle = "rgba(124,67,24,0.55)";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(-r * 0.45, -r * 0.2);
-    ctx.bezierCurveTo(0, -r * 0.5, r * 0.2, r * 0.1, -r * 0.1, r * 0.55);
-    ctx.stroke();
-
-    // cheek blush
-    ctx.fillStyle = "rgba(255,150,120,0.45)";
-    ctx.beginPath();
-    ctx.arc(r * 0.35, r * 0.15, 4, 0, Math.PI * 2);
-    ctx.fill();
-
-    // eye
-    ctx.fillStyle = "#fff";
-    ctx.beginPath();
-    ctx.arc(r * 0.45, -r * 0.35, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#222";
-    var pupil = (state === STATE_OVER) ? 0 : 1; // dead eyes look forward
-    ctx.beginPath();
-    ctx.arc(r * 0.45 + 1.5 * pupil, -r * 0.35, 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    // smile (or x_x mouth on game over)
-    ctx.strokeStyle = "#5a2e10";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    if (state === STATE_OVER) {
-      ctx.arc(r * 0.35, r * 0.15, 4, Math.PI, 2 * Math.PI);
-    } else {
-      ctx.arc(r * 0.35, 0, 5, 0.1 * Math.PI, 0.9 * Math.PI);
-    }
-    ctx.stroke();
-
-    ctx.restore();
-  }
-
-  function roundRect(x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-  }
-
-  function text(str, x, y, size, color, stroke) {
-    ctx.font = "700 " + size + "px -apple-system, 'Segoe UI', Roboto, sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    if (stroke) {
-      ctx.lineWidth = size / 8;
-      ctx.strokeStyle = stroke;
-      ctx.strokeText(str, x, y);
-    }
-    ctx.fillStyle = color;
-    ctx.fillText(str, x, y);
-  }
-
-  function drawParticles() {
-    for (var i = 0; i < particles.length; i++) {
-      var p = particles[i];
-      ctx.globalAlpha = Math.max(0, p.life);
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 2 + (1 - p.life) * 3, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  function drawLaser() {
-    if (!lasersOn) return;
-    if (state !== STATE_READY && state !== STATE_PLAY) return;
-
-    var e = eyeWorld();
-    var ix = laserImpact.x, iy = laserImpact.y;
-    var flick = 0.85 + Math.random() * 0.15;
-
-    ctx.save();
-    ctx.lineCap = "round";
-
-    // outer glow
-    ctx.globalAlpha = 0.25 * flick;
-    ctx.strokeStyle = "#ff2d1a";
-    ctx.lineWidth = 9;
-    ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(ix, iy); ctx.stroke();
-
-    // mid beam
-    ctx.globalAlpha = 0.7 * flick;
-    ctx.strokeStyle = "#ff5a3c";
-    ctx.lineWidth = 4.5;
-    ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(ix, iy); ctx.stroke();
-
-    // white-hot core
-    ctx.globalAlpha = flick;
-    ctx.strokeStyle = "#fff3e0";
-    ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(ix, iy); ctx.stroke();
-
-    // impact spark — grows as the stalk heats toward vaporizing
-    if (laserImpact.hit && laserHitPipe) {
-      var heat = Math.min(1, laserHitPipe.charge / LASER_HOLD);
-      var rad = 4 + heat * 10 + Math.random() * 2;
-      var g = ctx.createRadialGradient(ix, iy, 0, ix, iy, rad);
-      g.addColorStop(0, "rgba(255,255,220,0.95)");
-      g.addColorStop(0.4, "rgba(255,150,40,0.8)");
-      g.addColorStop(1, "rgba(255,60,30,0)");
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(ix, iy, rad, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.restore();
-    ctx.globalAlpha = 1;
-  }
-
-  function drawUI() {
-    if (state === STATE_PLAY) {
-      text(String(score), VW / 2, 80, 52, "#fff", "#3a3a3a");
-    }
-
-    // laser status indicator (top-center is always on-screen despite edge crop)
-    if (lasersOn && state !== STATE_OVER) {
-      var pulse = 0.6 + 0.4 * Math.abs(Math.sin(frame / 10));
-      ctx.globalAlpha = pulse;
-      ctx.fillStyle = "#ff3b30";
-      ctx.beginPath(); ctx.arc(VW / 2 - 52, 26, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.globalAlpha = 1;
-      text("LASER ON", VW / 2 + 6, 26, 18, "#fff", "#3a3a3a");
-    }
-
-    if (state === STATE_READY) {
-      text("Flappy Beans 🫘", VW / 2, 150, 30, "#fff", "#3a3a3a");
-      // tap hint
-      var bob = Math.sin(frame / 12) * 4;
-      text("Tap to start", VW / 2, 360 + bob, 24, "#fff", "#3a3a3a");
-      text("Best: " + best, VW / 2, 410, 18, "#fff", "#3a3a3a");
-      // little finger hint
-      ctx.font = "34px sans-serif";
-      ctx.fillText("👆", VW / 2, 320 + bob);
-      // laser gesture hint
-      text("✌️ Two fingers = laser eyes", VW / 2, 450, 15, "#fff", "#3a3a3a");
-    }
-
-    if (state === STATE_OVER) {
-      // panel
-      ctx.fillStyle = "rgba(0,0,0,0.35)";
-      ctx.fillRect(0, 0, VW, VH);
-      var pw = 250, ph = 230, px = (VW - pw) / 2, py = 160;
-      ctx.fillStyle = "#fff7e6";
-      roundRect(px, py, pw, ph, 18);
-      ctx.fill();
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = "#e0c98a";
-      ctx.stroke();
-
-      text("Game Over", VW / 2, py + 42, 30, "#b5651d");
-      text("Score", VW / 2, py + 92, 18, "#9a7b3a");
-      text(String(score), VW / 2, py + 122, 36, "#5a3d12");
-      text("Best", VW / 2, py + 158, 18, "#9a7b3a");
-      text(String(best), VW / 2, py + 185, 28, "#5a3d12");
-
-      if (overTimer <= 0) {
-        var bob2 = Math.sin(frame / 12) * 3;
-        text("Tap to play again", VW / 2, py + ph + 40 + bob2, 22, "#fff", "#3a3a3a");
-      }
-    }
-
-    // hit flash
-    if (flashAlpha > 0) {
-      ctx.fillStyle = "rgba(255,255,255," + Math.max(0, flashAlpha) + ")";
-      ctx.fillRect(0, 0, VW, VH);
-    }
-  }
-
-  // ---- Main loop -------------------------------------------------------------
-  function render() {
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // reset to device pixels
-    // clear full screen
-    ctx.fillStyle = "#70c5ce";
-    ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
-
-    // apply virtual-canvas transform
-    ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * offsetX, dpr * offsetY);
-
-    drawBackground();
-    for (var i = 0; i < pipes.length; i++) drawPipe(pipes[i]);
-    drawParticles();
-    drawGround();
-    drawBean();
-    drawLaser();
-    drawUI();
-  }
-
-  function loop() {
-    update();
-    render();
-    requestAnimationFrame(loop);
-  }
-
-  resetGame();
-  loop();
+  // expose a tiny debug handle (handy while building / personalising)
+  window.MNS = { state: state, save: save, reset: function () { localStorage.removeItem(SAVE_KEY); location.reload(); } };
 })();
 </script>
 </body>

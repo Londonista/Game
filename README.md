@@ -1,61 +1,70 @@
-# Flappy Beans 🫘
+# Monday Night Simulator 🌙
 
-A little Flappy Bird–style game, but you play as a bean! Tap the screen to make
-the bean flap and fly through the gaps. It's one single web page — nothing to
-install — and it works great in Safari on an iPhone.
+A cozy little hangout for three friends — **Jas, Aqsa, and Adam** — to tend
+together every Monday night over a video call. One person screen-shares; the
+call is the social layer, the game is the shared focus you all react to and
+decide on together.
+
+There are **no scores to lose and no way to fail**. The only goal is keeping
+the cozy going, week after week — and because the game remembers everything,
+months in it becomes a little **scrapbook of your Mondays**.
 
 ## ▶️ How to play
 
-- **Tap the screen** (or press the **Space bar** on a computer) to flap.
-- Fly through the gaps between the green stalks.
-- Each gap you pass = **+1 point**. Don't hit the stalks or the ground!
-- Your **best score is saved** on your phone automatically.
+1. **Open `index.html`** in any browser (or run `npx serve` in this folder).
+   One host opens it and shares their screen on the call. No install, no
+   accounts, no internet needed.
+2. Tap **🌙 Start Monday Night** to begin a night. You'll get a warm welcome,
+   a callback to last week, and a few coins just for showing up.
+3. Play a **🎲 mini-game** or two together to earn **cosiness coins 🪙**.
+4. Spend coins in the **🛍️ Shop** on décor, then **drag items** anywhere in the
+   room to make it yours. The room fills up and cosies over the weeks.
+5. **🌱 Tend** your plant so it grows over the months.
+6. **📖 Add a memory** — one real moment from the call becomes a postcard on
+   the wall.
+7. Tap **✨ Sign off** for an end-of-night card. Everything **auto-saves**.
 
-### 🔴 Laser Eyes (secret power!)
+## 🎲 Mini-games (co-op, low-stress, 2–5 min)
 
-- **Touch the screen with two fingers** to switch the bean's laser eyes on or off.
-  (One finger still flaps as normal.) A little "LASER ON" badge shows at the top
-  when they're active, and the setting is remembered next time.
-- When the lasers are on, beams shoot from the bean's eye in the direction it's
-  looking. **Hold the beam steady on a green stalk for about 2 seconds** and it
-  heats up and **vaporizes** — clearing a path to fly through!
-- It takes focus: aim through the gap and nothing happens, so the lasers don't
-  make the game too easy.
-- On a computer, press the **L** key to toggle the lasers.
+- **🔍 Spot the Cozy Object** — twinkling things are hidden around the room;
+  everyone calls out where they are.
+- **🃏 Memory Match** — flip-card pairs of your stuff.
+- **🧹 Tidy the Room** — a light timed clean-up (unlocks on week 6).
 
-## 📱 How to put it on your iPhone (one-time setup)
+More unlock as your Monday count climbs.
 
-The game lives in this GitHub project. To get a link you can open on your
-phone, you turn on a free feature called **GitHub Pages**. You only do this
-once:
+## 🌱 Growth & unlocks
 
-1. Go to this project on **GitHub.com** (on a computer is easiest).
-2. Click the **Settings** tab (top right of the project).
-3. In the left menu, click **Pages**.
-4. Under **"Build and deployment" → Source**, choose **"Deploy from a branch"**.
-5. For **Branch**, pick **`claude/flappy-beans-game-52erwe`** and the folder
-   **`/ (root)`**, then click **Save**.
-6. Wait about a minute. GitHub will show a green link near the top of that page,
-   something like:
+New item sets, mini-games, and room areas unlock as you play more Mondays
+(weeks 3, 6, 10, 15…). There's always a reason to come back next week.
 
-   ```
-   https://londonista.github.io/game/
-   ```
+## 💾 The save system (the heart of it)
 
-7. **Open that link on your iPhone** in Safari. 🎉
+Continuity is the whole point, so the save is solid:
 
-### 💡 Add it to your home screen (so it feels like a real app)
+- **Auto-saves** to your browser after everything you do.
+- **💾 Save → Export** downloads your whole game as a JSON file — back it up so
+  you never lose months of Mondays, move it to a new machine, or hand hosting
+  to someone else.
+- **💾 Save → Import** loads a save file back in.
 
-1. Open the link in **Safari** on your iPhone.
-2. Tap the **Share** button (the square with an arrow at the bottom).
-3. Tap **"Add to Home Screen"**.
-4. Now there's a Flappy Beans icon you can tap any time — it opens full-screen
-   with no browser bars.
+What's saved: room layout & owned items, cosiness coins, total Mondays played,
+unlocks reached, plant growth, and your memory wall.
+
+## 💛 Make it yours
+
+The code is seeded with the three of you and has clearly-marked
+`TODO(personalise)` comments so it's easy to fill in later:
+
+- Avatar names, colours and faces (top of the `<script>`).
+- In-joke shop items (the **In-Jokes** set in the catalogue) — swap the
+  placeholders for your real references, favourite snacks, that one poster.
+- Warm, personal opening callbacks and end-of-night copy.
 
 ## 🛠️ For the curious
 
-The whole game is in **`index.html`** — just HTML, CSS, and JavaScript drawn on
-a `<canvas>`. No frameworks, no build step, no internet needed once it's loaded.
+The whole game is in **`index.html`** — just HTML, CSS, and JavaScript using
+DOM elements for the room. No frameworks, no build step. Open it and go.
 
-> Tip: Later, if these changes get merged into the project's `main` branch, you
-> can switch GitHub Pages (step 5 above) to use `main` instead for a tidier setup.
+> Handy while tinkering: the browser console exposes `MNS.state` (the live
+> save), `MNS.save()`, and `MNS.reset()` (wipes the save and reloads).

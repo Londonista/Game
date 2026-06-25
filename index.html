@@ -97,11 +97,30 @@
   var flashAlpha = 0;       // white flash on hit
   var overTimer = 0;        // small delay before retry allowed
 
+  // ---- Laser eyes ------------------------------------------------------------
+  var LASER_HOLD = 75;      // frames the beam must stay on a stalk to vaporize it (~1.2s).
+                            // Tuned below 2s because a stalk is only in front of the bean
+                            // ~1.5s as it approaches, so a longer hold is impossible to land.
+  var lasersOn = false;
+  try { lasersOn = localStorage.getItem("flappyBeansLaser") === "1"; } catch (e) {}
+  var laserHitPipe = null;  // pipe the beam is currently touching (for drawing the impact)
+  var laserImpact = { x: 0, y: 0, hit: false };
+  var particles = [];       // vaporize burst particles
+  var pendingFlap = null;   // timer id used to debounce single- vs two-finger touch
+
+  function toggleLasers() {
+    lasersOn = !lasersOn;
+    try { localStorage.setItem("flappyBeansLaser", lasersOn ? "1" : "0"); } catch (e) {}
+    if (lasersOn) sndLaserToggle();
+    else sndLaserOff();
+  }
+
   function resetGame() {
     bean.y = VH / 2;
     bean.vy = 0;
     bean.rot = 0;
     pipes = [];
+    particles = [];
     score = 0;
     frame = 0;
     flashAlpha = 0;
@@ -116,7 +135,7 @@
     var minTop = margin;
     var maxTop = VH - GROUND_H - GAP - margin;
     var topH = minTop + Math.random() * (maxTop - minTop);
-    pipes.push({ x: x, top: topH, passed: false });
+    pipes.push({ x: x, top: topH, passed: false, charge: 0, destroyed: false });
   }
 
   // ---- Sound (WebAudio, generated — no files) --------------------------------
@@ -147,6 +166,9 @@
   function sndFlap() { beep(620, 0.09, "square", 0.06); }
   function sndScore() { beep(880, 0.10, "sine", 0.09); beep(1320, 0.10, "sine", 0.05); }
   function sndHit() { beep(180, 0.20, "sawtooth", 0.10); beep(90, 0.30, "sawtooth", 0.08); }
+  function sndLaserToggle() { beep(440, 0.08, "sawtooth", 0.06); beep(1200, 0.12, "sawtooth", 0.05); }
+  function sndLaserOff() { beep(700, 0.08, "sine", 0.05); beep(300, 0.10, "sine", 0.05); }
+  function sndZap() { beep(140, 0.30, "sawtooth", 0.12); beep(70, 0.40, "square", 0.08); beep(900, 0.08, "sawtooth", 0.05); }
 
   // ---- Input -----------------------------------------------------------------
   function flap() {
@@ -168,18 +190,94 @@
     }
   }
 
-  function onPress(e) {
+  function onTouchStart(e) {
+    if (e.cancelable) e.preventDefault();
+    initAudio();
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+
+    if (e.touches && e.touches.length >= 2) {
+      // Two fingers down: this is a laser toggle, not a flap.
+      if (pendingFlap) { clearTimeout(pendingFlap); pendingFlap = null; }
+      toggleLasers();
+      return;
+    }
+    // One finger: wait a tiny moment in case a second finger is landing.
+    if (pendingFlap) clearTimeout(pendingFlap);
+    pendingFlap = setTimeout(function () { pendingFlap = null; flap(); }, 70);
+  }
+
+  function onMouseDown(e) {
     if (e.cancelable) e.preventDefault();
     flap();
   }
-  canvas.addEventListener("touchstart", onPress, { passive: false });
-  canvas.addEventListener("mousedown", onPress);
+
+  canvas.addEventListener("touchstart", onTouchStart, { passive: false });
+  canvas.addEventListener("mousedown", onMouseDown);
   window.addEventListener("keydown", function (e) {
     if (e.code === "Space" || e.key === " " || e.code === "ArrowUp") {
       e.preventDefault();
       flap();
+    } else if (e.key === "l" || e.key === "L") {
+      e.preventDefault();
+      initAudio();
+      if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      toggleLasers();
     }
   });
+
+  // ---- Laser geometry --------------------------------------------------------
+  // World position of the bean's visible eye (matches drawBean()).
+  function eyeWorld() {
+    var r = BEAN_R + 2;
+    var lx = r * 0.45, ly = -r * 0.35;
+    var c = Math.cos(bean.rot), s = Math.sin(bean.rot);
+    return { x: BEAN_X + lx * c - ly * s, y: bean.y + lx * s + ly * c, ang: bean.rot };
+  }
+
+  // Cast the eye-ray to the right; find the first solid stalk it lands on.
+  // Beam passes through gaps and already-destroyed pipes. Updates laserImpact.
+  function computeLaser() {
+    var e = eyeWorld();
+    var c = Math.cos(e.ang), s = Math.sin(e.ang);
+    if (c < 0.05) c = 0.05; // beam always travels rightward
+    laserHitPipe = null;
+    for (var i = 0; i < pipes.length; i++) {
+      var p = pipes[i];
+      if (p.destroyed) continue;
+      if (p.x <= e.x) continue;            // only stalks ahead of the eye
+      var yAt = e.y + (p.x - e.x) * (s / c);
+      if (yAt < p.top || yAt > p.top + GAP) {
+        laserHitPipe = p;
+        laserImpact.x = p.x;
+        laserImpact.y = Math.max(0, Math.min(VH, yAt));
+        laserImpact.hit = true;
+        return;
+      }
+    }
+    // No stalk hit — beam exits the right edge of the screen.
+    laserImpact.x = VW;
+    laserImpact.y = e.y + (VW - e.x) * (s / c);
+    laserImpact.hit = false;
+  }
+
+  function spawnBurst(x, y) {
+    for (var i = 0; i < 16; i++) {
+      var a = Math.random() * Math.PI * 2;
+      var sp = 1 + Math.random() * 4;
+      particles.push({
+        x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1,
+        life: 1, color: Math.random() < 0.5 ? "#ff5a3c" : "#ffd23c"
+      });
+    }
+  }
+
+  function updateParticles() {
+    for (var i = particles.length - 1; i >= 0; i--) {
+      var p = particles[i];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life -= 0.03;
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+  }
 
   // ---- Update ----------------------------------------------------------------
   function update() {
@@ -189,12 +287,14 @@
 
     // backgrounds always drift a little for life
     bgScroll = (bgScroll + 0.3) % VW;
+    updateParticles();
 
     if (state === STATE_READY) {
       // gentle bobbing while waiting
       bean.y = VH / 2 + Math.sin(frame / 18) * 8;
       bean.rot = Math.sin(frame / 18) * 0.12;
       groundScroll = (groundScroll + PIPE_SPEED) % 24;
+      if (lasersOn) computeLaser(); else laserHitPipe = null;
       return;
     }
 
@@ -225,6 +325,28 @@
         spawnPipe((last ? last.x : VW) + PIPE_SPACING);
       }
 
+      // lasers: hold the beam on a stalk for ~2s to vaporize it
+      if (lasersOn) {
+        computeLaser();
+        for (var j = 0; j < pipes.length; j++) {
+          var pp = pipes[j];
+          if (pp === laserHitPipe) {
+            pp.charge++;
+            if (pp.charge >= LASER_HOLD && !pp.destroyed) {
+              pp.destroyed = true;
+              spawnBurst(BEAN_X + (laserImpact.x - BEAN_X) * 0.5, laserImpact.y);
+              flashAlpha = 0.4;
+              sndZap();
+            }
+          } else if (pp.charge > 0) {
+            pp.charge -= 3;
+            if (pp.charge < 0) pp.charge = 0;
+          }
+        }
+      } else {
+        laserHitPipe = null;
+      }
+
       // collisions
       if (checkCollision()) {
         die();
@@ -249,6 +371,7 @@
     var bx = BEAN_X;
     for (var i = 0; i < pipes.length; i++) {
       var p = pipes[i];
+      if (p.destroyed) continue;
       if (bx + BEAN_R > p.x && bx - BEAN_R < p.x + PIPE_W) {
         var gapTop = p.top;
         var gapBot = p.top + GAP;
@@ -311,6 +434,7 @@
   }
 
   function drawPipe(p) {
+    if (p.destroyed) return; // vaporized — only the burst particles remain
     var gapTop = p.top;
     var gapBot = p.top + GAP;
     var x = p.x;
@@ -336,6 +460,14 @@
     ctx.fillStyle = "rgba(255,255,255,0.18)";
     ctx.fillRect(x + 6, 0, 6, gapTop);
     ctx.fillRect(x + 6, gapBot, 6, VH - GROUND_H - gapBot);
+
+    // "heating up" glow while a laser is charging on this stalk
+    if (p.charge > 0) {
+      var heat = Math.min(1, p.charge / LASER_HOLD);
+      ctx.fillStyle = "rgba(255,80,40," + (0.45 * heat) + ")";
+      ctx.fillRect(x, 0, PIPE_W, gapTop);
+      ctx.fillRect(x, gapBot, PIPE_W, VH - GROUND_H - gapBot);
+    }
   }
 
   function drawGround() {
@@ -440,9 +572,76 @@
     ctx.fillText(str, x, y);
   }
 
+  function drawParticles() {
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 2 + (1 - p.life) * 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawLaser() {
+    if (!lasersOn) return;
+    if (state !== STATE_READY && state !== STATE_PLAY) return;
+
+    var e = eyeWorld();
+    var ix = laserImpact.x, iy = laserImpact.y;
+    var flick = 0.85 + Math.random() * 0.15;
+
+    ctx.save();
+    ctx.lineCap = "round";
+
+    // outer glow
+    ctx.globalAlpha = 0.25 * flick;
+    ctx.strokeStyle = "#ff2d1a";
+    ctx.lineWidth = 9;
+    ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(ix, iy); ctx.stroke();
+
+    // mid beam
+    ctx.globalAlpha = 0.7 * flick;
+    ctx.strokeStyle = "#ff5a3c";
+    ctx.lineWidth = 4.5;
+    ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(ix, iy); ctx.stroke();
+
+    // white-hot core
+    ctx.globalAlpha = flick;
+    ctx.strokeStyle = "#fff3e0";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(ix, iy); ctx.stroke();
+
+    // impact spark — grows as the stalk heats toward vaporizing
+    if (laserImpact.hit && laserHitPipe) {
+      var heat = Math.min(1, laserHitPipe.charge / LASER_HOLD);
+      var rad = 4 + heat * 10 + Math.random() * 2;
+      var g = ctx.createRadialGradient(ix, iy, 0, ix, iy, rad);
+      g.addColorStop(0, "rgba(255,255,220,0.95)");
+      g.addColorStop(0.4, "rgba(255,150,40,0.8)");
+      g.addColorStop(1, "rgba(255,60,30,0)");
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(ix, iy, rad, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+    ctx.globalAlpha = 1;
+  }
+
   function drawUI() {
     if (state === STATE_PLAY) {
       text(String(score), VW / 2, 80, 52, "#fff", "#3a3a3a");
+    }
+
+    // laser status indicator (top-center is always on-screen despite edge crop)
+    if (lasersOn && state !== STATE_OVER) {
+      var pulse = 0.6 + 0.4 * Math.abs(Math.sin(frame / 10));
+      ctx.globalAlpha = pulse;
+      ctx.fillStyle = "#ff3b30";
+      ctx.beginPath(); ctx.arc(VW / 2 - 52, 26, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+      text("LASER ON", VW / 2 + 6, 26, 18, "#fff", "#3a3a3a");
     }
 
     if (state === STATE_READY) {
@@ -454,6 +653,8 @@
       // little finger hint
       ctx.font = "34px sans-serif";
       ctx.fillText("👆", VW / 2, 320 + bob);
+      // laser gesture hint
+      text("✌️ Two fingers = laser eyes", VW / 2, 450, 15, "#fff", "#3a3a3a");
     }
 
     if (state === STATE_OVER) {
@@ -499,8 +700,10 @@
 
     drawBackground();
     for (var i = 0; i < pipes.length; i++) drawPipe(pipes[i]);
+    drawParticles();
     drawGround();
     drawBean();
+    drawLaser();
     drawUI();
   }
 

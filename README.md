@@ -11,6 +11,18 @@ install — and it works great in Safari on an iPhone.
 - Each gap you pass = **+1 point**. Don't hit the stalks or the ground!
 - Your **best score is saved** on your phone automatically.
 
+### 🔴 Laser Eyes (secret power!)
+
+- **Touch the screen with two fingers** to switch the bean's laser eyes on or off.
+  (One finger still flaps as normal.) A little "LASER ON" badge shows at the top
+  when they're active, and the setting is remembered next time.
+- When the lasers are on, beams shoot from the bean's eye in the direction it's
+  looking. **Hold the beam steady on a green stalk for about 2 seconds** and it
+  heats up and **vaporizes** — clearing a path to fly through!
+- It takes focus: aim through the gap and nothing happens, so the lasers don't
+  make the game too easy.
+- On a computer, press the **L** key to toggle the lasers.
+
 ## 📱 How to put it on your iPhone (one-time setup)
 
 The game lives in this GitHub project. To get a link you can open on your

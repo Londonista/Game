@@ -379,6 +379,22 @@
   .petlove { position: absolute; transform: translateX(-50%); font-size: 18px; z-index: 88;
     pointer-events: none; animation: petlove 1.1s ease-out forwards; }
   @keyframes petlove { 0%{ opacity: 0; transform: translate(-50%,0) scale(.6);} 20%{ opacity:1;} 100%{ opacity:0; transform: translate(-50%,-46px) scale(1.1);} }
+
+  /* ---- String-light garland (hangs across the room) -------------------- */
+  .item.garland { filter: drop-shadow(0 0 5px rgba(255,205,130,.55)); }
+  .item.garland .del { top: 0; right: -14px; }
+  .garland-svg { display: block; overflow: visible; }
+  .garland-svg .bulb { animation: gtwinkle 1.8s ease-in-out infinite; }
+  @keyframes gtwinkle { 0%,100%{ opacity:.5; } 50%{ opacity:1; } }
+
+  /* ---- Baseball bat: tap a friend to make them squeak ------------------ */
+  body.has-bat .avatar { pointer-events: auto; cursor: pointer; }
+  .avatar.squeaked .body { animation: avsquish .42s ease; }
+  @keyframes avsquish { 0%{ transform: scale(1);} 25%{ transform: scale(1.14,.84);} 55%{ transform: scale(.92,1.1);} 100%{ transform: scale(1);} }
+  .squeaknote { position: absolute; left: 50%; top: -16px; transform: translateX(-50%); white-space: nowrap;
+    font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.55); z-index: 80;
+    pointer-events: none; animation: squeakfloat .9s ease-out forwards; }
+  @keyframes squeakfloat { 0%{ opacity:0; transform: translate(-50%,0) scale(.6);} 20%{ opacity:1;} 100%{ opacity:0; transform: translate(-50%,-28px) scale(1.05);} }
 </style>
 </head>
 <body>
@@ -529,6 +545,8 @@
     { id: "candle",   name: "Candle",       ic: "🕯️", price: 7,  unlockAt: 0, set: "Starter" },
 
     // --- Lighting (all available from night 1) ---
+    // String Lights renders as a garland that hangs across the room (see buildGarland).
+    { id: "string",      name: "String Lights", ic: "✨", price: 16, unlockAt: 0, set: "Lighting", render: "garland" },
     { id: "fairylights", name: "Fairy Lights",  ic: "🎇", price: 16, unlockAt: 0, set: "Lighting" },
     { id: "lantern",     name: "Paper Lantern", ic: "🏮", price: 14, unlockAt: 0, set: "Lighting" },
     { id: "floorlamp",   name: "Floor Lamp",    ic: "🪔", price: 18, unlockAt: 0, set: "Lighting" },
@@ -554,9 +572,11 @@
 
     // --- Unlocks at 3 Mondays ---
     { id: "lava",     name: "Lava Lamp",    ic: "🔮", price: 18, unlockAt: 3, set: "Glow Up" },
-    { id: "string",   name: "String Lights",ic: "🎐", price: 16, unlockAt: 3, set: "Glow Up" },
     { id: "poster",   name: "Poster",       ic: "🖼️", price: 13, unlockAt: 3, set: "Glow Up" },
     { id: "guitar",   name: "Guitar",       ic: "🎸", price: 22, unlockAt: 3, set: "Glow Up" },
+
+    // --- Toys ---
+    { id: "bat",      name: "Baseball Bat", ic: "🏏", price: 15, unlockAt: 0, set: "Toys" },
 
     // --- Unlocks at 6 Mondays ---
     { id: "cat",      name: "Cat Plushie",  ic: "🐱", price: 30, unlockAt: 6, set: "Friends" },
@@ -716,6 +736,46 @@
   function depthScale(y) { return 0.80 + clamp01((y - 12) / 80) * 0.30; }  // 0.80 (back) .. 1.10 (front)
   function depthZ(y) { return 3 + Math.round(clamp01((y - 12) / 80) * 42); } // 3 (back) .. 45 (front)
 
+  var SVGNS = "http://www.w3.org/2000/svg";
+  var BULB_COLORS = ["#ffd36b", "#ff9d6b", "#fff1c0", "#ffb6e1", "#bfe8ff", "#c7f6c2"];
+
+  // Build a string-light garland: a sagging wire with twinkling bulbs.
+  function buildGarland() {
+    var W = 420, H = 74, n = 11, y0 = 8, sag = 44;
+    function wy(t) { return y0 + sag * (1 - Math.pow(2 * t - 1, 2)); } // parabolic droop
+    var svg = document.createElementNS(SVGNS, "svg");
+    svg.setAttribute("class", "garland-svg");
+    svg.setAttribute("width", W); svg.setAttribute("height", H);
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    var d = "M 0 " + wy(0).toFixed(1);
+    for (var i = 1; i <= 48; i++) { var t = i / 48; d += " L " + (t * W).toFixed(1) + " " + wy(t).toFixed(1); }
+    var wire = document.createElementNS(SVGNS, "path");
+    wire.setAttribute("d", d); wire.setAttribute("fill", "none");
+    wire.setAttribute("stroke", "#2f2618"); wire.setAttribute("stroke-width", "2");
+    svg.appendChild(wire);
+    for (var k = 0; k < n; k++) {
+      var tt = (k + 0.5) / n, cx = tt * W, cy = wy(tt);
+      var cap = document.createElementNS(SVGNS, "rect");
+      cap.setAttribute("x", (cx - 1.5).toFixed(1)); cap.setAttribute("y", (cy).toFixed(1));
+      cap.setAttribute("width", "3"); cap.setAttribute("height", "4"); cap.setAttribute("fill", "#2f2618");
+      svg.appendChild(cap);
+      var bulb = document.createElementNS(SVGNS, "circle");
+      bulb.setAttribute("cx", cx.toFixed(1)); bulb.setAttribute("cy", (cy + 8).toFixed(1));
+      bulb.setAttribute("r", "5.5"); bulb.setAttribute("fill", BULB_COLORS[k % BULB_COLORS.length]);
+      bulb.setAttribute("class", "bulb"); bulb.style.animationDelay = (k * 0.14) + "s";
+      svg.appendChild(bulb);
+    }
+    return svg;
+  }
+
+  // A tiny static garland for the shop card.
+  var GARLAND_ICON =
+    '<svg width="50" height="24" viewBox="0 0 50 24">' +
+    '<path d="M0 3 Q12 22 25 12 Q38 2 50 14" fill="none" stroke="#2f2618" stroke-width="1.5"/>' +
+    '<circle cx="8" cy="11" r="3" fill="#ffd36b"/><circle cx="18" cy="15" r="3" fill="#ff9d6b"/>' +
+    '<circle cx="28" cy="11" r="3" fill="#ffb6e1"/><circle cx="38" cy="9" r="3" fill="#bfe8ff"/>' +
+    '<circle cx="46" cy="13" r="3" fill="#c7f6c2"/></svg>';
+
   function renderRoom() {
     // remove existing item nodes
     Array.prototype.slice.call(room.querySelectorAll(".item")).forEach(function (n) { n.remove(); });
@@ -727,9 +787,17 @@
       el.dataset.uid = p.uid;
       el.style.left = p.x + "%";
       el.style.top = p.y + "%";
-      el.style.transform = "translate(-50%, -50%) scale(" + depthScale(p.y).toFixed(3) + ")";
-      el.style.zIndex = depthZ(p.y);
-      el.textContent = def.ic;
+      if (def.render === "garland") {
+        // a wide garland that hangs across the room — no depth shrink, sits near the wall
+        el.classList.add("garland");
+        el.style.transform = "translate(-50%, -50%)";
+        el.style.zIndex = 6;
+        el.appendChild(buildGarland());
+      } else {
+        el.style.transform = "translate(-50%, -50%) scale(" + depthScale(p.y).toFixed(3) + ")";
+        el.style.zIndex = depthZ(p.y);
+        el.textContent = def.ic;
+      }
       var del = document.createElement("div");
       del.className = "del"; del.textContent = "×";
       del.addEventListener("click", function (ev) { ev.stopPropagation(); removeItem(p.uid); });
@@ -738,6 +806,7 @@
       room.appendChild(el);
     });
     positionFurniture();
+    updateBatState();
     updateAmbient();
     updateHud();
   }
@@ -796,8 +865,12 @@
       y = Math.max(10, Math.min(95, y));
       p.x = x; p.y = y;
       el.style.left = x + "%"; el.style.top = y + "%";
-      el.style.transform = "translate(-50%, -50%) scale(" + depthScale(y).toFixed(3) + ")";
-      el.style.zIndex = depthZ(y);
+      if (el.classList.contains("garland")) {
+        el.style.transform = "translate(-50%, -50%)";
+      } else {
+        el.style.transform = "translate(-50%, -50%) scale(" + depthScale(y).toFixed(3) + ")";
+        el.style.zIndex = depthZ(y);
+      }
     }
     function up() {
       if (!dragging) return;
@@ -928,7 +1001,8 @@
         html += '<div class="' + cls + '" data-buy="' + it.id + '" data-ok="' + (unlocked && canAfford) + '">';
         if (it.joke) html += '<span class="tag">in-joke</span>';
         if (!unlocked) html += '<span class="lock">🔒</span>';
-        html += '<div class="ic">' + it.ic + '</div><div class="nm">' + it.name + '</div>';
+        var icHtml = it.render === "garland" ? GARLAND_ICON : it.ic;
+        html += '<div class="ic">' + icHtml + '</div><div class="nm">' + it.name + '</div>';
         html += unlocked ? '<div class="pr">🪙 ' + it.price + '</div>'
                          : '<div class="pr">Wk ' + (it.unlockAt + 1) + '</div>';
         html += '</div>';
@@ -955,14 +1029,19 @@
     if (!it || state.coins < it.price) return;
     setCoins(state.coins - it.price);
     var uid = "i" + Date.now() + Math.floor(Math.random() * 999);
-    // drop near the middle of the floor; player can drag it.
-    state.placed.push({ uid: uid, itemId: id, x: 35 + Math.random() * 30, y: 70 + Math.random() * 12 });
+    // a garland hangs high across the room; everything else lands on the floor.
+    var pos = it.render === "garland"
+      ? { x: 50, y: 17 }
+      : { x: 35 + Math.random() * 30, y: 70 + Math.random() * 12 };
+    state.placed.push({ uid: uid, itemId: id, x: pos.x, y: pos.y });
     state.lastItem = it.name;
     selectedUid = uid;
     save(); renderRoom();
     closePanel();
     showPlaceHint();
-    toast("Bought " + it.name + "! Drag it where you like ✋");
+    if (id === "bat") toast("🏏 Got the bat! Tap Jas, Aqsa or Adam to make them squeak.");
+    else if (it.render === "garland") toast("✨ Strung up the lights! Drag them where you like.");
+    else toast("Bought " + it.name + "! Drag it where you like ✋");
   }
 
   var placeHintTimer = null;
@@ -1568,8 +1647,29 @@
       o.start(t); o.stop(t + 0.3);
     }
 
-    return { start: start, toggle: toggle, squeak: squeak, updateBtn: updateBtn,
-             level: level, isMuted: function () { return muted; },
+    // A rubber-toy "squeak-eak" for bonking a friend with the bat.
+    function charSqueak() {
+      var c = getCtx(); if (!c) return;
+      if (c.state === "suspended") c.resume();
+      var t = c.currentTime;
+      var chirp = function (start, f1, f2) {
+        var o = c.createOscillator(), g = c.createGain();
+        o.type = "square";
+        o.frequency.setValueAtTime(f1, start);
+        o.frequency.exponentialRampToValueAtTime(f2, start + 0.05);
+        o.frequency.exponentialRampToValueAtTime(f1 * 0.8, start + 0.12);
+        g.gain.setValueAtTime(0.0001, start);
+        g.gain.exponentialRampToValueAtTime(0.085, start + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, start + 0.15);
+        o.connect(g); g.connect(c.destination);
+        o.start(start); o.stop(start + 0.16);
+      };
+      chirp(t, 900, 1500);
+      chirp(t + 0.11, 1150, 1850);
+    }
+
+    return { start: start, toggle: toggle, squeak: squeak, charSqueak: charSqueak,
+             updateBtn: updateBtn, level: level, isMuted: function () { return muted; },
              ctxState: function () { return ctx ? ctx.state : "none"; } };
   })();
 
@@ -1642,6 +1742,36 @@
   })();
 
   // =====================================================================
+  //  CHARACTERS — once you own the baseball bat, tap a friend to bonk &
+  //  squeak them (all in good fun — no scores, no harm done).
+  // =====================================================================
+  function batOwned() {
+    return state.placed.some(function (p) { return p.itemId === "bat"; });
+  }
+  function updateBatState() {
+    document.body.classList.toggle("has-bat", batOwned());
+  }
+  function initCharacters() {
+    ["avJas", "avAqsa", "avAdam"].forEach(function (id) {
+      var el = $(id); if (!el) return;
+      var hit = function (e) {
+        if (!batOwned()) return;        // need the bat to bonk
+        if (e && e.cancelable) e.preventDefault();
+        el.classList.remove("squeaked"); void el.offsetWidth; el.classList.add("squeaked");
+        setTimeout(function () { el.classList.remove("squeaked"); }, 460);
+        Ambient.charSqueak();
+        var note = document.createElement("div");
+        note.className = "squeaknote";
+        note.textContent = Math.random() < 0.5 ? "squeak!" : "🎵";
+        el.appendChild(note);
+        setTimeout(function () { if (note.parentNode) note.remove(); }, 900);
+      };
+      el.addEventListener("click", hit);
+      el.addEventListener("touchstart", hit, { passive: false });
+    });
+  }
+
+  // =====================================================================
   //  WIRING
   // =====================================================================
   $("btnNight").addEventListener("click", startNight);
@@ -1668,6 +1798,7 @@
     fitRoom();
     renderRoom();
     initFurnitureDrag();
+    initCharacters();
     updateHud();
     Pet.init();
     Ambient.updateBtn();

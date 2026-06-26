@@ -139,7 +139,7 @@
   /* Avatars */
   .avatar {
     position: absolute; bottom: 12%; width: 56px; text-align: center;
-    pointer-events: none; transition: transform .3s; z-index: 5;
+    pointer-events: none; transition: transform .3s; z-index: 50;
   }
   .avatar .body {
     width: 42px; height: 48px; margin: 0 auto;
@@ -162,7 +162,7 @@
     position: absolute; transform: translate(-50%, -50%);
     font-size: 38px; line-height: 1; cursor: grab;
     filter: drop-shadow(0 4px 4px rgba(0,0,0,0.35));
-    z-index: 4; touch-action: none;
+    z-index: 4; touch-action: none; transform-origin: center center;
     transition: filter .15s;
   }
   .item:active { cursor: grabbing; }
@@ -178,7 +178,7 @@
   /* Hidden-object sparkle targets */
   .hidden-target {
     position: absolute; transform: translate(-50%,-50%);
-    font-size: 26px; cursor: pointer; z-index: 8;
+    font-size: 26px; cursor: pointer; z-index: 90;
     animation: twinkle 1.6s ease-in-out infinite;
   }
   .hidden-target.found { animation: none; }
@@ -188,7 +188,7 @@
   #placeHint {
     position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
     background: rgba(0,0,0,0.65); color: #fff; padding: 6px 14px; border-radius: 999px;
-    font-size: 13px; font-weight: 600; z-index: 20; display: none; white-space: nowrap;
+    font-size: 13px; font-weight: 600; z-index: 95; display: none; white-space: nowrap;
   }
 
   /* ---- Bottom action bar ------------------------------------------------ */
@@ -286,11 +286,16 @@
   .hint-line { font-size:13px; color:#8a7560; margin-top:6px; }
   kbd { background:#efe3cf; border:1px solid #d9c39c; border-radius:5px; padding:1px 6px; font-size:12px; font-weight:700; }
 
-  /* ---- Built-in furniture (flat CSS art) -------------------------------- */
-  .fixture { position: absolute; z-index: 1; pointer-events: none; }
+  /* ---- Built-in furniture (flat CSS art, drag to rearrange) ------------- */
+  /* .furn is the draggable wrapper; JS sets its left/top/scale/z by depth so
+     pieces can be moved anywhere — drag one upward to push it to the back. */
+  .furn { position: absolute; pointer-events: auto; cursor: grab; touch-action: none;
+    transform: translate(-50%, -100%); transform-origin: bottom center; transition: filter .15s; }
+  .furn:active { cursor: grabbing; }
+  .furn.selected { filter: drop-shadow(0 0 9px var(--coin)); }
 
   /* Standing wardrobe with cute stickers */
-  .wardrobe { left: 2.5%; bottom: 9%; width: 96px; height: 196px;
+  .wardrobe { width: 96px; height: 196px;
     background: linear-gradient(180deg,#8a6440,#71502d); border-radius: 8px 8px 4px 4px;
     box-shadow: inset 0 0 0 3px rgba(0,0,0,.08), 0 10px 16px rgba(0,0,0,.35); }
   .wardrobe .door { position: absolute; top: 8px; bottom: 22px; width: 40%;
@@ -304,7 +309,7 @@
   .wardrobe .stickers span { position: absolute; font-size: 15px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
 
   /* Cozy bed with a plush + sticker */
-  .bed { left: 17%; bottom: 5%; width: 168px; height: 78px; }
+  .bed { width: 168px; height: 78px; }
   .bed .head { position: absolute; left: 0; bottom: 0; width: 22px; height: 66px;
     background: linear-gradient(180deg,#8a6aa0,#6f5286); border-radius: 8px 8px 4px 4px; }
   .bed .mattress { position: absolute; left: 18px; bottom: 4px; right: 0; height: 36px;
@@ -319,7 +324,7 @@
   .bed .bedsticker { position: absolute; left: 4px; bottom: 40px; font-size: 14px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
 
   /* Desk with a chunky 90s beige computer */
-  .deskunit { left: 68%; bottom: 6%; width: 176px; height: 116px; }
+  .deskunit { width: 176px; height: 116px; }
   .deskunit .desk { position: absolute; bottom: 0; left: 0; right: 0; height: 14px;
     background: linear-gradient(180deg,#86603a,#6d4d2c); border-radius: 3px; box-shadow: 0 8px 12px rgba(0,0,0,.35); }
   .deskunit .leg { position: absolute; bottom: -28px; width: 9px; height: 28px; background: #5e4528; }
@@ -344,7 +349,7 @@
 
   /* ---- The pet — a little wandering cat --------------------------------- */
   .pet { position: absolute; bottom: 12.5%; left: 50%; width: 44px; height: 40px;
-    z-index: 5; cursor: pointer; pointer-events: auto; transition: left .2s; }
+    z-index: 52; cursor: pointer; pointer-events: auto; transition: left .2s; }
   .petbody { position: absolute; bottom: 0; left: 3px; right: 3px; height: 32px;
     background: linear-gradient(180deg,#e3ab73,#c2854f);
     border-radius: 46% 46% 42% 42% / 58% 58% 42% 42%;
@@ -371,7 +376,7 @@
   .pet .tail { position: absolute; bottom: 4px; right: -9px; width: 18px; height: 7px;
     background: #c2854f; border-radius: 6px; transform-origin: left center; animation: tailflick 2.4s ease-in-out infinite; }
   @keyframes tailflick { 0%,100%{ transform: rotate(-10deg);} 50%{ transform: rotate(22deg);} }
-  .petlove { position: absolute; transform: translateX(-50%); font-size: 18px; z-index: 9;
+  .petlove { position: absolute; transform: translateX(-50%); font-size: 18px; z-index: 88;
     pointer-events: none; animation: petlove 1.1s ease-out forwards; }
   @keyframes petlove { 0%{ opacity: 0; transform: translate(-50%,0) scale(.6);} 20%{ opacity:1;} 100%{ opacity:0; transform: translate(-50%,-46px) scale(1.1);} }
 </style>
@@ -405,9 +410,9 @@
       <div class="skirting"></div>
       <div class="floor"></div>
 
-      <!-- Built-in cozy furniture (flat CSS art) -->
+      <!-- Built-in cozy furniture (flat CSS art) — drag to rearrange -->
       <!-- Standing wardrobe with cute stickers (TODO(personalise): swap stickers) -->
-      <div class="fixture wardrobe">
+      <div class="furn wardrobe" data-furn="wardrobe" title="Drag me anywhere">
         <div class="door left"></div>
         <div class="door right"></div>
         <div class="stickers">
@@ -417,8 +422,8 @@
           <span style="top:30%; left:74%">🐱</span>
         </div>
       </div>
-      <!-- Cozy bed (sits in Jas's nook) -->
-      <div class="fixture bed">
+      <!-- Cozy bed -->
+      <div class="furn bed" data-furn="bed" title="Drag me anywhere">
         <div class="head"></div>
         <div class="mattress"></div>
         <div class="blanket"></div>
@@ -427,7 +432,7 @@
         <div class="bedsticker">⭐</div>
       </div>
       <!-- Desk with a chunky 90s beige computer -->
-      <div class="fixture deskunit">
+      <div class="furn deskunit" data-furn="desk" title="Drag me anywhere">
         <div class="crt">
           <div class="screen"><span class="cursor"></span></div>
           <div class="stand"></div>
@@ -523,6 +528,30 @@
     { id: "books",    name: "Book Stack",   ic: "📚", price: 9,  unlockAt: 0, set: "Starter" },
     { id: "candle",   name: "Candle",       ic: "🕯️", price: 7,  unlockAt: 0, set: "Starter" },
 
+    // --- Lighting (all available from night 1) ---
+    { id: "fairylights", name: "Fairy Lights",  ic: "🎇", price: 16, unlockAt: 0, set: "Lighting" },
+    { id: "lantern",     name: "Paper Lantern", ic: "🏮", price: 14, unlockAt: 0, set: "Lighting" },
+    { id: "floorlamp",   name: "Floor Lamp",    ic: "🪔", price: 18, unlockAt: 0, set: "Lighting" },
+    { id: "glowstars",   name: "Glow Stars",    ic: "🌟", price: 12, unlockAt: 0, set: "Lighting" },
+    { id: "neon",        name: "Neon Sign",     ic: "💟", price: 22, unlockAt: 0, set: "Lighting" },
+    { id: "sunsetlamp",  name: "Sunset Lamp",   ic: "🌇", price: 20, unlockAt: 0, set: "Lighting" },
+
+    // --- Greenery: mini plants ---
+    { id: "sprout",    name: "Tiny Sprout",      ic: "🌱", price: 6,  unlockAt: 0, set: "Greenery" },
+    { id: "succulent", name: "Mini Succulent",   ic: "🌵", price: 9,  unlockAt: 0, set: "Greenery" },
+    { id: "flowers",   name: "Vase of Flowers",  ic: "💐", price: 12, unlockAt: 0, set: "Greenery" },
+    { id: "bamboo",    name: "Lucky Bamboo",     ic: "🎍", price: 11, unlockAt: 0, set: "Greenery" },
+    { id: "herb",      name: "Herb Pot",         ic: "🌿", price: 8,  unlockAt: 0, set: "Greenery" },
+    { id: "tulip",     name: "Potted Tulip",     ic: "🌷", price: 10, unlockAt: 0, set: "Greenery" },
+
+    // --- Wall Art: paintings & posters ---
+    { id: "landscape", name: "Landscape Painting", ic: "🏞️", price: 16, unlockAt: 0, set: "Wall Art" },
+    { id: "abstract",  name: "Abstract Art",       ic: "🎨", price: 14, unlockAt: 0, set: "Wall Art" },
+    { id: "mappost",   name: "Map Poster",         ic: "🗺️", price: 10, unlockAt: 0, set: "Wall Art" },
+    { id: "filmposter",name: "Film Poster",        ic: "🎭", price: 13, unlockAt: 0, set: "Wall Art" },
+    { id: "framedpic", name: "Framed Photo",       ic: "🖼️", price: 12, unlockAt: 0, set: "Wall Art" },
+    { id: "tapestry",  name: "Tapestry",           ic: "🧵", price: 15, unlockAt: 0, set: "Wall Art" },
+
     // --- Unlocks at 3 Mondays ---
     { id: "lava",     name: "Lava Lamp",    ic: "🔮", price: 18, unlockAt: 3, set: "Glow Up" },
     { id: "string",   name: "String Lights",ic: "🎐", price: 16, unlockAt: 3, set: "Glow Up" },
@@ -581,9 +610,18 @@
     memories: [],          // [{week, emoji, text}]
     lastItem: null,        // for the "Last Monday you added…" callback
     nights: [],            // log of each night for end-cards / history
+    // Positions of the built-in furniture (x = centre %, y = floor-contact %).
+    // Drag a piece upward (smaller y) to send it to the back of the room.
+    furniture: [
+      { id: "wardrobe", x: 8.5, y: 91 },
+      { id: "bed",      x: 27.5, y: 95 },
+      { id: "desk",     x: 79,  y: 94 }
+    ],
     createdAt: null,
     updatedAt: null
   };
+  // Fallback positions if a save is missing a piece.
+  var FURN_DEFAULTS = { wardrobe: { x: 8.5, y: 91 }, bed: { x: 27.5, y: 95 }, desk: { x: 79, y: 94 } };
 
   var state = load();
 
@@ -671,6 +709,13 @@
   // =====================================================================
   var selectedUid = null;
 
+  // ---- Depth: things higher up (smaller y) read as further "back" — they
+  //      get a little smaller and tuck behind closer things. Used for both
+  //      placed items and the draggable furniture. -------------------------
+  function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+  function depthScale(y) { return 0.80 + clamp01((y - 12) / 80) * 0.30; }  // 0.80 (back) .. 1.10 (front)
+  function depthZ(y) { return 3 + Math.round(clamp01((y - 12) / 80) * 42); } // 3 (back) .. 45 (front)
+
   function renderRoom() {
     // remove existing item nodes
     Array.prototype.slice.call(room.querySelectorAll(".item")).forEach(function (n) { n.remove(); });
@@ -682,6 +727,8 @@
       el.dataset.uid = p.uid;
       el.style.left = p.x + "%";
       el.style.top = p.y + "%";
+      el.style.transform = "translate(-50%, -50%) scale(" + depthScale(p.y).toFixed(3) + ")";
+      el.style.zIndex = depthZ(p.y);
       el.textContent = def.ic;
       var del = document.createElement("div");
       del.className = "del"; del.textContent = "×";
@@ -690,6 +737,7 @@
       attachDrag(el, p);
       room.appendChild(el);
     });
+    positionFurniture();
     updateAmbient();
     updateHud();
   }
@@ -748,6 +796,8 @@
       y = Math.max(10, Math.min(95, y));
       p.x = x; p.y = y;
       el.style.left = x + "%"; el.style.top = y + "%";
+      el.style.transform = "translate(-50%, -50%) scale(" + depthScale(y).toFixed(3) + ")";
+      el.style.zIndex = depthZ(y);
     }
     function up() {
       if (!dragging) return;
@@ -760,6 +810,75 @@
     }
     el.addEventListener("mousedown", down);
     el.addEventListener("touchstart", down, { passive: false });
+  }
+
+  // =====================================================================
+  //  FURNITURE — the built-in pieces are draggable too (and persist).
+  // =====================================================================
+  function furnById(id) {
+    for (var i = 0; i < state.furniture.length; i++) if (state.furniture[i].id === id) return state.furniture[i];
+    // older save missing this piece → seed from defaults
+    var seed = { id: id, x: (FURN_DEFAULTS[id] || { x: 50, y: 90 }).x, y: (FURN_DEFAULTS[id] || { x: 50, y: 90 }).y };
+    state.furniture.push(seed);
+    return seed;
+  }
+
+  // Place every furniture element from saved state (also re-runs after import).
+  function positionFurniture() {
+    Array.prototype.slice.call(room.querySelectorAll("[data-furn]")).forEach(function (el) {
+      var f = furnById(el.dataset.furn);
+      el.style.left = f.x + "%";
+      el.style.top = f.y + "%";
+      el.style.transform = "translate(-50%, -100%) scale(" + depthScale(f.y).toFixed(3) + ")";
+      el.style.zIndex = depthZ(f.y);
+    });
+  }
+
+  // Attach drag handlers once at boot.
+  function initFurnitureDrag() {
+    Array.prototype.slice.call(room.querySelectorAll("[data-furn]")).forEach(function (el) {
+      var id = el.dataset.furn;
+      var dragging = false, moved = false;
+
+      function reposition(x, y) {
+        el.style.left = x + "%"; el.style.top = y + "%";
+        el.style.transform = "translate(-50%, -100%) scale(" + depthScale(y).toFixed(3) + ")";
+        el.style.zIndex = depthZ(y);
+      }
+      function down(e) {
+        e.preventDefault();
+        dragging = true; moved = false;
+        selectedUid = null;
+        el.classList.add("selected");
+        window.addEventListener("mousemove", move);
+        window.addEventListener("touchmove", move, { passive: false });
+        window.addEventListener("mouseup", up);
+        window.addEventListener("touchend", up);
+      }
+      function move(e) {
+        if (!dragging) return;
+        e.preventDefault(); moved = true;
+        var pt = e.touches ? e.touches[0] : e;
+        var rect = room.getBoundingClientRect();
+        var x = Math.max(5, Math.min(95, ((pt.clientX - rect.left) / rect.width) * 100));
+        var y = Math.max(34, Math.min(98, ((pt.clientY - rect.top) / rect.height) * 100));
+        var f = furnById(id);
+        f.x = x; f.y = y;
+        reposition(x, y);
+      }
+      function up() {
+        if (!dragging) return;
+        dragging = false;
+        el.classList.remove("selected");
+        window.removeEventListener("mousemove", move);
+        window.removeEventListener("touchmove", move);
+        window.removeEventListener("mouseup", up);
+        window.removeEventListener("touchend", up);
+        if (moved) { save(); toast("Moved it. ✨"); }
+      }
+      el.addEventListener("mousedown", down);
+      el.addEventListener("touchstart", down, { passive: false });
+    });
   }
 
   // tap empty floor to deselect
@@ -1548,6 +1667,7 @@
     renderSeason();
     fitRoom();
     renderRoom();
+    initFurnitureDrag();
     updateHud();
     Pet.init();
     Ambient.updateBtn();

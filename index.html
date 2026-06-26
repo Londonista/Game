@@ -452,6 +452,62 @@
     font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.55); z-index: 80;
     pointer-events: none; animation: squeakfloat .9s ease-out forwards; }
   @keyframes squeakfloat { 0%{ opacity:0; transform: translate(-50%,0) scale(.6);} 20%{ opacity:1;} 100%{ opacity:0; transform: translate(-50%,-28px) scale(1.05);} }
+
+  /* ---- Two rooms: a door on the right wall leads to "the snug" ---------- */
+  #room { transition: opacity .16s ease; }              /* gentle fade on room change */
+
+  .door-next, .door-back { position: absolute; bottom: 0; width: 78px; height: 214px; z-index: 3;
+    cursor: pointer; pointer-events: auto; }
+  .door-next { right: 6px; } .door-back { left: 6px; }
+  .door-next .leaf, .door-back .leaf { position: absolute; inset: 0;
+    background: linear-gradient(180deg,#7a5230,#5a3a20); border: 4px solid #44301c; border-radius: 8px 8px 0 0; }
+  .door-next .leaf { box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), -8px 0 16px rgba(0,0,0,.32); }
+  .door-back .leaf { box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), 8px 0 16px rgba(0,0,0,.32); }
+  .door-next .panel, .door-back .panel { position: absolute; left: 12px; right: 12px; top: 14px; bottom: 38px;
+    background: linear-gradient(180deg,#6b482a,#503620); border: 3px solid rgba(0,0,0,.18); border-radius: 5px; }
+  .door-next .knob, .door-back .knob { position: absolute; top: 54%; width: 9px; height: 9px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffe39a, #c79436); box-shadow: 0 0 6px rgba(255,210,120,.6); }
+  .door-next .knob { left: 12px; } .door-back .knob { right: 12px; }
+  .door-next .sign, .door-back .sign { position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+    white-space: nowrap; font-size: 11px; font-weight: 800; color: #ffe7c0; text-shadow: 0 1px 2px rgba(0,0,0,.6);
+    background: rgba(0,0,0,.4); padding: 2px 9px; border-radius: 999px; animation: doorhint 2.2s ease-in-out infinite; }
+  @keyframes doorhint { 0%,100%{ opacity: .65; transform: translateX(-50%) translateY(0);} 50%{ opacity: 1; transform: translateX(-50%) translateY(-2px);} }
+  .door-next:hover .leaf, .door-back:hover .leaf, .door-next:active .leaf, .door-back:active .leaf { filter: brightness(1.12); }
+
+  /* Second room ("the snug") — warmer green theme + its own fixtures */
+  #room.room-two { background: linear-gradient(180deg,#2e514a,#427563 64%); }
+  #room.room-two .floor { background: linear-gradient(180deg,#9a7445,#7c5a32); }
+  /* hide the bedroom's wall fixtures while viewing the snug (friends + cat
+     come along, so they're NOT hidden) */
+  #room.room-two .window, #room.room-two .curtain, #room.room-two .curtain-rod,
+  #room.room-two .poster-dracula, #room.room-two .nook-label, #room.room-two .door-next { display: none; }
+  /* furniture is per-room: each piece shows only in its own room */
+  #room.room-two .furn[data-room="main"] { display: none; }
+  #room:not(.room-two) .furn[data-room="two"] { display: none; }
+
+  /* Bookshelf (lives in the snug) */
+  .bookshelf { width: 104px; height: 158px; background: linear-gradient(180deg,#7a4f2f,#5c3a20);
+    border: 4px solid #44301c; border-radius: 4px;
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,.12), 0 12px 18px rgba(0,0,0,.4); }
+  .bookshelf .shelf { position: absolute; left: 7px; right: 7px; height: 40px; border-bottom: 5px solid #3f2a18; }
+  .bookshelf .shelf.s1 { top: 6px; } .bookshelf .shelf.s2 { top: 54px; } .bookshelf .shelf.s3 { top: 102px; }
+  .bookshelf .shelf::before { content:""; position: absolute; left: 2px; right: 2px; top: 2px; bottom: 5px; border-radius: 1px; }
+  .bookshelf .shelf.s1::before { background: linear-gradient(90deg,#c0563e 0 13%,#e0a64b 13% 23%,#4f8a5a 23% 41%,#3e6fb0 41% 53%,#b04f86 53% 66%,#d8c24a 66% 78%,#6a4fb0 78% 100%); }
+  .bookshelf .shelf.s2::before { background: linear-gradient(90deg,#3e6fb0 0 12%,#d8c24a 12% 22%,#b04f86 22% 36%,#4f8a5a 36% 50%,#c0563e 50% 63%,#6a4fb0 63% 78%,#e0a64b 78% 100%); }
+  .bookshelf .shelf.s3::before { background: linear-gradient(90deg,#4f8a5a 0 14%,#c0563e 14% 26%,#6a4fb0 26% 40%,#e0a64b 40% 52%,#3e6fb0 52% 66%,#b04f86 66% 80%,#d8c24a 80% 100%); }
+  /* the snug's own fixtures appear only there */
+  .two-only { display: none; }
+  #room.room-two .two-only { display: block; }
+  .window2 { position: absolute; top: 44px; left: 50%; transform: translateX(-50%);
+    width: 148px; height: 148px; border-radius: 50%; border: 8px solid #eaddc4; overflow: hidden;
+    background: #1f2740; box-shadow: inset 0 0 0 2px #cdbb9c, 0 10px 22px rgba(0,0,0,.35); }
+  .window2 .sky2 { position: absolute; inset: 0; background: linear-gradient(180deg,#22304c,#3a3358); }
+  .window2 .cross::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #eaddc4; transform: translateX(-50%); }
+  .window2 .cross::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #eaddc4; transform: translateY(-50%); }
+  .window2 .moon2 { position: absolute; width: 30px; height: 30px; border-radius: 50%; top: 24px; left: 28px;
+    background: radial-gradient(circle at 40% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 16px rgba(255,240,200,.6); }
+  .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(255,255,255,.78);
+    text-shadow: 0 1px 2px rgba(0,0,0,.4); pointer-events: none; }
 </style>
 </head>
 <body>
@@ -539,7 +595,7 @@
 
       <!-- Built-in cozy furniture (flat CSS art) — drag to rearrange -->
       <!-- Standing wardrobe with cute stickers (TODO(personalise): swap stickers) -->
-      <div class="furn wardrobe" data-furn="wardrobe" title="Drag me anywhere">
+      <div class="furn wardrobe" data-furn="wardrobe" data-room="main" title="Drag me anywhere">
         <div class="door left"></div>
         <div class="door right"></div>
         <div class="stickers">
@@ -550,7 +606,7 @@
         </div>
       </div>
       <!-- Cozy bed -->
-      <div class="furn bed" data-furn="bed" title="Drag me anywhere">
+      <div class="furn bed" data-furn="bed" data-room="main" title="Drag me anywhere">
         <div class="head"></div>
         <div class="mattress"></div>
         <div class="blanket"></div>
@@ -559,7 +615,7 @@
         <div class="bedsticker">⭐</div>
       </div>
       <!-- Desk with a chunky 90s beige computer -->
-      <div class="furn deskunit" data-furn="desk" title="Drag me anywhere">
+      <div class="furn deskunit" data-furn="desk" data-room="main" title="Drag me anywhere">
         <div class="crt">
           <div class="screen"><span class="cursor"></span></div>
           <div class="stand"></div>
@@ -568,6 +624,12 @@
         <div class="desk"></div>
         <div class="leg l"></div>
         <div class="leg r"></div>
+      </div>
+      <!-- Bookshelf — lives in the snug (second room) -->
+      <div class="furn bookshelf" data-furn="bookshelf" data-room="two" title="Drag me anywhere">
+        <div class="shelf s1"></div>
+        <div class="shelf s2"></div>
+        <div class="shelf s3"></div>
       </div>
 
       <!-- Nook labels (TODO(personalise): rename / restyle each nook) -->
@@ -601,6 +663,24 @@
           </div>
           <div class="tail"></div>
         </div>
+      </div>
+
+      <!-- Door on the right wall → leads to the second room -->
+      <div class="door-next" id="doorNext" title="Go to the snug">
+        <div class="leaf"><div class="panel"></div><div class="knob"></div></div>
+        <div class="sign">the snug →</div>
+      </div>
+
+      <!-- ===== SECOND ROOM ("the snug") — shown only when you're in it ===== -->
+      <div class="window2 two-only">
+        <div class="sky2"></div>
+        <div class="moon2"></div>
+        <div class="cross"></div>
+      </div>
+      <div class="label2 two-only" style="left:50%; transform:translateX(-50%)">🛋️ The Snug</div>
+      <div class="door-back two-only" id="doorBack" title="Back to the bedroom">
+        <div class="leaf"><div class="panel"></div><div class="knob"></div></div>
+        <div class="sign">← bedroom</div>
       </div>
 
       <!-- Placed items get injected here -->
@@ -744,9 +824,10 @@
     // Positions of the built-in furniture (x = centre %, y = floor-contact %).
     // Drag a piece upward (smaller y) to send it to the back of the room.
     furniture: [
-      { id: "wardrobe", x: 8.5, y: 91 },
-      { id: "bed",      x: 27.5, y: 95 },
-      { id: "desk",     x: 79,  y: 94 }
+      { id: "wardrobe",  x: 8.5,  y: 91 },
+      { id: "bed",       x: 27.5, y: 95 },
+      { id: "desk",      x: 79,   y: 94 },
+      { id: "bookshelf", x: 82,   y: 93 }   // in the snug
     ],
     // Where the three friends are standing (x = centre %, y = floor-contact %).
     characters: [
@@ -754,11 +835,12 @@
       { id: "aqsa", x: 47.5, y: 88 },
       { id: "adam", x: 83.5, y: 88 }
     ],
+    currentRoom: "main",   // which room is on screen ("main" bedroom or "two" snug)
     createdAt: null,
     updatedAt: null
   };
   // Fallback positions if a save is missing a piece / friend.
-  var FURN_DEFAULTS = { wardrobe: { x: 8.5, y: 91 }, bed: { x: 27.5, y: 95 }, desk: { x: 79, y: 94 } };
+  var FURN_DEFAULTS = { wardrobe: { x: 8.5, y: 91 }, bed: { x: 27.5, y: 95 }, desk: { x: 79, y: 94 }, bookshelf: { x: 82, y: 93 } };
   var CHAR_DEFAULTS = { jas: { x: 9.5, y: 88 }, aqsa: { x: 47.5, y: 88 }, adam: { x: 83.5, y: 88 } };
 
   var state = load();
@@ -894,10 +976,16 @@
     '<circle cx="28" cy="11" r="3" fill="#ffb6e1"/><circle cx="38" cy="9" r="3" fill="#bfe8ff"/>' +
     '<circle cx="46" cy="13" r="3" fill="#c7f6c2"/></svg>';
 
+  function applyRoomClass() {
+    room.classList.toggle("room-two", state.currentRoom === "two");
+  }
+
   function renderRoom() {
+    applyRoomClass();
     // remove existing item nodes
     Array.prototype.slice.call(room.querySelectorAll(".item")).forEach(function (n) { n.remove(); });
     state.placed.forEach(function (p) {
+      if ((p.room || "main") !== state.currentRoom) return;   // only this room's items
       var def = itemDef(p.itemId);
       if (!def) return;
       var el = document.createElement("div");
@@ -1152,7 +1240,7 @@
     var pos = it.render === "garland"
       ? { x: 50, y: 17 }
       : { x: 35 + Math.random() * 30, y: 70 + Math.random() * 12 };
-    state.placed.push({ uid: uid, itemId: id, x: pos.x, y: pos.y });
+    state.placed.push({ uid: uid, itemId: id, x: pos.x, y: pos.y, room: state.currentRoom });
     state.lastItem = it.name;
     selectedUid = uid;
     save(); renderRoom();
@@ -1942,6 +2030,23 @@
   }
 
   // =====================================================================
+  //  ROOMS — a door on each wall switches between the bedroom and the snug.
+  // =====================================================================
+  function goToRoom(name) {
+    if (state.currentRoom === name) return;
+    room.style.opacity = "0";
+    setTimeout(function () {
+      state.currentRoom = name;
+      selectedUid = null;
+      renderRoom();              // also flips the room-two theme class
+      room.style.opacity = "1";
+      save();
+      toast(name === "two" ? "🚪 The snug — decorate it too! Tap ← to head back."
+                           : "🏠 Back in the bedroom.");
+    }, 160);
+  }
+
+  // =====================================================================
   //  WIRING
   // =====================================================================
   $("btnNight").addEventListener("click", startNight);
@@ -1952,6 +2057,8 @@
   $("btnMemory").addEventListener("click", openMemories);
   $("btnSave").addEventListener("click", openSaveMenu);
   $("btnMute").addEventListener("click", function () { Ambient.toggle(); });
+  $("doorNext").addEventListener("click", function () { goToRoom("two"); });
+  $("doorBack").addEventListener("click", function () { goToRoom("main"); });
 
   // Browsers block autoplay, so the music begins on the first interaction.
   function armAudio() {

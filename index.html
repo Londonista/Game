@@ -225,13 +225,16 @@
   }
   .item:active { cursor: grabbing; }
   .item.selected { filter: drop-shadow(0 0 8px var(--coin)) drop-shadow(0 4px 4px rgba(0,0,0,0.35)); }
-  .item .del {
-    position: absolute; top: -10px; right: -12px; width: 20px; height: 20px;
-    border-radius: 50%; background: #e2574c; color: #fff; font-size: 13px; font-weight: 800;
+  .item .del, .item .grow, .item .shrink {
+    position: absolute; width: 20px; height: 20px;
+    border-radius: 50%; color: #fff; font-size: 14px; font-weight: 800; line-height: 1;
     display: none; align-items: center; justify-content: center; cursor: pointer;
     box-shadow: 0 2px 4px rgba(0,0,0,0.4);
   }
-  .item.selected .del { display: flex; }
+  .item.selected .del, .item.selected .grow, .item.selected .shrink { display: flex; }
+  .item .del    { top: -10px; right: -12px; background: #e2574c; font-size: 13px; }
+  .item .grow   { bottom: -12px; right: -12px; background: #3aa657; }
+  .item .shrink { bottom: -12px; left: -12px; background: #3a7fb0; }
 
   /* Hidden-object sparkle targets */
   .hidden-target {
@@ -699,7 +702,7 @@
       </div>
 
       <!-- Placed items get injected here -->
-      <div id="placeHint">✋ Drag to move · tap empty floor to drop</div>
+      <div id="placeHint">✋ Drag to move · tap it, then + / − to resize</div>
     </div>
   </div>
 
@@ -1042,26 +1045,35 @@
       el.dataset.uid = p.uid;
       el.style.left = p.x + "%";
       el.style.top = p.y + "%";
-      if (def.render === "garland") {
-        // a wide garland that hangs across the room — no depth shrink, sits near the wall
-        el.classList.add("garland");
-        el.style.transform = "translate(-50%, -50%)";
-        el.style.zIndex = 6;
-        el.appendChild(buildGarland());
-      } else if (def.render === "bookcase") {
-        el.classList.add("bookcase");
-        el.style.transform = "translate(-50%, -50%) scale(" + depthScale(p.y).toFixed(3) + ")";
-        el.style.zIndex = depthZ(p.y);
-        el.appendChild(buildBookcase());
-      } else {
-        el.style.transform = "translate(-50%, -50%) scale(" + depthScale(p.y).toFixed(3) + ")";
-        el.style.zIndex = depthZ(p.y);
-        el.textContent = def.ic;
+      // a garland hangs flat (no depth); everything else scales with depth.
+      // The per-item p.scale (set with the + / − buttons) stacks on top.
+      var isGarland = def.render === "garland";
+      function applyItemTransform() {
+        var base = isGarland ? 1 : depthScale(p.y);
+        el.style.transform = "translate(-50%, -50%) scale(" + (base * (p.scale || 1)).toFixed(3) + ")";
       }
-      var del = document.createElement("div");
-      del.className = "del"; del.textContent = "×";
-      del.addEventListener("click", function (ev) { ev.stopPropagation(); removeItem(p.uid); });
-      el.appendChild(del);
+      if (isGarland) { el.classList.add("garland"); el.style.zIndex = 6; el.appendChild(buildGarland()); }
+      else if (def.render === "bookcase") { el.classList.add("bookcase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBookcase()); }
+      else { el.style.zIndex = depthZ(p.y); el.textContent = def.ic; }
+      applyItemTransform();
+
+      // selection controls: delete · grow · shrink
+      function mkCtrl(cls, label, fn) {
+        var b = document.createElement("div");
+        b.className = cls; b.textContent = label;
+        b.addEventListener("click", function (ev) { ev.stopPropagation(); fn(); });
+        // tapping a control shouldn't start a drag
+        b.addEventListener("mousedown", function (ev) { ev.stopPropagation(); });
+        b.addEventListener("touchstart", function (ev) { ev.stopPropagation(); }, { passive: true });
+        return b;
+      }
+      el.appendChild(mkCtrl("del", "×", function () { removeItem(p.uid); }));
+      el.appendChild(mkCtrl("grow", "+", function () {
+        p.scale = Math.min(2.4, (p.scale || 1) * 1.18); applyItemTransform(); save();
+      }));
+      el.appendChild(mkCtrl("shrink", "−", function () {
+        p.scale = Math.max(0.45, (p.scale || 1) / 1.18); applyItemTransform(); save();
+      }));
       attachDrag(el, p);
       room.appendChild(el);
     });
@@ -1126,12 +1138,9 @@
       y = Math.max(10, Math.min(95, y));
       p.x = x; p.y = y;
       el.style.left = x + "%"; el.style.top = y + "%";
-      if (el.classList.contains("garland")) {
-        el.style.transform = "translate(-50%, -50%)";
-      } else {
-        el.style.transform = "translate(-50%, -50%) scale(" + depthScale(y).toFixed(3) + ")";
-        el.style.zIndex = depthZ(y);
-      }
+      var base = el.classList.contains("garland") ? 1 : depthScale(y);
+      el.style.transform = "translate(-50%, -50%) scale(" + (base * (p.scale || 1)).toFixed(3) + ")";
+      if (!el.classList.contains("garland")) el.style.zIndex = depthZ(y);
     }
     function up() {
       if (!dragging) return;

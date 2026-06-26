@@ -452,6 +452,48 @@
     font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.55); z-index: 80;
     pointer-events: none; animation: squeakfloat .9s ease-out forwards; }
   @keyframes squeakfloat { 0%{ opacity:0; transform: translate(-50%,0) scale(.6);} 20%{ opacity:1;} 100%{ opacity:0; transform: translate(-50%,-28px) scale(1.05);} }
+
+  /* ---- Two rooms: a door on the right wall leads to "the snug" ---------- */
+  #room { transition: opacity .16s ease; }              /* gentle fade on room change */
+
+  .door-next, .door-back { position: absolute; bottom: 0; width: 78px; height: 214px; z-index: 3;
+    cursor: pointer; pointer-events: auto; }
+  .door-next { right: 6px; } .door-back { left: 6px; }
+  .door-next .leaf, .door-back .leaf { position: absolute; inset: 0;
+    background: linear-gradient(180deg,#7a5230,#5a3a20); border: 4px solid #44301c; border-radius: 8px 8px 0 0; }
+  .door-next .leaf { box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), -8px 0 16px rgba(0,0,0,.32); }
+  .door-back .leaf { box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), 8px 0 16px rgba(0,0,0,.32); }
+  .door-next .panel, .door-back .panel { position: absolute; left: 12px; right: 12px; top: 14px; bottom: 38px;
+    background: linear-gradient(180deg,#6b482a,#503620); border: 3px solid rgba(0,0,0,.18); border-radius: 5px; }
+  .door-next .knob, .door-back .knob { position: absolute; top: 54%; width: 9px; height: 9px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffe39a, #c79436); box-shadow: 0 0 6px rgba(255,210,120,.6); }
+  .door-next .knob { left: 12px; } .door-back .knob { right: 12px; }
+  .door-next .sign, .door-back .sign { position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+    white-space: nowrap; font-size: 11px; font-weight: 800; color: #ffe7c0; text-shadow: 0 1px 2px rgba(0,0,0,.6);
+    background: rgba(0,0,0,.4); padding: 2px 9px; border-radius: 999px; animation: doorhint 2.2s ease-in-out infinite; }
+  @keyframes doorhint { 0%,100%{ opacity: .65; transform: translateX(-50%) translateY(0);} 50%{ opacity: 1; transform: translateX(-50%) translateY(-2px);} }
+  .door-next:hover .leaf, .door-back:hover .leaf, .door-next:active .leaf, .door-back:active .leaf { filter: brightness(1.12); }
+
+  /* Second room ("the snug") — warmer green theme + its own fixtures */
+  #room.room-two { background: linear-gradient(180deg,#2e514a,#427563 64%); }
+  #room.room-two .floor { background: linear-gradient(180deg,#9a7445,#7c5a32); }
+  /* hide the bedroom's fixtures while viewing the snug */
+  #room.room-two .window, #room.room-two .curtain, #room.room-two .curtain-rod,
+  #room.room-two .poster-dracula, #room.room-two .nook-label, #room.room-two .furn,
+  #room.room-two .avatar, #room.room-two .pet, #room.room-two .door-next { display: none; }
+  /* the snug's own fixtures appear only there */
+  .two-only { display: none; }
+  #room.room-two .two-only { display: block; }
+  .window2 { position: absolute; top: 44px; left: 50%; transform: translateX(-50%);
+    width: 148px; height: 148px; border-radius: 50%; border: 8px solid #eaddc4; overflow: hidden;
+    background: #1f2740; box-shadow: inset 0 0 0 2px #cdbb9c, 0 10px 22px rgba(0,0,0,.35); }
+  .window2 .sky2 { position: absolute; inset: 0; background: linear-gradient(180deg,#22304c,#3a3358); }
+  .window2 .cross::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #eaddc4; transform: translateX(-50%); }
+  .window2 .cross::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #eaddc4; transform: translateY(-50%); }
+  .window2 .moon2 { position: absolute; width: 30px; height: 30px; border-radius: 50%; top: 24px; left: 28px;
+    background: radial-gradient(circle at 40% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 16px rgba(255,240,200,.6); }
+  .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(255,255,255,.78);
+    text-shadow: 0 1px 2px rgba(0,0,0,.4); pointer-events: none; }
 </style>
 </head>
 <body>
@@ -601,6 +643,24 @@
           </div>
           <div class="tail"></div>
         </div>
+      </div>
+
+      <!-- Door on the right wall → leads to the second room -->
+      <div class="door-next" id="doorNext" title="Go to the snug">
+        <div class="leaf"><div class="panel"></div><div class="knob"></div></div>
+        <div class="sign">the snug →</div>
+      </div>
+
+      <!-- ===== SECOND ROOM ("the snug") — shown only when you're in it ===== -->
+      <div class="window2 two-only">
+        <div class="sky2"></div>
+        <div class="moon2"></div>
+        <div class="cross"></div>
+      </div>
+      <div class="label2 two-only" style="left:50%; transform:translateX(-50%)">🛋️ The Snug</div>
+      <div class="door-back two-only" id="doorBack" title="Back to the bedroom">
+        <div class="leaf"><div class="panel"></div><div class="knob"></div></div>
+        <div class="sign">← bedroom</div>
       </div>
 
       <!-- Placed items get injected here -->
@@ -754,6 +814,7 @@
       { id: "aqsa", x: 47.5, y: 88 },
       { id: "adam", x: 83.5, y: 88 }
     ],
+    currentRoom: "main",   // which room is on screen ("main" bedroom or "two" snug)
     createdAt: null,
     updatedAt: null
   };
@@ -894,10 +955,16 @@
     '<circle cx="28" cy="11" r="3" fill="#ffb6e1"/><circle cx="38" cy="9" r="3" fill="#bfe8ff"/>' +
     '<circle cx="46" cy="13" r="3" fill="#c7f6c2"/></svg>';
 
+  function applyRoomClass() {
+    room.classList.toggle("room-two", state.currentRoom === "two");
+  }
+
   function renderRoom() {
+    applyRoomClass();
     // remove existing item nodes
     Array.prototype.slice.call(room.querySelectorAll(".item")).forEach(function (n) { n.remove(); });
     state.placed.forEach(function (p) {
+      if ((p.room || "main") !== state.currentRoom) return;   // only this room's items
       var def = itemDef(p.itemId);
       if (!def) return;
       var el = document.createElement("div");
@@ -1152,7 +1219,7 @@
     var pos = it.render === "garland"
       ? { x: 50, y: 17 }
       : { x: 35 + Math.random() * 30, y: 70 + Math.random() * 12 };
-    state.placed.push({ uid: uid, itemId: id, x: pos.x, y: pos.y });
+    state.placed.push({ uid: uid, itemId: id, x: pos.x, y: pos.y, room: state.currentRoom });
     state.lastItem = it.name;
     selectedUid = uid;
     save(); renderRoom();
@@ -1942,6 +2009,23 @@
   }
 
   // =====================================================================
+  //  ROOMS — a door on each wall switches between the bedroom and the snug.
+  // =====================================================================
+  function goToRoom(name) {
+    if (state.currentRoom === name) return;
+    room.style.opacity = "0";
+    setTimeout(function () {
+      state.currentRoom = name;
+      selectedUid = null;
+      renderRoom();              // also flips the room-two theme class
+      room.style.opacity = "1";
+      save();
+      toast(name === "two" ? "🚪 The snug — decorate it too! Tap ← to head back."
+                           : "🏠 Back in the bedroom.");
+    }, 160);
+  }
+
+  // =====================================================================
   //  WIRING
   // =====================================================================
   $("btnNight").addEventListener("click", startNight);
@@ -1952,6 +2036,8 @@
   $("btnMemory").addEventListener("click", openMemories);
   $("btnSave").addEventListener("click", openSaveMenu);
   $("btnMute").addEventListener("click", function () { Ambient.toggle(); });
+  $("doorNext").addEventListener("click", function () { goToRoom("two"); });
+  $("doorBack").addEventListener("click", function () { goToRoom("main"); });
 
   // Browsers block autoplay, so the music begins on the first interaction.
   function armAudio() {

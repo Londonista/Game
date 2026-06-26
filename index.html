@@ -1280,13 +1280,35 @@
     var analyser = null;            // signal tap (for self-test / debugging)
     var LEVEL = 0.55;               // master volume when unmuted
 
+    // iOS/Safari mutes all WebAudio when the physical silent switch is ON,
+    // because the page uses the "ambient" audio session. Keeping a tiny silent
+    // <audio> element looping switches it to the "media playback" session,
+    // which ignores the silent switch — so the music plays regardless.
+    var silentEl = null;
+    function unlockSilentLoop() {
+      try {
+        if (!silentEl) {
+          var sr = 8000, n = Math.floor(sr * 0.4), ab = new ArrayBuffer(44 + n * 2), dv = new DataView(ab);
+          var w = function (o, s) { for (var i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+          w(0, "RIFF"); dv.setUint32(4, 36 + n * 2, true); w(8, "WAVE"); w(12, "fmt ");
+          dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
+          dv.setUint32(24, sr, true); dv.setUint32(28, sr * 2, true); dv.setUint16(32, 2, true); dv.setUint16(34, 16, true);
+          w(36, "data"); dv.setUint32(40, n * 2, true); // samples stay zero = silence
+          silentEl = new Audio(URL.createObjectURL(new Blob([ab], { type: "audio/wav" })));
+          silentEl.loop = true; silentEl.playsInline = true; silentEl.setAttribute("playsinline", "");
+        }
+        var p = silentEl.play(); if (p && p.catch) p.catch(function () {});
+      } catch (e) {}
+    }
+
     // Some browsers hand back a context that's still "suspended" even after a
     // gesture, and resume() is async. Keep nudging it until it's running.
     function ensureRunning() {
       if (!ctx) return;
+      unlockSilentLoop();
       if (ctx.state !== "running") {
         ctx.resume();
-        var kick = function () { if (ctx && ctx.state !== "running") ctx.resume(); };
+        var kick = function () { if (ctx && ctx.state !== "running") ctx.resume(); unlockSilentLoop(); };
         ["pointerdown", "touchend", "keydown", "click"].forEach(function (ev) {
           document.addEventListener(ev, kick, { once: true });
         });

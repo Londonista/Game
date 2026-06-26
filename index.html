@@ -1277,6 +1277,22 @@
       convolver.buffer = buf;
     }
 
+    var analyser = null;            // signal tap (for self-test / debugging)
+    var LEVEL = 0.55;               // master volume when unmuted
+
+    // Some browsers hand back a context that's still "suspended" even after a
+    // gesture, and resume() is async. Keep nudging it until it's running.
+    function ensureRunning() {
+      if (!ctx) return;
+      if (ctx.state !== "running") {
+        ctx.resume();
+        var kick = function () { if (ctx && ctx.state !== "running") ctx.resume(); };
+        ["pointerdown", "touchend", "keydown", "click"].forEach(function (ev) {
+          document.addEventListener(ev, kick, { once: true });
+        });
+      }
+    }
+
     function start() {
       if (started) return;
       var c = getCtx(); if (!c) return;
@@ -1286,13 +1302,33 @@
       master.gain.value = 0;
       var rvb = c.createGain(); rvb.gain.value = 0.9;
       convolver.connect(rvb); rvb.connect(master);
-      master.connect(c.destination);
-      if (c.state === "suspended") c.resume();
-      master.gain.setTargetAtTime(muted ? 0 : 0.16, c.currentTime, 1.6);
+      // A gentle compressor evens out the pad swell and keeps it present
+      // without ever clipping, so it's comfortably audible on laptop speakers.
+      var comp = c.createDynamicsCompressor();
+      comp.threshold.value = -22; comp.ratio.value = 3;
+      comp.attack.value = 0.02; comp.release.value = 0.4;
+      analyser = c.createAnalyser();
+      master.connect(comp);
+      comp.connect(analyser);       // tap the final signal for the self-test
+      comp.connect(c.destination);
+      ensureRunning();
+      // quick, audible swell so you hear it within a second or two
+      master.gain.setValueAtTime(0.0001, c.currentTime);
+      master.gain.setTargetAtTime(muted ? 0 : LEVEL, c.currentTime, 0.7);
       playChord();
       chordTimer = setInterval(playChord, 9000);
       scheduleTwinkle();
       updateBtn();
+    }
+
+    // Read the current output level — used by an in-page self-test.
+    function level() {
+      if (!analyser) return 0;
+      var buf = new Float32Array(analyser.fftSize);
+      analyser.getFloatTimeDomainData(buf);
+      var sum = 0;
+      for (var i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+      return Math.sqrt(sum / buf.length);
     }
 
     function playChord() {
@@ -1320,7 +1356,7 @@
           o.connect(lp); lp.connect(g);
           g.connect(master);
           if (convolver) g.connect(convolver);
-          g.gain.setTargetAtTime(0.04, now, 2.4);
+          g.gain.setTargetAtTime(0.07, now, 1.4);
           o.start(now);
           voices.push({ o: o, g: g });
         });
@@ -1342,7 +1378,6 @@
       var o = c.createOscillator(); o.type = "sine"; o.frequency.value = f;
       var g = c.createGain(); g.gain.value = 0.0001;
       o.connect(g);
-      var dest = master;
       if (c.createStereoPanner) {
         var pan = c.createStereoPanner();
         pan.pan.value = Math.random() * 1.6 - 0.8;
@@ -1353,7 +1388,7 @@
         if (convolver) g.connect(convolver);
       }
       g.gain.setValueAtTime(0.0001, now);
-      g.gain.exponentialRampToValueAtTime(0.085, now + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.13, now + 0.05);
       g.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
       o.start(now); o.stop(now + 2.5);
     }
@@ -1363,9 +1398,9 @@
       try { localStorage.setItem("mns.muted", muted ? "1" : "0"); } catch (e) {}
       if (!muted) {
         if (!started) start();
-        else master.gain.setTargetAtTime(0.16, ctx.currentTime, 0.6);
+        else { ensureRunning(); master.gain.setTargetAtTime(LEVEL, ctx.currentTime, 0.5); }
       } else if (started) {
-        master.gain.setTargetAtTime(0, ctx.currentTime, 0.5);
+        master.gain.setTargetAtTime(0, ctx.currentTime, 0.4);
       }
       updateBtn();
     }
@@ -1393,7 +1428,8 @@
     }
 
     return { start: start, toggle: toggle, squeak: squeak, updateBtn: updateBtn,
-             isMuted: function () { return muted; } };
+             level: level, isMuted: function () { return muted; },
+             ctxState: function () { return ctx ? ctx.state : "none"; } };
   })();
 
   // =====================================================================
@@ -1503,7 +1539,8 @@
   boot();
 
   // expose a tiny debug handle (handy while building / personalising)
-  window.MNS = { state: state, save: save, reset: function () { localStorage.removeItem(SAVE_KEY); location.reload(); } };
+  window.MNS = { state: state, save: save, Ambient: Ambient,
+    reset: function () { localStorage.removeItem(SAVE_KEY); location.reload(); } };
 })();
 </script>
 </body>

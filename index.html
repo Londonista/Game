@@ -463,7 +463,7 @@
     background: linear-gradient(180deg,#7a5230,#5a3a20); border: 4px solid #44301c; border-radius: 8px 8px 0 0; }
   .door-next .leaf { box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), -8px 0 16px rgba(0,0,0,.32); }
   .door-back .leaf { box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), 8px 0 16px rgba(0,0,0,.32); }
-  .door-next .panel, .door-back .panel { position: absolute; left: 12px; right: 12px; top: 14px; bottom: 38px;
+  .door-next .dpanel, .door-back .dpanel { position: absolute; left: 12px; right: 12px; top: 14px; bottom: 38px;
     background: linear-gradient(180deg,#6b482a,#503620); border: 3px solid rgba(0,0,0,.18); border-radius: 5px; }
   .door-next .knob, .door-back .knob { position: absolute; top: 54%; width: 9px; height: 9px; border-radius: 50%;
     background: radial-gradient(circle at 35% 35%, #ffe39a, #c79436); box-shadow: 0 0 6px rgba(255,210,120,.6); }
@@ -485,16 +485,37 @@
   #room.room-two .furn[data-room="main"] { display: none; }
   #room:not(.room-two) .furn[data-room="two"] { display: none; }
 
-  /* Bookshelf (lives in the snug) */
-  .bookshelf { width: 104px; height: 158px; background: linear-gradient(180deg,#7a4f2f,#5c3a20);
-    border: 4px solid #44301c; border-radius: 4px;
-    box-shadow: inset 0 0 0 2px rgba(0,0,0,.12), 0 12px 18px rgba(0,0,0,.4); }
-  .bookshelf .shelf { position: absolute; left: 7px; right: 7px; height: 40px; border-bottom: 5px solid #3f2a18; }
-  .bookshelf .shelf.s1 { top: 6px; } .bookshelf .shelf.s2 { top: 54px; } .bookshelf .shelf.s3 { top: 102px; }
-  .bookshelf .shelf::before { content:""; position: absolute; left: 2px; right: 2px; top: 2px; bottom: 5px; border-radius: 1px; }
-  .bookshelf .shelf.s1::before { background: linear-gradient(90deg,#c0563e 0 13%,#e0a64b 13% 23%,#4f8a5a 23% 41%,#3e6fb0 41% 53%,#b04f86 53% 66%,#d8c24a 66% 78%,#6a4fb0 78% 100%); }
-  .bookshelf .shelf.s2::before { background: linear-gradient(90deg,#3e6fb0 0 12%,#d8c24a 12% 22%,#b04f86 22% 36%,#4f8a5a 36% 50%,#c0563e 50% 63%,#6a4fb0 63% 78%,#e0a64b 78% 100%); }
-  .bookshelf .shelf.s3::before { background: linear-gradient(90deg,#4f8a5a 0 14%,#c0563e 14% 26%,#6a4fb0 26% 40%,#e0a64b 40% 52%,#3e6fb0 52% 66%,#b04f86 66% 80%,#d8c24a 80% 100%); }
+  /* Ornate, empty wooden bookcase — a purchasable, removable item */
+  .item.bookcase { font-size: 0; filter: drop-shadow(0 8px 7px rgba(0,0,0,0.4)); }
+  .item.bookcase .del { top: -8px; right: -10px; }
+  .bookcase-art { position: relative; width: 104px; height: 168px; }
+  /* arched pediment / crown */
+  .bookcase-art .crown { position: absolute; top: 0; left: -4px; right: -4px; height: 26px;
+    background: linear-gradient(180deg,#8a5a36,#6e4526); border-radius: 16px 16px 4px 4px;
+    box-shadow: inset 0 2px 0 rgba(255,225,180,.3), 0 2px 3px rgba(0,0,0,.3); }
+  .bookcase-art .crown::after { content:""; position: absolute; top: -7px; left: 50%; transform: translateX(-50%);
+    width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle at 35% 35%,#a9763b,#5e3d1f); } /* finial */
+  .bookcase-art .body { position: absolute; top: 22px; left: 0; right: 0; bottom: 16px;
+    background: linear-gradient(90deg,#5a3a20 0 8%,#7a4f2f 8% 92%,#5a3a20 92% 100%);
+    border: 3px solid #44301c; border-radius: 3px;
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,.1); }
+  /* fluted side pilasters */
+  .bookcase-art .body::before, .bookcase-art .body::after { content:""; position: absolute; top: 4px; bottom: 4px; width: 8px;
+    background: repeating-linear-gradient(90deg,#6e4526 0 2px,#4a3018 2px 4px); }
+  .bookcase-art .body::before { left: 4px; } .bookcase-art .body::after { right: 4px; }
+  /* empty shelves: a dark recessed back with wooden ledges */
+  .bookcase-art .inner { position: absolute; top: 28px; left: 16px; right: 16px; bottom: 22px;
+    background: linear-gradient(180deg,#2e1f12,#3a281a); border-radius: 2px; box-shadow: inset 0 0 6px rgba(0,0,0,.6); }
+  .bookcase-art .inner .ledge { position: absolute; left: 0; right: 0; height: 5px;
+    background: linear-gradient(180deg,#7a4f2f,#5a3a20); box-shadow: 0 2px 3px rgba(0,0,0,.5); }
+  .bookcase-art .inner .ledge.l1 { top: 31%; } .bookcase-art .inner .ledge.l2 { top: 64%; }
+  /* carved base + bracket feet */
+  .bookcase-art .base { position: absolute; bottom: 0; left: -4px; right: -4px; height: 16px;
+    background: linear-gradient(180deg,#7a4f2f,#5a3a20); border-radius: 3px;
+    box-shadow: inset 0 2px 0 rgba(255,225,180,.25); }
+  .bookcase-art .foot { position: absolute; bottom: -8px; width: 14px; height: 10px;
+    background: linear-gradient(180deg,#6e4526,#46301c); border-radius: 0 0 5px 5px; }
+  .bookcase-art .foot.l { left: 6px; } .bookcase-art .foot.r { right: 6px; }
   /* the snug's own fixtures appear only there */
   .two-only { display: none; }
   #room.room-two .two-only { display: block; }
@@ -625,12 +646,6 @@
         <div class="leg l"></div>
         <div class="leg r"></div>
       </div>
-      <!-- Bookshelf — lives in the snug (second room) -->
-      <div class="furn bookshelf" data-furn="bookshelf" data-room="two" title="Drag me anywhere">
-        <div class="shelf s1"></div>
-        <div class="shelf s2"></div>
-        <div class="shelf s3"></div>
-      </div>
 
       <!-- Nook labels (TODO(personalise): rename / restyle each nook) -->
       <div class="nook-label" style="left:8%">🛏️ Jas</div>
@@ -667,7 +682,7 @@
 
       <!-- Door on the right wall → leads to the second room -->
       <div class="door-next" id="doorNext" title="Go to the snug">
-        <div class="leaf"><div class="panel"></div><div class="knob"></div></div>
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
         <div class="sign">the snug →</div>
       </div>
 
@@ -679,7 +694,7 @@
       </div>
       <div class="label2 two-only" style="left:50%; transform:translateX(-50%)">🛋️ The Snug</div>
       <div class="door-back two-only" id="doorBack" title="Back to the bedroom">
-        <div class="leaf"><div class="panel"></div><div class="knob"></div></div>
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
         <div class="sign">← bedroom</div>
       </div>
 
@@ -761,6 +776,17 @@
     { id: "framedpic", name: "Framed Photo",       ic: "🖼️", price: 12, unlockAt: 0, set: "Wall Art" },
     { id: "tapestry",  name: "Tapestry",           ic: "🧵", price: 15, unlockAt: 0, set: "Wall Art" },
 
+    // --- Study: an empty ornate bookcase + things to fill it ---
+    { id: "bookcase",  name: "Bookcase",      ic: "📚", price: 28, unlockAt: 0, set: "Study", render: "bookcase" },
+    { id: "globe",     name: "Globe",         ic: "🌐", price: 16, unlockAt: 0, set: "Study" },
+    { id: "skull",     name: "Skull Décor",   ic: "💀", price: 12, unlockAt: 0, set: "Study" },
+    { id: "penpot",    name: "Pen Pot",       ic: "🖊️", price: 8,  unlockAt: 0, set: "Study" },
+    { id: "redbook",   name: "Red Book",      ic: "📕", price: 5,  unlockAt: 0, set: "Study" },
+    { id: "greenbook", name: "Green Book",    ic: "📗", price: 5,  unlockAt: 0, set: "Study" },
+    { id: "bluebook",  name: "Blue Book",     ic: "📘", price: 5,  unlockAt: 0, set: "Study" },
+    { id: "orangebook",name: "Orange Book",   ic: "📙", price: 5,  unlockAt: 0, set: "Study" },
+    { id: "openbook",  name: "Open Book",     ic: "📖", price: 6,  unlockAt: 0, set: "Study" },
+
     // --- Unlocks at 3 Mondays ---
     { id: "lava",     name: "Lava Lamp",    ic: "🔮", price: 18, unlockAt: 3, set: "Glow Up" },
     { id: "poster",   name: "Poster",       ic: "🖼️", price: 13, unlockAt: 3, set: "Glow Up" },
@@ -826,8 +852,7 @@
     furniture: [
       { id: "wardrobe",  x: 8.5,  y: 91 },
       { id: "bed",       x: 27.5, y: 95 },
-      { id: "desk",      x: 79,   y: 94 },
-      { id: "bookshelf", x: 82,   y: 93 }   // in the snug
+      { id: "desk",      x: 79,   y: 94 }
     ],
     // Where the three friends are standing (x = centre %, y = floor-contact %).
     characters: [
@@ -840,7 +865,7 @@
     updatedAt: null
   };
   // Fallback positions if a save is missing a piece / friend.
-  var FURN_DEFAULTS = { wardrobe: { x: 8.5, y: 91 }, bed: { x: 27.5, y: 95 }, desk: { x: 79, y: 94 }, bookshelf: { x: 82, y: 93 } };
+  var FURN_DEFAULTS = { wardrobe: { x: 8.5, y: 91 }, bed: { x: 27.5, y: 95 }, desk: { x: 79, y: 94 } };
   var CHAR_DEFAULTS = { jas: { x: 9.5, y: 88 }, aqsa: { x: 47.5, y: 88 }, adam: { x: 83.5, y: 88 } };
 
   var state = load();
@@ -976,6 +1001,30 @@
     '<circle cx="28" cy="11" r="3" fill="#ffb6e1"/><circle cx="38" cy="9" r="3" fill="#bfe8ff"/>' +
     '<circle cx="46" cy="13" r="3" fill="#c7f6c2"/></svg>';
 
+  // Build an ornate, empty wooden bookcase (a placeable, removable item).
+  function buildBookcase() {
+    var wrap = document.createElement("div");
+    wrap.className = "bookcase-art";
+    wrap.innerHTML =
+      '<div class="crown"></div>' +
+      '<div class="body"></div>' +
+      '<div class="inner"><div class="ledge l1"></div><div class="ledge l2"></div></div>' +
+      '<div class="base"></div>' +
+      '<div class="foot l"></div><div class="foot r"></div>';
+    return wrap;
+  }
+
+  // Small ornate-bookcase icon for the shop card.
+  var BOOKCASE_ICON =
+    '<svg width="34" height="46" viewBox="0 0 34 46">' +
+    '<rect x="2" y="0" width="30" height="5" rx="2" fill="#8a5a36"/>' +
+    '<rect x="4" y="5" width="26" height="34" rx="2" fill="#7a4f2f" stroke="#44301c" stroke-width="2"/>' +
+    '<rect x="8" y="9" width="18" height="26" fill="#2e1f12"/>' +
+    '<rect x="8" y="19" width="18" height="3" fill="#6e4526"/><rect x="8" y="28" width="18" height="3" fill="#6e4526"/>' +
+    '<rect x="2" y="39" width="30" height="5" rx="2" fill="#7a4f2f"/>' +
+    '<rect x="6" y="44" width="5" height="2" fill="#44301c"/><rect x="23" y="44" width="5" height="2" fill="#44301c"/>' +
+    '</svg>';
+
   function applyRoomClass() {
     room.classList.toggle("room-two", state.currentRoom === "two");
   }
@@ -999,6 +1048,11 @@
         el.style.transform = "translate(-50%, -50%)";
         el.style.zIndex = 6;
         el.appendChild(buildGarland());
+      } else if (def.render === "bookcase") {
+        el.classList.add("bookcase");
+        el.style.transform = "translate(-50%, -50%) scale(" + depthScale(p.y).toFixed(3) + ")";
+        el.style.zIndex = depthZ(p.y);
+        el.appendChild(buildBookcase());
       } else {
         el.style.transform = "translate(-50%, -50%) scale(" + depthScale(p.y).toFixed(3) + ")";
         el.style.zIndex = depthZ(p.y);
@@ -1208,7 +1262,7 @@
         html += '<div class="' + cls + '" data-buy="' + it.id + '" data-ok="' + (unlocked && canAfford) + '">';
         if (it.joke) html += '<span class="tag">in-joke</span>';
         if (!unlocked) html += '<span class="lock">🔒</span>';
-        var icHtml = it.render === "garland" ? GARLAND_ICON : it.ic;
+        var icHtml = it.render === "garland" ? GARLAND_ICON : (it.render === "bookcase" ? BOOKCASE_ICON : it.ic);
         html += '<div class="ic">' + icHtml + '</div><div class="nm">' + it.name + '</div>';
         html += unlocked ? '<div class="pr">🪙 ' + it.price + '</div>'
                          : '<div class="pr">Wk ' + (it.unlockAt + 1) + '</div>';

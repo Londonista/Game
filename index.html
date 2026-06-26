@@ -156,6 +156,27 @@
   .curtain.right { right: 30%; border-radius: 8px 24px 40% 60% / 8px 16px 30px 40px;
     -webkit-mask-image: linear-gradient(180deg,#000 86%,transparent); mask-image: linear-gradient(180deg,#000 86%,transparent); }
 
+  /* Large gothic Dracula poster on the right wall */
+  .poster-dracula {
+    position: absolute; top: 34px; right: 34px; width: 166px; height: 232px;
+    background: radial-gradient(120% 90% at 50% 20%, #5a1320 0%, #2a0a12 55%, #100407 100%);
+    border: 5px solid #14080b; border-radius: 5px; z-index: 1; pointer-events: none;
+    overflow: hidden; text-align: center; font-family: Georgia, "Times New Roman", serif;
+    box-shadow: 0 12px 26px rgba(0,0,0,0.5), 0 0 22px rgba(150,12,40,0.30), inset 0 0 0 2px rgba(255,210,170,0.08);
+  }
+  .poster-dracula .bats { position: absolute; top: 8px; left: 0; right: 0; font-size: 14px; color: #1a0a0d; opacity: .9; }
+  .poster-dracula .moon { position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+    width: 74px; height: 74px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 38%, #fdf3c4, #e9d27a 70%, #c9a94e);
+    box-shadow: 0 0 30px rgba(253,243,196,0.5); }
+  .poster-dracula .vamp { position: absolute; top: 58px; left: 50%; transform: translateX(-50%);
+    font-size: 66px; filter: drop-shadow(0 5px 7px rgba(0,0,0,0.65)); }
+  .poster-dracula .title { position: absolute; bottom: 42px; left: 0; right: 0;
+    font-size: 27px; font-weight: 800; letter-spacing: 1px; color: #d51f30;
+    text-shadow: 0 0 12px rgba(210,22,42,0.6), 0 2px 0 #5a0a12, 0 3px 5px #000; }
+  .poster-dracula .tag { position: absolute; bottom: 18px; left: 0; right: 0;
+    font-size: 11px; font-style: italic; letter-spacing: .4px; color: #ecccae; opacity: .92; }
+
   /* Three nooks: labels float along the floor */
   .nook-label {
     position: absolute; bottom: 4px; font-size: 11px; font-weight: 700;
@@ -458,6 +479,15 @@
       <div class="curtain-rod"></div>
       <div class="curtain left"></div>
       <div class="curtain right"></div>
+
+      <!-- Large Dracula poster on the right wall (TODO(personalise): tweak the tagline) -->
+      <div class="poster-dracula" aria-label="Dracula poster">
+        <div class="bats">🦇&nbsp;&nbsp;&nbsp;🦇</div>
+        <div class="moon"></div>
+        <div class="vamp">🧛</div>
+        <div class="title">DRACULA</div>
+        <div class="tag">“Children of the Night”</div>
+      </div>
       <div class="skirting"></div>
       <div class="floor"></div>
 

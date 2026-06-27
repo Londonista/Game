@@ -384,6 +384,26 @@
   /* double bed: wider, with a second pillow */
   .bed.double { width: 218px; }
   .bed.double .pillow.p2 { left: 26px; bottom: 18px; transform: rotate(5deg); }
+  /* right-side view: mirror the long side */
+  .bed.flip { transform: scaleX(-1); }
+
+  /* viewed from the foot of the bed (head + pillows at the back, footboard near) */
+  .bed.front { width: 86px; height: 122px; }
+  .bed.front.double { width: 118px; }
+  .bed.front .fb-head { position: absolute; top: 0; left: 8px; right: 8px; height: 13px;
+    background: linear-gradient(180deg, var(--bed-h1), var(--bed-h2)); border-radius: 7px 7px 3px 3px; }
+  .bed.front .fb-base { position: absolute; top: 10px; left: 4px; right: 4px; bottom: 7px;
+    background: #f4eee2; border-radius: 7px 7px 5px 5px; box-shadow: 0 9px 12px rgba(0,0,0,.3); }
+  .bed.front .fb-blanket { position: absolute; left: 4px; right: 4px; bottom: 7px; height: 60%;
+    background: linear-gradient(180deg, var(--bed-1), var(--bed-2)); border-radius: 4px 4px 5px 5px; overflow: hidden; }
+  .bed.front .fb-blanket::after { content:""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 5px, transparent 5px 14px); }
+  .bed.front .fb-pillow { position: absolute; top: 16px; width: 30px; height: 17px;
+    background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+  .bed.front .fb-pillow.c { left: 50%; transform: translateX(-50%); width: 38px; }
+  .bed.front .fb-pillow.l { left: 12px; } .bed.front .fb-pillow.r { right: 12px; }
+  .bed.front .fb-foot { position: absolute; bottom: 0; left: 2px; right: 2px; height: 12px;
+    background: linear-gradient(180deg, var(--bed-h1), var(--bed-h2)); border-radius: 3px 3px 6px 6px; }
 
   /* Desk with a chunky 90s beige computer */
   .deskunit { width: 176px; height: 116px; }
@@ -1172,16 +1192,25 @@
     lilac:  ["#c0a3e0", "#9678c0", "#6a5288", "#52406a"],
     teal:   ["#7fc9c0", "#5aa39a", "#477a72", "#365e58"]
   };
-  function buildBed(tint, size) {
+  // orient 0 = side view (head left), 1 = seen from the foot, 2 = side (head right)
+  function buildBed(tint, size, orient) {
     var t = BED_TINTS[tint] || BED_TINTS.pink;
     var dbl = size === "double";
+    orient = orient || 0;
     var wrap = document.createElement("div");
-    wrap.className = "bed" + (dbl ? " double" : "");
     wrap.style.setProperty("--bed-1", t[0]); wrap.style.setProperty("--bed-2", t[1]);
     wrap.style.setProperty("--bed-h1", t[2]); wrap.style.setProperty("--bed-h2", t[3]);
-    wrap.innerHTML = '<div class="head"></div><div class="mattress"></div><div class="blanket"></div>' +
-      '<div class="pillow"></div>' + (dbl ? '<div class="pillow p2"></div>' : '') +
-      '<div class="plush">🧸</div><div class="bedsticker">⭐</div>';
+    if (orient === 1) {                       // viewed from the foot of the bed
+      wrap.className = "bed front" + (dbl ? " double" : "");
+      wrap.innerHTML = '<div class="fb-head"></div><div class="fb-base"></div><div class="fb-blanket"></div>' +
+        (dbl ? '<div class="fb-pillow l"></div><div class="fb-pillow r"></div>' : '<div class="fb-pillow c"></div>') +
+        '<div class="fb-foot"></div>';
+    } else {                                  // long side view (0 = left, 2 = right/flipped)
+      wrap.className = "bed" + (dbl ? " double" : "") + (orient === 2 ? " flip" : "");
+      wrap.innerHTML = '<div class="head"></div><div class="mattress"></div><div class="blanket"></div>' +
+        '<div class="pillow"></div>' + (dbl ? '<div class="pillow p2"></div>' : '') +
+        '<div class="plush">🧸</div><div class="bedsticker">⭐</div>';
+    }
     return wrap;
   }
   function bedIcon(tint, size) {
@@ -1282,14 +1311,14 @@
       var isGarland = def.render === "garland";
       function applyItemTransform() {
         var base = isGarland ? 1 : depthScale(p.y);
-        el.style.transform = "translate(-50%, -50%) rotate(" + (p.rot || 0) + "deg) scale(" + (base * (p.scale || 1)).toFixed(3) + ")";
+        el.style.transform = "translate(-50%, -50%) scale(" + (base * (p.scale || 1)).toFixed(3) + ")";
       }
       if (isGarland) { el.classList.add("garland"); el.style.zIndex = 6; el.appendChild(buildGarland()); }
       else if (def.render === "bookcase") { el.classList.add("bookcase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBookcase()); }
       else if (def.render === "map") { el.classList.add("mapitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildMap()); }
       else if (def.render === "vanity") { el.classList.add("vanity"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVanity()); }
       else if (def.render === "vase") { el.classList.add("vase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVase()); }
-      else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint, def.size)); }
+      else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint, def.size, p.orient)); }
       else { el.style.zIndex = depthZ(p.y); el.textContent = def.ic; }
       applyItemTransform();
 
@@ -1304,9 +1333,11 @@
         return b;
       }
       el.appendChild(mkCtrl("del", "×", function () { removeItem(p.uid); }));
-      el.appendChild(mkCtrl("rotate", "↻", function () {
-        p.rot = ((p.rot || 0) + 15) % 360; applyItemTransform(); save();
-      }));
+      if (def.render === "bed") {            // cycle the bed's viewing angle
+        el.appendChild(mkCtrl("rotate", "↻", function () {
+          p.orient = ((p.orient || 0) + 1) % 3; save(); renderRoom();
+        }));
+      }
       el.appendChild(mkCtrl("grow", "+", function () {
         p.scale = Math.min(2.4, (p.scale || 1) * 1.18); applyItemTransform(); save();
       }));
@@ -1378,7 +1409,7 @@
       p.x = x; p.y = y;
       el.style.left = x + "%"; el.style.top = y + "%";
       var base = el.classList.contains("garland") ? 1 : depthScale(y);
-      el.style.transform = "translate(-50%, -50%) rotate(" + (p.rot || 0) + "deg) scale(" + (base * (p.scale || 1)).toFixed(3) + ")";
+      el.style.transform = "translate(-50%, -50%) scale(" + (base * (p.scale || 1)).toFixed(3) + ")";
       if (!el.classList.contains("garland")) el.style.zIndex = depthZ(y);
     }
     function up() {

@@ -138,13 +138,14 @@
   @keyframes wtwinkle { 0%,100%{ opacity: .35; transform: scale(.8);} 50%{ opacity: 1; transform: scale(1.1);} }
 
   /* Curtain rod + soft side drapes framing the window for a romantic look */
-  .curtain-rod { position: absolute; top: 20px; left: 31%; width: 38%; height: 6px; z-index: 2;
+  .curtain-rod { position: absolute; top: 20px; left: 25%; width: 50%; height: 6px; z-index: 0;
     background: linear-gradient(180deg,#e7c98f,#b58a4f); border-radius: 3px; pointer-events: none;
     box-shadow: 0 2px 4px rgba(0,0,0,.3); }
   .curtain-rod::before, .curtain-rod::after { content:""; position: absolute; top: -3px; width: 12px; height: 12px;
     border-radius: 50%; background: radial-gradient(circle at 35% 35%,#f3dca6,#a9762f); }
   .curtain-rod::before { left: -10px; } .curtain-rod::after { right: -10px; }
-  .curtain { position: absolute; top: 22px; width: 74px; height: 334px; z-index: 2; pointer-events: none; }
+  /* curtains start above the rod so their heading covers the pole where hung */
+  .curtain { position: absolute; top: 8px; width: 74px; height: 350px; z-index: 4; pointer-events: none; }
   .curtain.left  { left: 27%; }
   .curtain.right { right: 27%; transform: scaleX(-1); }
   .curtain-svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.35)); }
@@ -570,6 +571,7 @@
       <!-- old fancy curtains, gathered by tasseled tiebacks ("pulls") -->
       <div class="curtain left">
         <svg class="curtain-svg" viewBox="0 0 72 334" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="-2" y="-2" width="76" height="24" fill="#7a2c46"/>
           <path d="M4 2 L66 2 C71 36 70 56 66 78 C56 120 36 150 34 172 C33 200 54 224 62 250 C68 284 64 312 58 324 C40 331 18 331 8 324 C2 312 2 290 3 264 C5 180 3 90 4 2 Z" fill="#7a2c46"/>
           <path d="M16 6 C18 80 14 132 30 172 C20 224 26 286 18 320" fill="none" stroke="#561d33" stroke-width="2.4" opacity=".55"/>
           <path d="M30 6 C34 86 26 140 33 172 C28 230 36 288 30 320" fill="none" stroke="#561d33" stroke-width="2.4" opacity=".5"/>
@@ -577,15 +579,13 @@
           <path d="M11 6 C12 90 10 134 27 172 C16 226 22 288 13 318" fill="none" stroke="#a8466a" stroke-width="1.6" opacity=".5"/>
           <path d="M40 7 C44 84 33 140 33 172 C36 226 44 284 40 314" fill="none" stroke="#a8466a" stroke-width="1.6" opacity=".5"/>
           <path d="M60 8 C64 70 56 130 36 170" fill="none" stroke="#a8466a" stroke-width="1.6" opacity=".45"/>
-          <path d="M25 167 C25 161 51 161 51 167 C53 175 53 182 51 187 C49 193 27 193 25 187 C23 182 23 173 25 167 Z" fill="#cda154" stroke="#9a7536" stroke-width="1"/>
-          <path d="M27 170 C34 168 44 168 49 170" fill="none" stroke="#e6c87f" stroke-width="1.2" opacity=".8"/>
-          <circle cx="38" cy="190" r="2.4" fill="#cda154"/>
-          <path d="M34 193 Q38 190 42 193 L41 205 Q38 208 35 205 Z" fill="#cda154" stroke="#9a7536" stroke-width=".8"/>
-          <path d="M35 205 L35 215 M37.5 206 L37.5 217 M40 206 L40 217 M42 205 L42 215" stroke="#cda154" stroke-width="1" stroke-linecap="round"/>
+          <path d="M25 169 C25 166 51 166 51 169 C52 172 52 175 51 178 C49 181 27 181 25 178 C24 175 24 172 25 169 Z" fill="#cda154" stroke="#9a7536" stroke-width="0.8"/>
+          <path d="M28 171 C35 169.5 44 169.5 48 171" fill="none" stroke="#e6c87f" stroke-width="0.9" opacity=".75"/>
         </svg>
       </div>
       <div class="curtain right">
         <svg class="curtain-svg" viewBox="0 0 72 334" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="-2" y="-2" width="76" height="24" fill="#7a2c46"/>
           <path d="M4 2 L66 2 C71 36 70 56 66 78 C56 120 36 150 34 172 C33 200 54 224 62 250 C68 284 64 312 58 324 C40 331 18 331 8 324 C2 312 2 290 3 264 C5 180 3 90 4 2 Z" fill="#7a2c46"/>
           <path d="M16 6 C18 80 14 132 30 172 C20 224 26 286 18 320" fill="none" stroke="#561d33" stroke-width="2.4" opacity=".55"/>
           <path d="M30 6 C34 86 26 140 33 172 C28 230 36 288 30 320" fill="none" stroke="#561d33" stroke-width="2.4" opacity=".5"/>
@@ -593,11 +593,8 @@
           <path d="M11 6 C12 90 10 134 27 172 C16 226 22 288 13 318" fill="none" stroke="#a8466a" stroke-width="1.6" opacity=".5"/>
           <path d="M40 7 C44 84 33 140 33 172 C36 226 44 284 40 314" fill="none" stroke="#a8466a" stroke-width="1.6" opacity=".5"/>
           <path d="M60 8 C64 70 56 130 36 170" fill="none" stroke="#a8466a" stroke-width="1.6" opacity=".45"/>
-          <path d="M25 167 C25 161 51 161 51 167 C53 175 53 182 51 187 C49 193 27 193 25 187 C23 182 23 173 25 167 Z" fill="#cda154" stroke="#9a7536" stroke-width="1"/>
-          <path d="M27 170 C34 168 44 168 49 170" fill="none" stroke="#e6c87f" stroke-width="1.2" opacity=".8"/>
-          <circle cx="38" cy="190" r="2.4" fill="#cda154"/>
-          <path d="M34 193 Q38 190 42 193 L41 205 Q38 208 35 205 Z" fill="#cda154" stroke="#9a7536" stroke-width=".8"/>
-          <path d="M35 205 L35 215 M37.5 206 L37.5 217 M40 206 L40 217 M42 205 L42 215" stroke="#cda154" stroke-width="1" stroke-linecap="round"/>
+          <path d="M25 169 C25 166 51 166 51 169 C52 172 52 175 51 178 C49 181 27 181 25 178 C24 175 24 172 25 169 Z" fill="#cda154" stroke="#9a7536" stroke-width="0.8"/>
+          <path d="M28 171 C35 169.5 44 169.5 48 171" fill="none" stroke="#e6c87f" stroke-width="0.9" opacity=".75"/>
         </svg>
       </div>
 

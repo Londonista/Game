@@ -591,6 +591,14 @@
   .hr-here { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 800;
     background: rgba(0,0,0,.55); color: #fff; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
   .hr-count { font-size: 11px; color: #9a7a52; margin-top: 3px; font-weight: 700; }
+
+  /* ---- Desk computer's retro mini-game ---------------------------------- */
+  .crt-wrap { position: relative; display: inline-block; padding: 12px; border-radius: 14px;
+    background: linear-gradient(180deg,#e9ddc2,#cdbf9c); box-shadow: inset 0 0 0 3px #d8cbab, 0 6px 14px rgba(0,0,0,.35); }
+  #gameCanvas { display: block; width: 320px; max-width: 78vw; height: auto; border-radius: 6px;
+    background: #07140e; box-shadow: inset 0 0 18px rgba(0,0,0,.7); image-rendering: pixelated; }
+  .crt-scan { position: absolute; inset: 12px; border-radius: 6px; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px); }
 </style>
 </head>
 <body>
@@ -812,6 +820,17 @@
     <header><h2 id="gTitle">Title</h2><span class="x" data-close>✕</span></header>
     <div class="body" id="gBody"></div>
     <div class="foot" id="gFoot"></div>
+  </div>
+</div>
+
+<!-- The desk computer's retro mini-game -->
+<div class="overlay" id="ovGame">
+  <div class="panel">
+    <header><h2>💻 Star Catcher</h2><span class="x" id="gameClose">✕</span></header>
+    <div class="body" style="text-align:center">
+      <div class="crt-wrap"><canvas id="gameCanvas" width="320" height="240"></canvas><div class="crt-scan"></div></div>
+      <p class="muted" id="gameHint">Move the dish with your mouse / finger (or ← →) and catch the falling stars!</p>
+    </div>
   </div>
 </div>
 
@@ -1451,7 +1470,7 @@
   function initFurnitureDrag() {
     Array.prototype.slice.call(room.querySelectorAll("[data-furn]")).forEach(function (el) {
       var id = el.dataset.furn;
-      var dragging = false, moved = false;
+      var dragging = false, moved = false, startX = 0, startY = 0;
 
       function reposition(x, y) {
         el.style.left = x + "%"; el.style.top = y + "%";
@@ -1461,6 +1480,8 @@
       function down(e) {
         e.preventDefault();
         dragging = true; moved = false;
+        var pt = e.touches ? e.touches[0] : e;
+        startX = pt.clientX; startY = pt.clientY;
         selectedUid = null;
         el.classList.add("selected");
         window.addEventListener("mousemove", move);
@@ -1470,8 +1491,11 @@
       }
       function move(e) {
         if (!dragging) return;
-        e.preventDefault(); moved = true;
+        e.preventDefault();
         var pt = e.touches ? e.touches[0] : e;
+        // small dead-zone so a tap isn't treated as a drag
+        if (!moved && Math.abs(pt.clientX - startX) < 5 && Math.abs(pt.clientY - startY) < 5) return;
+        moved = true;
         var rect = room.getBoundingClientRect();
         var x = Math.max(5, Math.min(95, ((pt.clientX - rect.left) / rect.width) * 100));
         var y = Math.max(34, Math.min(98, ((pt.clientY - rect.top) / rect.height) * 100));
@@ -1488,6 +1512,7 @@
         window.removeEventListener("mouseup", up);
         window.removeEventListener("touchend", up);
         if (moved) { save(); toast("Moved it. ✨"); }
+        else if (id === "desk") ComputerGame.open();   // a tap on the computer
       }
       el.addEventListener("mousedown", down);
       el.addEventListener("touchstart", down, { passive: false });
@@ -2214,7 +2239,20 @@
       chirp(t + 0.11, 1150, 1850);
     }
 
-    return { start: start, toggle: toggle, squeak: squeak, charSqueak: charSqueak,
+    // A short arcade blip for the computer game.
+    function blip(freq, dur, type) {
+      var c = getCtx(); if (!c) return;
+      if (c.state === "suspended") c.resume();
+      var t = c.currentTime, o = c.createOscillator(), g = c.createGain();
+      o.type = type || "sine"; o.frequency.value = freq || 600;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.09, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + (dur || 0.08));
+      o.connect(g); g.connect(c.destination);
+      o.start(t); o.stop(t + (dur || 0.08) + 0.02);
+    }
+
+    return { start: start, toggle: toggle, squeak: squeak, charSqueak: charSqueak, blip: blip,
              updateBtn: updateBtn, level: level, isMuted: function () { return muted; },
              ctxState: function () { return ctx ? ctx.state : "none"; } };
   })();
@@ -2431,6 +2469,120 @@
   }
 
   // =====================================================================
+  //  COMPUTER MINI-GAME — "Star Catcher": a tiny retro arcade game that
+  //  pops up on the desk computer's screen. Catch falling stars for coins.
+  // =====================================================================
+  var ComputerGame = (function () {
+    var ov, canvas, ctx, W = 320, H = 240;
+    var raf = null, running = false;
+    var paddle, stars, score, lives, spawnT, speed, over, awarded, keyDir;
+
+    function reset() {
+      paddle = { x: W / 2, w: 50, y: H - 18 };
+      stars = []; score = 0; lives = 3; spawnT = 0; speed = 1.4; over = false; awarded = false; keyDir = 0;
+    }
+    function open() {
+      ov = $("ovGame"); canvas = $("gameCanvas"); ctx = canvas.getContext("2d");
+      ov.classList.add("show");
+      reset(); bindInput(); running = true; loop();
+    }
+    function close() {
+      running = false; if (raf) cancelAnimationFrame(raf);
+      unbindInput(); if (ov) ov.classList.remove("show");
+    }
+    function spawnStar() { stars.push({ x: 14 + Math.random() * (W - 28), y: -10, vy: speed + Math.random() * 0.8, r: 7, t: Math.random() * 6 }); }
+    function coinsFor() { return Math.floor(score / 3); }
+
+    function update() {
+      if (over) return;
+      paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, paddle.x + keyDir * 5));
+      if (--spawnT <= 0) { spawnStar(); spawnT = Math.max(20, 58 - score); }
+      speed += 0.001;
+      for (var i = stars.length - 1; i >= 0; i--) {
+        var s = stars[i]; s.y += s.vy; s.t += 0.1;
+        if (s.y >= paddle.y - 8 && s.y <= paddle.y + 10 && Math.abs(s.x - paddle.x) < paddle.w / 2 + s.r) {
+          score++; stars.splice(i, 1); Ambient.blip(720, 0.05); continue;
+        }
+        if (s.y > H + 12) {
+          stars.splice(i, 1); lives--; Ambient.blip(150, 0.13, "square");
+          if (lives <= 0) { over = true; award(); }
+        }
+      }
+    }
+    function award() {
+      if (awarded) return; awarded = true;
+      var c = coinsFor();
+      if (c > 0) { addCoins(c); save(); }
+    }
+    function drawStar(x, y, r, t) {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(t * 0.25); ctx.beginPath();
+      for (var i = 0; i < 5; i++) {
+        var a = -Math.PI / 2 + i * 2 * Math.PI / 5;
+        ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+        var a2 = a + Math.PI / 5;
+        ctx.lineTo(Math.cos(a2) * r * 0.45, Math.sin(a2) * r * 0.45);
+      }
+      ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+    function draw() {
+      ctx.fillStyle = "#07140e"; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "#9be36b";
+      stars.forEach(function (s) { drawStar(s.x, s.y, s.r, s.t); });
+      ctx.fillStyle = "#cfeecb";                 // the catching dish
+      ctx.beginPath();
+      ctx.moveTo(paddle.x - paddle.w / 2, paddle.y);
+      ctx.quadraticCurveTo(paddle.x, paddle.y + 13, paddle.x + paddle.w / 2, paddle.y);
+      ctx.lineTo(paddle.x + paddle.w / 2 - 4, paddle.y - 5);
+      ctx.lineTo(paddle.x - paddle.w / 2 + 4, paddle.y - 5);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#9be36b"; ctx.font = "bold 14px monospace"; ctx.textAlign = "left";
+      ctx.fillText("SCORE " + score, 8, 18);
+      ctx.textAlign = "right"; ctx.fillStyle = "#ff6b6b";
+      ctx.fillText(new Array(Math.max(0, lives) + 1).join("♥"), W - 8, 18);
+      if (over) {
+        ctx.fillStyle = "rgba(0,0,0,.6)"; ctx.fillRect(0, 0, W, H);
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#ffd86b"; ctx.font = "bold 22px monospace"; ctx.fillText("GAME OVER", W / 2, H / 2 - 12);
+        ctx.fillStyle = "#9be36b"; ctx.font = "bold 13px monospace";
+        ctx.fillText("Score " + score + "  ·  +" + coinsFor() + " coins", W / 2, H / 2 + 12);
+        ctx.fillStyle = "#cfeecb"; ctx.font = "12px monospace"; ctx.fillText("tap / press space to play again", W / 2, H / 2 + 34);
+      }
+    }
+    function loop() { if (!running) return; update(); draw(); raf = requestAnimationFrame(loop); }
+
+    function setFromPointer(e) {
+      var pt = e.touches ? e.touches[0] : e, rect = canvas.getBoundingClientRect();
+      paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, (pt.clientX - rect.left) / rect.width * W));
+      if (e.cancelable) e.preventDefault();
+    }
+    function onKey(e) {
+      if (e.key === "ArrowLeft") { keyDir = -1; e.preventDefault(); }
+      else if (e.key === "ArrowRight") { keyDir = 1; e.preventDefault(); }
+      else if (e.key === " " || e.code === "Space") { if (over) reset(); e.preventDefault(); }
+    }
+    function onKeyUp(e) { if (e.key === "ArrowLeft" && keyDir < 0) keyDir = 0; if (e.key === "ArrowRight" && keyDir > 0) keyDir = 0; }
+    function onTouchStart(e) { setFromPointer(e); if (over) reset(); }
+    function onClick() { if (over) reset(); }
+    function bindInput() {
+      canvas.addEventListener("mousemove", setFromPointer);
+      canvas.addEventListener("touchmove", setFromPointer, { passive: false });
+      canvas.addEventListener("touchstart", onTouchStart, { passive: false });
+      canvas.addEventListener("click", onClick);
+      window.addEventListener("keydown", onKey);
+      window.addEventListener("keyup", onKeyUp);
+    }
+    function unbindInput() {
+      canvas.removeEventListener("mousemove", setFromPointer);
+      canvas.removeEventListener("touchmove", setFromPointer);
+      canvas.removeEventListener("touchstart", onTouchStart);
+      canvas.removeEventListener("click", onClick);
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keyup", onKeyUp);
+    }
+    return { open: open, close: close };
+  })();
+
+  // =====================================================================
   //  WIRING
   // =====================================================================
   $("btnNight").addEventListener("click", startNight);
@@ -2446,6 +2598,8 @@
   $("doorWard").addEventListener("click", function () { goToRoom("wardrobe"); });
   $("doorWardBack").addEventListener("click", function () { goToRoom("main"); });
   $("btnHouse").addEventListener("click", openHouse);
+  $("gameClose").addEventListener("click", function () { ComputerGame.close(); });
+  $("ovGame").addEventListener("click", function (e) { if (e.target === $("ovGame")) ComputerGame.close(); });
 
   // Browsers block autoplay, so the music begins on the first interaction.
   function armAudio() {

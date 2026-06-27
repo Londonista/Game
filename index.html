@@ -2601,22 +2601,15 @@
     }
 
     // ===== Game 2: Aqsa's Laundromat (load baskets into machines) ============
-    // 8-bit laundromat: customers drop off baskets of clothes (orders). Tap a
+    // 8-bit laundromat: baskets of clothes (orders) drop onto the queue. Tap a
     // free machine to load a basket; when the wash finishes you get paid. Each
-    // level the customers arrive faster, so you must work quicker — and if the
+    // level the baskets arrive faster, so you must work quicker — and if the
     // orders pile up past the limit, it's closing time.
     function Laundromat() {
       var N = 4, MAXQ = 8;
       var mw = 50, mh = 52, my = 38, mx = [10, 67, 124, 181];
-      var qY = 150, laneY = 200;
-      // customers are drawn like the bedroom friends — soft blob bodies in warm,
-      // feminine tones, each with a little face.
-      var CHARS = [
-        { col: "#e98aa8", face: "^‿^" }, { col: "#f0a6b6", face: "◕‿◕" },
-        { col: "#e7b3a0", face: "•ᴗ•" }, { col: "#d79ec8", face: "^‿^" },
-        { col: "#f3c08a", face: "◕ᴗ◕" }, { col: "#caa0d6", face: "•‿•" }
-      ];
-      var mach, pending, customers, pops, money, level, over, awarded;
+      var qY = 150;
+      var mach, pending, pops, money, level, over, awarded;
       var spawnT, arriveEvery, washF, nextLvl, msg, msgT, spin, curMode;
 
       // sorting difficulty: 0 = accept anything, 1 = lights vs darks, 2 = + colours
@@ -2635,9 +2628,9 @@
       function reset() {
         mach = []; for (var i = 0; i < N; i++) mach.push({ on: false, prog: 0, load: "any", flash: 0, accept: "any" });
         curMode = sortMode(1); assignAccepts();
-        pending = []; customers = []; pops = [];
-        money = 0; level = 1; over = false; awarded = false;
+        pops = []; money = 0; level = 1; over = false; awarded = false;
         arriveEvery = 150; washF = 170; nextLvl = 14; spawnT = 70; msg = ""; msgT = 0; spin = 0;
+        pending = [{ type: randType() }];
       }
       function coinsFor() { return Math.floor(money / 6); }
       function pay() { return 2 + level; }
@@ -2645,11 +2638,6 @@
       function typeLabel(t) { return t === "dark" ? "D" : t === "colour" ? "C" : t === "light" ? "L" : "★"; }
       function accepts(m, t) { return m.accept === "any" || t === "any" || m.accept === t; }
 
-      function spawnCustomer() {
-        var ch = CHARS[(Math.random() * CHARS.length) | 0];
-        customers.push({ x: -14, y: laneY, dir: 1, col: ch.col, face: ch.face,
-                         target: 90 + Math.random() * 120, basket: randType(), dropped: false });
-      }
       function load(i) {
         var m = mach[i]; if (m.on) return;
         for (var q = 0; q < pending.length; q++) {
@@ -2736,13 +2724,6 @@
           ctx.font = "bold 10px monospace"; ctx.textAlign = "center"; ctx.fillText(typeLabel(m.accept), cx, chy + 4);
         }
       }
-      function customer(c) {
-        var x = Math.round(c.x), y = c.y;
-        var hop = c.dropped ? Math.abs(Math.sin(spin * 0.22 + c.x * 0.2)) * 2.5
-                            : Math.abs(Math.sin(spin * 0.2 + c.x * 0.2)) * 2.5;
-        if (!c.dropped) basket(x + 13, y - 7 - hop, c.basket, false);   // basket carried in front
-        blobChar(x, y, 16, 21, c.col, c.face, hop);
-      }
       function tillAndAqsa() {
         var tx = 240, ax = 294;
         // Aqsa, drawn like her bedroom self (teal blob + her face), standing
@@ -2766,17 +2747,9 @@
         update: function () {
           if (over) return;
           spin++;
-          if (--spawnT <= 0) { spawnCustomer(); spawnT = arriveEvery; }
-          for (var ci = customers.length - 1; ci >= 0; ci--) {
-            var c = customers[ci];
-            if (!c.dropped) {
-              c.x += 0.9;
-              if (c.x >= c.target) {
-                c.dropped = true; c.dir = -1;
-                pending.push({ type: c.basket }); Ambient.blip(440, 0.05, "triangle");
-                if (pending.length > MAXQ) { over = true; if (!awarded) { awarded = true; award(coinsFor()); } return; }
-              }
-            } else { c.x -= 1.2; if (c.x < -18) customers.splice(ci, 1); }
+          if (--spawnT <= 0) {   // a new basket simply drops onto the queue
+            pending.push({ type: randType() }); spawnT = arriveEvery; Ambient.blip(440, 0.05, "triangle");
+            if (pending.length > MAXQ) { over = true; if (!awarded) { awarded = true; award(coinsFor()); } return; }
           }
           for (var i = 0; i < N; i++) {
             var m = mach[i]; if (m.flash > 0) m.flash--;
@@ -2814,7 +2787,6 @@
           tillAndAqsa();
           var danger = pending.length >= MAXQ - 1;
           for (var q = 0; q < pending.length && q < MAXQ; q++) basket(20 + q * 26, qY, pending[q].type, danger);
-          customers.forEach(customer);
           ctx.font = "bold 11px monospace"; ctx.textAlign = "center";
           pops.forEach(function (p) { ctx.fillStyle = "rgba(255,224,107," + Math.min(1, p.life / 30) + ")"; ctx.fillText(p.txt, p.x, p.y); });
           var vig = ctx.createRadialGradient(W / 2, H / 2, 70, W / 2, H / 2, 200);   // soft warm vignette

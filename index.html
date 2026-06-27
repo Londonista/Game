@@ -219,16 +219,17 @@
   }
   .item:active { cursor: grabbing; }
   .item.selected { filter: drop-shadow(0 0 8px var(--coin)) drop-shadow(0 4px 4px rgba(0,0,0,0.35)); }
-  .item .del, .item .grow, .item .shrink {
+  .item .del, .item .grow, .item .shrink, .item .rotate {
     position: absolute; width: 20px; height: 20px;
     border-radius: 50%; color: #fff; font-size: 14px; font-weight: 800; line-height: 1;
     display: none; align-items: center; justify-content: center; cursor: pointer;
     box-shadow: 0 2px 4px rgba(0,0,0,0.4);
   }
-  .item.selected .del, .item.selected .grow, .item.selected .shrink { display: flex; }
+  .item.selected .del, .item.selected .grow, .item.selected .shrink, .item.selected .rotate { display: flex; }
   .item .del    { top: -10px; right: -12px; background: #e2574c; font-size: 13px; }
   .item .grow   { bottom: -12px; right: -12px; background: #3aa657; }
   .item .shrink { bottom: -12px; left: -12px; background: #3a7fb0; }
+  .item .rotate { top: -10px; left: -12px; background: #a06fd0; font-size: 13px; }
 
   /* Hidden-object sparkle targets */
   .hidden-target {
@@ -380,6 +381,29 @@
     background: #fff; border-radius: 9px; box-shadow: 0 2px 4px rgba(0,0,0,.2); transform: rotate(-6deg); }
   .bed .plush { position: absolute; left: 34px; bottom: 32px; font-size: 22px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.3)); }
   .bed .bedsticker { position: absolute; left: 4px; bottom: 40px; font-size: 14px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
+  /* double bed: wider, with a second pillow */
+  .bed.double { width: 218px; }
+  .bed.double .pillow.p2 { left: 26px; bottom: 18px; transform: rotate(5deg); }
+  /* right-side view: mirror the long side */
+  .bed.flip { transform: scaleX(-1); }
+
+  /* viewed from the foot of the bed (head + pillows at the back, footboard near) */
+  .bed.front { width: 86px; height: 122px; }
+  .bed.front.double { width: 118px; }
+  .bed.front .fb-head { position: absolute; top: 0; left: 8px; right: 8px; height: 13px;
+    background: linear-gradient(180deg, var(--bed-h1), var(--bed-h2)); border-radius: 7px 7px 3px 3px; }
+  .bed.front .fb-base { position: absolute; top: 10px; left: 4px; right: 4px; bottom: 7px;
+    background: #f4eee2; border-radius: 7px 7px 5px 5px; box-shadow: 0 9px 12px rgba(0,0,0,.3); }
+  .bed.front .fb-blanket { position: absolute; left: 4px; right: 4px; bottom: 7px; height: 60%;
+    background: linear-gradient(180deg, var(--bed-1), var(--bed-2)); border-radius: 4px 4px 5px 5px; overflow: hidden; }
+  .bed.front .fb-blanket::after { content:""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 5px, transparent 5px 14px); }
+  .bed.front .fb-pillow { position: absolute; top: 16px; width: 30px; height: 17px;
+    background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+  .bed.front .fb-pillow.c { left: 50%; transform: translateX(-50%); width: 38px; }
+  .bed.front .fb-pillow.l { left: 12px; } .bed.front .fb-pillow.r { right: 12px; }
+  .bed.front .fb-foot { position: absolute; bottom: 0; left: 2px; right: 2px; height: 12px;
+    background: linear-gradient(180deg, var(--bed-h1), var(--bed-h2)); border-radius: 3px 3px 6px 6px; }
 
   /* Desk with a chunky 90s beige computer */
   .deskunit { width: 176px; height: 116px; }
@@ -867,6 +891,12 @@
     { id: "bed_yellow", name: "Yellow Bed", ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "yellow" },
     { id: "bed_lilac",  name: "Lilac Bed",  ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "lilac" },
     { id: "bed_teal",   name: "Teal Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "teal" },
+    { id: "dbed_pink",   name: "Pink Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "pink",   size: "double" },
+    { id: "dbed_blue",   name: "Blue Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "blue",   size: "double" },
+    { id: "dbed_green",  name: "Green Double",  ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "green",  size: "double" },
+    { id: "dbed_yellow", name: "Yellow Double", ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "yellow", size: "double" },
+    { id: "dbed_lilac",  name: "Lilac Double",  ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "lilac",  size: "double" },
+    { id: "dbed_teal",   name: "Teal Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "teal",   size: "double" },
 
     // --- Unlocks at 3 Mondays ---
     { id: "lava",     name: "Lava Lamp",    ic: "🔮", price: 18, unlockAt: 3, set: "Glow Up" },
@@ -1162,23 +1192,36 @@
     lilac:  ["#c0a3e0", "#9678c0", "#6a5288", "#52406a"],
     teal:   ["#7fc9c0", "#5aa39a", "#477a72", "#365e58"]
   };
-  function buildBed(tint) {
+  // orient 0 = side view (head left), 1 = seen from the foot, 2 = side (head right)
+  function buildBed(tint, size, orient) {
     var t = BED_TINTS[tint] || BED_TINTS.pink;
+    var dbl = size === "double";
+    orient = orient || 0;
     var wrap = document.createElement("div");
-    wrap.className = "bed";
     wrap.style.setProperty("--bed-1", t[0]); wrap.style.setProperty("--bed-2", t[1]);
     wrap.style.setProperty("--bed-h1", t[2]); wrap.style.setProperty("--bed-h2", t[3]);
-    wrap.innerHTML = '<div class="head"></div><div class="mattress"></div><div class="blanket"></div>' +
-      '<div class="pillow"></div><div class="plush">🧸</div><div class="bedsticker">⭐</div>';
+    if (orient === 1) {                       // viewed from the foot of the bed
+      wrap.className = "bed front" + (dbl ? " double" : "");
+      wrap.innerHTML = '<div class="fb-head"></div><div class="fb-base"></div><div class="fb-blanket"></div>' +
+        (dbl ? '<div class="fb-pillow l"></div><div class="fb-pillow r"></div>' : '<div class="fb-pillow c"></div>') +
+        '<div class="fb-foot"></div>';
+    } else {                                  // long side view (0 = left, 2 = right/flipped)
+      wrap.className = "bed" + (dbl ? " double" : "") + (orient === 2 ? " flip" : "");
+      wrap.innerHTML = '<div class="head"></div><div class="mattress"></div><div class="blanket"></div>' +
+        '<div class="pillow"></div>' + (dbl ? '<div class="pillow p2"></div>' : '') +
+        '<div class="plush">🧸</div><div class="bedsticker">⭐</div>';
+    }
     return wrap;
   }
-  function bedIcon(tint) {
+  function bedIcon(tint, size) {
     var t = BED_TINTS[tint] || BED_TINTS.pink;
+    var dbl = size === "double";
     return '<svg width="46" height="28" viewBox="0 0 46 28">' +
       '<rect x="2" y="5" width="6" height="19" rx="2" fill="' + t[2] + '"/>' +
       '<rect x="6" y="14" width="38" height="10" rx="2" fill="#f4eee2"/>' +
-      '<rect x="23" y="14" width="21" height="10" rx="2" fill="' + t[0] + '"/>' +
-      '<rect x="9" y="11" width="11" height="6" rx="2.5" fill="#fff"/>' +
+      '<rect x="' + (dbl ? 20 : 23) + '" y="14" width="' + (dbl ? 24 : 21) + '" height="10" rx="2" fill="' + t[0] + '"/>' +
+      '<rect x="9" y="11" width="9" height="6" rx="2.5" fill="#fff"/>' +
+      (dbl ? '<rect x="9" y="8" width="9" height="6" rx="2.5" fill="#fff"/>' : '') +
       '</svg>';
   }
 
@@ -1275,11 +1318,11 @@
       else if (def.render === "map") { el.classList.add("mapitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildMap()); }
       else if (def.render === "vanity") { el.classList.add("vanity"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVanity()); }
       else if (def.render === "vase") { el.classList.add("vase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVase()); }
-      else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint)); }
+      else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint, def.size, p.orient)); }
       else { el.style.zIndex = depthZ(p.y); el.textContent = def.ic; }
       applyItemTransform();
 
-      // selection controls: delete · grow · shrink
+      // selection controls: rotate · delete · grow · shrink
       function mkCtrl(cls, label, fn) {
         var b = document.createElement("div");
         b.className = cls; b.textContent = label;
@@ -1290,6 +1333,11 @@
         return b;
       }
       el.appendChild(mkCtrl("del", "×", function () { removeItem(p.uid); }));
+      if (def.render === "bed") {            // cycle the bed's viewing angle
+        el.appendChild(mkCtrl("rotate", "↻", function () {
+          p.orient = ((p.orient || 0) + 1) % 3; save(); renderRoom();
+        }));
+      }
       el.appendChild(mkCtrl("grow", "+", function () {
         p.scale = Math.min(2.4, (p.scale || 1) * 1.18); applyItemTransform(); save();
       }));
@@ -1498,7 +1546,7 @@
                    : it.render === "map" ? MAP_SVG
                    : it.render === "vanity" ? VANITY_ICON
                    : it.render === "vase" ? VASE_SVG
-                   : it.render === "bed" ? bedIcon(it.tint)
+                   : it.render === "bed" ? bedIcon(it.tint, it.size)
                    : it.ic;
         html += '<div class="ic">' + icHtml + '</div><div class="nm">' + it.name + '</div>';
         html += unlocked ? '<div class="pr">🪙 ' + it.price + '</div>'

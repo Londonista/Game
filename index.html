@@ -2609,7 +2609,13 @@
       var N = 4, MAXQ = 8;
       var mw = 50, mh = 52, my = 38, mx = [10, 67, 124, 181];
       var qY = 150, laneY = 200;
-      var CUSTCOL = ["#c98aa6", "#8aa6c9", "#a6c98a", "#c9b48a", "#9a8ac9", "#c98a8a"];
+      // customers are drawn like the bedroom friends — soft blob bodies in warm,
+      // feminine tones, each with a little face.
+      var CHARS = [
+        { col: "#e98aa8", face: "^‿^" }, { col: "#f0a6b6", face: "◕‿◕" },
+        { col: "#e7b3a0", face: "•ᴗ•" }, { col: "#d79ec8", face: "^‿^" },
+        { col: "#f3c08a", face: "◕ᴗ◕" }, { col: "#caa0d6", face: "•‿•" }
+      ];
       var mach, pending, customers, pops, money, level, over, awarded;
       var spawnT, arriveEvery, washF, nextLvl, msg, msgT, spin, curMode;
 
@@ -2640,7 +2646,8 @@
       function accepts(m, t) { return m.accept === "any" || t === "any" || m.accept === t; }
 
       function spawnCustomer() {
-        customers.push({ x: -14, y: laneY, dir: 1, col: CUSTCOL[(Math.random() * CUSTCOL.length) | 0],
+        var ch = CHARS[(Math.random() * CHARS.length) | 0];
+        customers.push({ x: -14, y: laneY, dir: 1, col: ch.col, face: ch.face,
                          target: 90 + Math.random() * 120, basket: randType(), dropped: false });
       }
       function load(i) {
@@ -2670,56 +2677,87 @@
         ctx.beginPath(); ctx.moveTo(x - 10, y - 6); ctx.lineTo(x + 10, y - 6); ctx.lineTo(x + 8, y + 8); ctx.lineTo(x - 8, y + 8); ctx.closePath(); ctx.fill();
         ctx.fillStyle = "rgba(0,0,0,.16)"; ctx.fillRect(x - 9, y - 1, 18, 2); ctx.fillRect(x - 8, y + 3, 16, 2);
       }
+      // a soft warm pool of light (used for the hanging lamps)
+      function lampGlow(cx, cy, r) {
+        var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        g.addColorStop(0, "rgba(255,224,178,.55)"); g.addColorStop(0.5, "rgba(255,206,160,.20)"); g.addColorStop(1, "rgba(255,206,160,0)");
+        ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill(); ctx.restore();
+      }
+      // a bedroom-style "blob" character: rounded body + little face, with a
+      // soft top-light highlight and a contact shadow. (x,y) is the foot point.
+      function blobChar(x, y, w, h, col, face, hop) {
+        ctx.fillStyle = "rgba(90,40,55,.18)";   // contact shadow on the floor
+        ctx.beginPath(); ctx.ellipse(x, y + 1, w * 0.55, 3.5, 0, 0, 7); ctx.fill();
+        y -= hop || 0;
+        var rt = w * 0.5, rb = w * 0.34;
+        ctx.beginPath();
+        ctx.moveTo(x - w / 2, y - h + rt);
+        ctx.arcTo(x - w / 2, y - h, x, y - h, rt);
+        ctx.arcTo(x + w / 2, y - h, x + w / 2, y - h + rt, rt);
+        ctx.lineTo(x + w / 2, y - rb);
+        ctx.arcTo(x + w / 2, y, x, y, rb);
+        ctx.arcTo(x - w / 2, y, x - w / 2, y - rb, rb);
+        ctx.closePath();
+        var g = ctx.createLinearGradient(0, y - h, 0, y);   // warm top light
+        g.addColorStop(0, "rgba(255,255,255,.45)"); g.addColorStop(0.4, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(0,0,0,.16)");
+        ctx.fillStyle = col; ctx.fill();
+        ctx.save(); ctx.clip(); ctx.fillStyle = g; ctx.fillRect(x - w / 2, y - h, w, h);
+        ctx.fillStyle = "rgba(255,236,210,.6)"; ctx.beginPath(); ctx.ellipse(x - w * 0.22, y - h * 0.72, w * 0.16, h * 0.18, 0, 0, 7); ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = "rgba(70,40,55,.82)"; ctx.font = "bold " + Math.round(h * 0.3) + "px monospace";
+        ctx.textAlign = "center"; ctx.fillText(face, x, y - h * 0.52);
+      }
       function machine(i) {
         var x = mx[i], m = mach[i], cx = x + mw / 2, cy = my + 30, R = 15;
         var flashing = m.flash > 0 && (m.flash % 6 < 3);
-        ctx.fillStyle = flashing ? "#ff6b6b" : "#9aa6b6"; rrect(x - 2, my - 2, mw + 4, mh + 4, 8);
-        ctx.fillStyle = "#eef1f6"; rrect(x, my, mw, mh, 6);
-        ctx.fillStyle = "#c2cad6"; rrect(x + 5, my + 5, mw - 10, 9, 3);
-        ctx.fillStyle = "#8a93a2"; ctx.beginPath(); ctx.arc(x + 12, my + 9, 2, 0, 7); ctx.arc(x + 19, my + 9, 2, 0, 7); ctx.fill();
-        ctx.fillStyle = m.on ? "#7ad17a" : "#5a6472"; ctx.fillRect(x + mw - 18, my + 7, 11, 5);
-        ctx.fillStyle = "#8893a4"; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();
-        ctx.fillStyle = m.on ? "#28323f" : "#20262f"; ctx.beginPath(); ctx.arc(cx, cy, R - 4, 0, 7); ctx.fill();
+        ctx.fillStyle = flashing ? "#e06b8a" : "#d8b3ad"; rrect(x - 2, my - 2, mw + 4, mh + 4, 8);
+        ctx.fillStyle = "#f7efe9"; rrect(x, my, mw, mh, 6);
+        var bg = ctx.createLinearGradient(0, my, 0, my + mh);   // warm sheen
+        bg.addColorStop(0, "rgba(255,255,255,.5)"); bg.addColorStop(0.5, "rgba(255,255,255,0)");
+        ctx.fillStyle = bg; rrect(x, my, mw, mh, 6);
+        ctx.fillStyle = "#efcdd2"; rrect(x + 5, my + 5, mw - 10, 9, 3);     // detergent tray (rose)
+        ctx.fillStyle = "#c99aa0"; ctx.beginPath(); ctx.arc(x + 12, my + 9, 2, 0, 7); ctx.arc(x + 19, my + 9, 2, 0, 7); ctx.fill();
+        ctx.fillStyle = m.on ? "#8fd6a0" : "#c2a39c"; ctx.fillRect(x + mw - 18, my + 7, 11, 5);
+        ctx.fillStyle = "#bfa39c"; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();   // chrome ring
+        ctx.fillStyle = m.on ? "#2a2026" : "#241c20"; ctx.beginPath(); ctx.arc(cx, cy, R - 4, 0, 7); ctx.fill();
         if (m.on) {
           ctx.fillStyle = clothCol(m.load);
           for (var k = 0; k < 3; k++) { var a = spin * 0.35 + k * 2.094; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * 6, cy + Math.sin(a) * 6, 3.4, 0, 7); ctx.fill(); }
-          ctx.strokeStyle = "#7ad17a"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(cx, cy, R + 2, -Math.PI / 2, -Math.PI / 2 + m.prog * Math.PI * 2); ctx.stroke();
+          ctx.strokeStyle = "#ffce82"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(cx, cy, R + 2, -Math.PI / 2, -Math.PI / 2 + m.prog * Math.PI * 2); ctx.stroke();
         } else {
-          ctx.fillStyle = "rgba(255,255,255,.12)"; ctx.beginPath(); ctx.arc(cx - 4, cy - 4, 4, 0, 7); ctx.fill();
+          ctx.fillStyle = "rgba(255,240,230,.18)"; ctx.beginPath(); ctx.arc(cx - 4, cy - 4, 4, 0, 7); ctx.fill();
         }
         if (m.accept !== "any") {   // accept chip floats above the machine
           var chy = my - 8;
           ctx.fillStyle = clothCol(m.accept); rrect(cx - 11, chy - 7, 22, 14, 4);
-          ctx.strokeStyle = "rgba(0,0,0,.3)"; ctx.lineWidth = 1; ctx.strokeRect(cx - 11, chy - 7, 22, 14);
-          ctx.fillStyle = m.accept === "light" ? "#5a5340" : "#fff";
+          ctx.strokeStyle = "rgba(90,50,60,.4)"; ctx.lineWidth = 1; ctx.strokeRect(cx - 11, chy - 7, 22, 14);
+          ctx.fillStyle = m.accept === "light" ? "#7a6450" : "#fff";
           ctx.font = "bold 10px monospace"; ctx.textAlign = "center"; ctx.fillText(typeLabel(m.accept), cx, chy + 4);
         }
       }
       function customer(c) {
         var x = Math.round(c.x), y = c.y;
-        var legph = Math.sin(spin * 0.3 + c.x * 0.25) * 2.5;
-        ctx.fillStyle = "#3a3f48"; ctx.fillRect(x - 5, y + 8, 3, 8 + legph); ctx.fillRect(x + 2, y + 8, 3, 8 - legph);
-        ctx.fillStyle = c.col; rrect(x - 7, y - 10, 14, 20, 4);
-        ctx.fillStyle = "#caa07a"; ctx.beginPath(); ctx.arc(x, y - 16, 6, 0, 7); ctx.fill();
-        ctx.fillStyle = "#2c2420"; ctx.beginPath(); ctx.arc(x, y - 18, 6, Math.PI, 0); ctx.fill();
-        if (!c.dropped) basket(x + 13, y - 1, c.basket, false);
+        var hop = c.dropped ? Math.abs(Math.sin(spin * 0.22 + c.x * 0.2)) * 2.5
+                            : Math.abs(Math.sin(spin * 0.2 + c.x * 0.2)) * 2.5;
+        if (!c.dropped) basket(x + 13, y - 7 - hop, c.basket, false);   // basket carried in front
+        blobChar(x, y, 16, 21, c.col, c.face, hop);
       }
       function tillAndAqsa() {
-        var tx = 240, ax = 282, hy = 70;
-        ctx.fillStyle = "#7fbfb0"; rrect(ax - 12, hy + 8, 24, 42, 6);                 // apron body
-        ctx.fillStyle = "#6fae9f"; ctx.fillRect(ax - 14, hy + 12, 5, 24); ctx.fillRect(ax + 9, hy + 12, 5, 24); // arms
-        ctx.fillStyle = "#caa07a"; ctx.beginPath(); ctx.arc(ax, hy, 9, 0, 7); ctx.fill();   // head
-        ctx.fillStyle = "#3a2b25"; ctx.beginPath(); ctx.arc(ax, hy - 2, 9, Math.PI, 0); ctx.fill();  // hair
-        ctx.fillRect(ax - 9, hy - 2, 3, 14); ctx.fillRect(ax + 6, hy - 2, 3, 14);
-        ctx.fillStyle = "#20262f"; ctx.fillRect(ax - 4, hy, 2, 2); ctx.fillRect(ax + 3, hy, 2, 2);  // eyes
-        ctx.strokeStyle = "#20262f"; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(ax, hy + 2, 3, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();  // smile
-        ctx.fillStyle = "#8a5a3c"; rrect(tx, 120, 76, 64, 4);              // counter
-        ctx.fillStyle = "#a06a46"; rrect(tx, 120, 76, 10, 4);
-        ctx.fillStyle = "#d8d2c4"; rrect(tx + 16, 96, 40, 28, 4);          // register body
-        ctx.fillStyle = "#b6afa0"; rrect(tx + 20, 100, 32, 12, 2);
-        ctx.fillStyle = "#7ad17a"; ctx.fillRect(tx + 23, 103, 26, 6);      // little screen
-        ctx.fillStyle = "#8a8478"; ctx.fillRect(tx + 22, 116, 28, 5);      // keys
-        ctx.fillStyle = "#ffe06b"; ctx.font = "bold 16px monospace"; ctx.textAlign = "center"; ctx.fillText("$", tx + 38, 154);
+        var tx = 240, ax = 294;
+        // Aqsa, drawn like her bedroom self (teal blob + her face), standing
+        // tall so her head rises above the counter she's working behind
+        blobChar(ax, 122, 26, 48, "#7fbfb0", "◕‿◕", Math.abs(Math.sin(spin * 0.05)) * 1.5);
+        // counter the friends stand behind
+        ctx.fillStyle = "#a87a5a"; rrect(tx, 120, 76, 64, 4);
+        ctx.fillStyle = "#c39068"; rrect(tx, 120, 76, 10, 4);
+        ctx.fillStyle = "rgba(255,236,210,.35)"; rrect(tx + 2, 121, 72, 4, 2);
+        // cash register tucked at the near corner of the counter
+        ctx.fillStyle = "#e8ddcf"; rrect(tx + 4, 100, 34, 24, 4);
+        ctx.fillStyle = "#cdbfae"; rrect(tx + 8, 104, 26, 10, 2);
+        ctx.fillStyle = "#9be36b"; ctx.fillRect(tx + 10, 106, 22, 6);      // little screen
+        ctx.fillStyle = "#a89c8a"; ctx.fillRect(tx + 9, 117, 24, 4);       // keys
+        ctx.fillStyle = "#ffe06b"; ctx.font = "bold 16px monospace"; ctx.textAlign = "center"; ctx.fillText("$", tx + 58, 152);
       }
       return {
         title: "🧺 Aqsa's Laundromat",
@@ -2748,21 +2786,41 @@
           if (msgT > 0) msgT--;
         },
         draw: function () {
-          ctx.fillStyle = "#a7c5e2"; ctx.fillRect(0, 0, W, H);       // wall
-          var fy = 112; ctx.fillStyle = "#cdd5e0"; ctx.fillRect(0, fy, W, H - fy);   // floor
-          ctx.fillStyle = "#bcc6d4";
+          var fy = 112;
+          var wall = ctx.createLinearGradient(0, 0, 0, fy);   // warm blush wall
+          wall.addColorStop(0, "#f7dcd6"); wall.addColorStop(0.6, "#efc4cb"); wall.addColorStop(1, "#e7b2bd");
+          ctx.fillStyle = wall; ctx.fillRect(0, 0, W, fy);
+          var floor = ctx.createLinearGradient(0, fy, 0, H);   // warm rose-cream floor
+          floor.addColorStop(0, "#ecd6cc"); floor.addColorStop(1, "#e2c2c4");
+          ctx.fillStyle = floor; ctx.fillRect(0, fy, W, H - fy);
+          ctx.fillStyle = "rgba(196,150,150,.35)";
           for (var ty = fy; ty < H; ty += 20) for (var tx = (((ty - fy) / 20) % 2 ? 20 : 0); tx < W; tx += 40) ctx.fillRect(tx, ty, 20, 20);
-          ctx.fillStyle = "#6b7686"; ctx.fillRect(0, 92, 16, 88);    // entrance door (left)
-          ctx.fillStyle = "#566072"; ctx.fillRect(2, 96, 12, 80);
+          // a little pink neon "OPEN" heart-sign glowing on the back wall
+          var nx = 150, ny = 30; lampGlow(nx, ny, 34);
+          ctx.fillStyle = "#ff8fc0"; ctx.font = "bold 13px monospace"; ctx.textAlign = "center";
+          ctx.fillStyle = "rgba(255,143,192,.9)"; ctx.fillText("♥ OPEN ♥", nx, ny + 4);
+          // hanging pendant lamps over the machines
+          for (var li = 0; li < N; li++) {
+            var lx = mx[li] + mw / 2;
+            ctx.strokeStyle = "rgba(120,80,70,.5)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, 8); ctx.stroke();
+            ctx.fillStyle = "#caa07a"; ctx.beginPath(); ctx.moveTo(lx - 6, 14); ctx.lineTo(lx + 6, 14); ctx.lineTo(lx + 3, 8); ctx.lineTo(lx - 3, 8); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = "#fff3d6"; ctx.fillRect(lx - 4, 13, 8, 3);
+          }
+          ctx.fillStyle = "#b88f6e"; ctx.fillRect(0, 92, 16, 88);    // entrance door (left)
+          ctx.fillStyle = "#a07a5c"; ctx.fillRect(2, 96, 12, 80);
           ctx.fillStyle = "#ffe06b"; ctx.fillRect(11, 134, 2, 6);
           for (var i = 0; i < N; i++) machine(i);
+          for (var li2 = 0; li2 < N; li2++) lampGlow(mx[li2] + mw / 2, my + 18, 46);   // warm pools on the machines
           tillAndAqsa();
           var danger = pending.length >= MAXQ - 1;
           for (var q = 0; q < pending.length && q < MAXQ; q++) basket(20 + q * 26, qY, pending[q].type, danger);
           customers.forEach(customer);
           ctx.font = "bold 11px monospace"; ctx.textAlign = "center";
           pops.forEach(function (p) { ctx.fillStyle = "rgba(255,224,107," + Math.min(1, p.life / 30) + ")"; ctx.fillText(p.txt, p.x, p.y); });
-          ctx.fillStyle = "rgba(0,0,0,.45)"; ctx.fillRect(0, 0, W, 20);
+          var vig = ctx.createRadialGradient(W / 2, H / 2, 70, W / 2, H / 2, 200);   // soft warm vignette
+          vig.addColorStop(0, "rgba(80,30,45,0)"); vig.addColorStop(1, "rgba(80,30,45,.28)");
+          ctx.fillStyle = vig; ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = "rgba(0,0,0,.4)"; ctx.fillRect(0, 0, W, 20);
           ctx.font = "bold 13px monospace"; ctx.textAlign = "left"; ctx.fillStyle = "#ffe06b"; ctx.fillText("$" + money, 8, 15);
           ctx.textAlign = "center"; ctx.fillStyle = "#cfeecb"; ctx.fillText("LEVEL " + level, W / 2, 15);
           ctx.textAlign = "right"; ctx.fillStyle = danger ? "#ff7b7b" : "#cfeecb"; ctx.fillText("ORDERS " + pending.length + "/" + MAXQ, W - 8, 15);

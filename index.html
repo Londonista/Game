@@ -144,20 +144,10 @@
   .curtain-rod::before, .curtain-rod::after { content:""; position: absolute; top: -3px; width: 12px; height: 12px;
     border-radius: 50%; background: radial-gradient(circle at 35% 35%,#f3dca6,#a9762f); }
   .curtain-rod::before { left: -10px; } .curtain-rod::after { right: -10px; }
-  .curtain { position: absolute; top: 24px; width: 48px; height: 332px; z-index: 2; pointer-events: none;
-    background: linear-gradient(90deg,#7c2f49,#b35a78 45%,#8a3a57 75%,#6f2942);
-    background-blend-mode: multiply;
-    box-shadow: inset -6px 0 10px rgba(0,0,0,.25), inset 6px 0 8px rgba(255,255,255,.12);
-    backdrop-filter: none; }
-  .curtain::before { content:""; position: absolute; inset: 0;
-    background: repeating-linear-gradient(90deg, rgba(255,255,255,.10) 0 4px, rgba(0,0,0,.10) 4px 12px); }
-  .curtain.left  { left: 30%;  border-radius: 24px 8px 18px 26px / 16px 8px 14px 18px;
-    -webkit-mask-image: linear-gradient(180deg,#000 95%,transparent); mask-image: linear-gradient(180deg,#000 95%,transparent); }
-  .curtain.right { right: 30%; border-radius: 24px 8px 26px 18px / 8px 16px 18px 14px;
-    -webkit-mask-image: linear-gradient(180deg,#000 95%,transparent); mask-image: linear-gradient(180deg,#000 95%,transparent); }
-  /* swag valance — the draped fabric swooping between the curtain tops */
-  .valance { position: absolute; top: 19px; left: 50%; transform: translateX(-50%); width: 292px; z-index: 3; pointer-events: none; }
-  .valance-svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3)); }
+  .curtain { position: absolute; top: 22px; width: 74px; height: 334px; z-index: 2; pointer-events: none; }
+  .curtain.left  { left: 27%; }
+  .curtain.right { right: 27%; transform: scaleX(-1); }
+  .curtain-svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.35)); }
 
   /* Large gothic Dracula poster on the right wall */
   .poster-dracula {
@@ -485,7 +475,7 @@
   #room.room-two .floor { background: linear-gradient(180deg,#9a7445,#7c5a32); }
   /* hide the bedroom's wall fixtures while viewing the snug (friends + cat
      come along, so they're NOT hidden) */
-  #room.room-two .window, #room.room-two .curtain, #room.room-two .curtain-rod, #room.room-two .valance,
+  #room.room-two .window, #room.room-two .curtain, #room.room-two .curtain-rod,
   #room.room-two .poster-dracula, #room.room-two .nook-label, #room.room-two .door-next { display: none; }
   /* furniture is per-room: each piece shows only in its own room */
   #room.room-two .furn[data-room="main"] { display: none; }
@@ -577,24 +567,37 @@
         <div class="scene-emoji" id="winScene">🌷</div>
       </div>
       <div class="curtain-rod"></div>
-      <div class="curtain left"></div>
-      <div class="curtain right"></div>
-      <!-- swag valance draped between the curtain tops -->
-      <div class="valance">
-        <svg class="valance-svg" viewBox="0 0 240 38" width="240" height="38" aria-hidden="true">
-          <path d="M3 4 L21 4 L18 35 L13 27 L8 34 L3 26 Z" fill="#8a3552"/>
-          <path d="M237 4 L219 4 L222 35 L227 27 L232 34 L237 26 Z" fill="#8a3552"/>
-          <path d="M9 6 L9 30" stroke="#6f2942" stroke-width="1" opacity=".4"/>
-          <path d="M231 6 L231 30" stroke="#6f2942" stroke-width="1" opacity=".4"/>
-          <path d="M10 6 C42 24 92 32 120 34 C148 32 198 24 230 6 C200 16 150 24 120 27 C90 24 40 16 10 6 Z" fill="#9a3a59"/>
-          <path d="M12 7 C44 22 92 30 119 33" stroke="#6f2942" stroke-width="1.4" fill="none" opacity=".45"/>
-          <path d="M228 7 C196 22 148 30 121 33" stroke="#6f2942" stroke-width="1.4" fill="none" opacity=".45"/>
-          <path d="M34 8 C60 20 96 28 119 31" stroke="#6f2942" stroke-width="1.1" fill="none" opacity=".35"/>
-          <path d="M206 8 C180 20 144 28 121 31" stroke="#6f2942" stroke-width="1.1" fill="none" opacity=".35"/>
-          <path d="M22 8 C52 20 96 27 119 30" stroke="#c06a86" stroke-width="1" fill="none" opacity=".5"/>
-          <path d="M218 8 C188 20 144 27 121 30" stroke="#c06a86" stroke-width="1" fill="none" opacity=".5"/>
-          <ellipse cx="120" cy="28" rx="5" ry="7" fill="#7c2f49"/>
-          <circle cx="120" cy="24" r="2.6" fill="#c79a4e"/>
+      <!-- old fancy curtains, gathered by tasseled tiebacks ("pulls") -->
+      <div class="curtain left">
+        <svg class="curtain-svg" viewBox="0 0 72 334" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M4 2 L66 2 C71 36 70 56 66 78 C56 120 36 150 34 172 C33 200 54 224 62 250 C68 284 64 312 58 324 C40 331 18 331 8 324 C2 312 2 290 3 264 C5 180 3 90 4 2 Z" fill="#7a2c46"/>
+          <path d="M16 6 C18 80 14 132 30 172 C20 224 26 286 18 320" fill="none" stroke="#561d33" stroke-width="2.4" opacity=".55"/>
+          <path d="M30 6 C34 86 26 140 33 172 C28 230 36 288 30 320" fill="none" stroke="#561d33" stroke-width="2.4" opacity=".5"/>
+          <path d="M50 8 C54 80 40 142 34 172 C44 220 52 280 50 312" fill="none" stroke="#561d33" stroke-width="2.4" opacity=".5"/>
+          <path d="M11 6 C12 90 10 134 27 172 C16 226 22 288 13 318" fill="none" stroke="#a8466a" stroke-width="1.6" opacity=".5"/>
+          <path d="M40 7 C44 84 33 140 33 172 C36 226 44 284 40 314" fill="none" stroke="#a8466a" stroke-width="1.6" opacity=".5"/>
+          <path d="M60 8 C64 70 56 130 36 170" fill="none" stroke="#a8466a" stroke-width="1.6" opacity=".45"/>
+          <path d="M25 167 C25 161 51 161 51 167 C53 175 53 182 51 187 C49 193 27 193 25 187 C23 182 23 173 25 167 Z" fill="#cda154" stroke="#9a7536" stroke-width="1"/>
+          <path d="M27 170 C34 168 44 168 49 170" fill="none" stroke="#e6c87f" stroke-width="1.2" opacity=".8"/>
+          <circle cx="38" cy="190" r="2.4" fill="#cda154"/>
+          <path d="M34 193 Q38 190 42 193 L41 205 Q38 208 35 205 Z" fill="#cda154" stroke="#9a7536" stroke-width=".8"/>
+          <path d="M35 205 L35 215 M37.5 206 L37.5 217 M40 206 L40 217 M42 205 L42 215" stroke="#cda154" stroke-width="1" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="curtain right">
+        <svg class="curtain-svg" viewBox="0 0 72 334" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M4 2 L66 2 C71 36 70 56 66 78 C56 120 36 150 34 172 C33 200 54 224 62 250 C68 284 64 312 58 324 C40 331 18 331 8 324 C2 312 2 290 3 264 C5 180 3 90 4 2 Z" fill="#7a2c46"/>
+          <path d="M16 6 C18 80 14 132 30 172 C20 224 26 286 18 320" fill="none" stroke="#561d33" stroke-width="2.4" opacity=".55"/>
+          <path d="M30 6 C34 86 26 140 33 172 C28 230 36 288 30 320" fill="none" stroke="#561d33" stroke-width="2.4" opacity=".5"/>
+          <path d="M50 8 C54 80 40 142 34 172 C44 220 52 280 50 312" fill="none" stroke="#561d33" stroke-width="2.4" opacity=".5"/>
+          <path d="M11 6 C12 90 10 134 27 172 C16 226 22 288 13 318" fill="none" stroke="#a8466a" stroke-width="1.6" opacity=".5"/>
+          <path d="M40 7 C44 84 33 140 33 172 C36 226 44 284 40 314" fill="none" stroke="#a8466a" stroke-width="1.6" opacity=".5"/>
+          <path d="M60 8 C64 70 56 130 36 170" fill="none" stroke="#a8466a" stroke-width="1.6" opacity=".45"/>
+          <path d="M25 167 C25 161 51 161 51 167 C53 175 53 182 51 187 C49 193 27 193 25 187 C23 182 23 173 25 167 Z" fill="#cda154" stroke="#9a7536" stroke-width="1"/>
+          <path d="M27 170 C34 168 44 168 49 170" fill="none" stroke="#e6c87f" stroke-width="1.2" opacity=".8"/>
+          <circle cx="38" cy="190" r="2.4" fill="#cda154"/>
+          <path d="M34 193 Q38 190 42 193 L41 205 Q38 208 35 205 Z" fill="#cda154" stroke="#9a7536" stroke-width=".8"/>
+          <path d="M35 205 L35 215 M37.5 206 L37.5 217 M40 206 L40 217 M42 205 L42 215" stroke="#cda154" stroke-width="1" stroke-linecap="round"/>
         </svg>
       </div>
 

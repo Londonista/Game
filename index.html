@@ -2495,153 +2495,186 @@
   // =====================================================================
   var ComputerGame = (function () {
     var ov, canvas, ctx, W = 320, H = 240;
-    var raf = null, running = false, inputBound = false;
-    var paddle, items, score, lives, spawnT, speed, over, awarded, keyDir, mode;
+    var raf = null, running = false, inputBound = false, game = null;
 
     function rrect(x, y, w, h, r) {
       ctx.beginPath(); ctx.moveTo(x + r, y);
       ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
       ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); ctx.fill();
     }
-    function drawStar(x, y, r, t) {
-      ctx.save(); ctx.translate(x, y); ctx.rotate(t * 0.25); ctx.beginPath();
-      for (var i = 0; i < 5; i++) {
-        var a = -Math.PI / 2 + i * 2 * Math.PI / 5; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
-        var a2 = a + Math.PI / 5; ctx.lineTo(Math.cos(a2) * r * 0.45, Math.sin(a2) * r * 0.45);
-      }
-      ctx.closePath(); ctx.fill(); ctx.restore();
+    function gameOverText(title, sub) {
+      ctx.fillStyle = "rgba(0,0,0,.62)"; ctx.fillRect(0, 0, W, H); ctx.textAlign = "center";
+      ctx.fillStyle = "#ffd86b"; ctx.font = "bold 20px monospace"; ctx.fillText(title, W / 2, H / 2 - 12);
+      ctx.fillStyle = "#9be36b"; ctx.font = "bold 13px monospace"; ctx.fillText(sub, W / 2, H / 2 + 12);
+      ctx.fillStyle = "#cfeecb"; ctx.font = "12px monospace"; ctx.fillText("tap / press space to play again", W / 2, H / 2 + 34);
     }
+    function award(c) { if (c > 0) { addCoins(c); save(); } }
 
-    // ---- the two games ------------------------------------------------------
-    var MODES = {
-      starcatcher: {
-        title: "⭐ Star Catcher", paddleColor: "#cfeecb",
+    // ===== Game 1: Star Catcher (catch falling stars) ========================
+    function StarCatcher() {
+      var paddle, items, score, lives, spawnT, speed, over, awarded, keyDir;
+      function reset() { paddle = { x: W / 2, w: 52, y: H - 18 }; items = []; score = 0; lives = 3; spawnT = 0; speed = 1.4; over = false; awarded = false; keyDir = 0; }
+      function coinsFor() { return Math.floor(score / 3); }
+      function star(x, y, r, t) {
+        ctx.save(); ctx.translate(x, y); ctx.rotate(t * 0.25); ctx.beginPath();
+        for (var i = 0; i < 5; i++) { var a = -Math.PI / 2 + i * 2 * Math.PI / 5; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); var a2 = a + Math.PI / 5; ctx.lineTo(Math.cos(a2) * r * 0.45, Math.sin(a2) * r * 0.45); }
+        ctx.closePath(); ctx.fill(); ctx.restore();
+      }
+      return {
+        title: "⭐ Star Catcher",
         hint: "Move the dish (mouse / finger or ← →) and catch the falling stars!",
-        spawn: function () { return { kind: "star" }; },
-        onCatch: function (s) { score++; Ambient.blip(720, 0.05); },
-        onMiss: function (s) { lives--; Ambient.blip(150, 0.13, "square"); },
-        drawItem: function (s) { ctx.fillStyle = "#9be36b"; drawStar(s.x, s.y, s.r, s.t); }
-      },
-      laundromat: {
-        title: "🧺 Aqsa's Laundromat", paddleColor: "#e6d2a6",
-        hint: "Catch the clean laundry in the basket — but DODGE the red socks!",
-        spawn: function () { return { kind: Math.random() < 0.28 ? "redsock" : "laundry" }; },
-        onCatch: function (s) {
-          if (s.kind === "redsock") { lives--; Ambient.blip(150, 0.14, "square"); }
-          else { score++; Ambient.blip(720, 0.05); }
-        },
-        onMiss: function (s) { /* missing laundry is fine; missing a red sock is good */ },
-        drawItem: function (s) {
-          if (s.kind === "redsock") {
-            ctx.fillStyle = "#ff6b6b";
-            rrect(s.x - 4, s.y - 9, 8, 11, 3);            // sock leg
-            ctx.fillRect(s.x - 4, s.y + 1, 12, 5);         // foot
-            ctx.fillStyle = "#fff"; ctx.fillRect(s.x - 4, s.y - 9, 8, 3); // cuff
-          } else {
-            ctx.fillStyle = "#e9f0e0"; rrect(s.x - 8, s.y - 7, 16, 14, 3); // folded clothes
-            ctx.fillStyle = "rgba(0,0,0,.12)"; ctx.fillRect(s.x - 8, s.y, 16, 2);
+        init: reset,
+        update: function () {
+          if (over) return;
+          paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, paddle.x + keyDir * 5));
+          if (--spawnT <= 0) { items.push({ x: 16 + Math.random() * (W - 32), y: -12, vy: speed + Math.random() * 0.8, r: 8, t: Math.random() * 6 }); spawnT = Math.max(20, 58 - score); }
+          speed += 0.001;
+          for (var i = items.length - 1; i >= 0; i--) {
+            var s = items[i]; s.y += s.vy; s.t += 0.1;
+            if (s.y >= paddle.y - 8 && s.y <= paddle.y + 10 && Math.abs(s.x - paddle.x) < paddle.w / 2 + s.r) { score++; items.splice(i, 1); Ambient.blip(720, 0.05); continue; }
+            if (s.y > H + 12) { items.splice(i, 1); lives--; Ambient.blip(150, 0.13, "square"); }
           }
+          if (lives <= 0) { over = true; if (!awarded) { awarded = true; award(coinsFor()); } }
+        },
+        draw: function () {
+          ctx.fillStyle = "#07140e"; ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = "#9be36b"; items.forEach(function (s) { star(s.x, s.y, s.r, s.t); });
+          ctx.fillStyle = "#cfeecb"; ctx.beginPath(); ctx.moveTo(paddle.x - paddle.w / 2, paddle.y); ctx.quadraticCurveTo(paddle.x, paddle.y + 13, paddle.x + paddle.w / 2, paddle.y); ctx.lineTo(paddle.x + paddle.w / 2 - 4, paddle.y - 5); ctx.lineTo(paddle.x - paddle.w / 2 + 4, paddle.y - 5); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = "#9be36b"; ctx.font = "bold 14px monospace"; ctx.textAlign = "left"; ctx.fillText("SCORE " + score, 8, 18);
+          ctx.textAlign = "right"; ctx.fillStyle = "#ff6b6b"; ctx.fillText(new Array(Math.max(0, lives) + 1).join("♥"), W - 8, 18);
+          if (over) gameOverText("GAME OVER", "Score " + score + "  ·  +" + coinsFor() + " coins");
+        },
+        pointer: function (x, y, type) { paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, x)); if (type === "down" && over) reset(); },
+        key: function (e) {
+          if (e.key === "ArrowLeft") { keyDir = -1; e.preventDefault(); }
+          else if (e.key === "ArrowRight") { keyDir = 1; e.preventDefault(); }
+          else if (e.key === " " || e.code === "Space") { if (over) reset(); e.preventDefault(); }
+        },
+        keyUp: function (e) { if (e.key === "ArrowLeft" && keyDir < 0) keyDir = 0; if (e.key === "ArrowRight" && keyDir > 0) keyDir = 0; }
+      };
+    }
+
+    // ===== Game 2: Aqsa's Laundromat (load baskets into machines) ============
+    // 8-bit laundromat: customers drop off baskets of clothes (orders). Tap a
+    // free machine to load a basket; when the wash finishes you get paid. Each
+    // level the customers arrive faster, so you must work quicker — and if the
+    // orders pile up past the limit, it's closing time.
+    function Laundromat() {
+      var N = 4, MAXQ = 10, mx = [25, 95, 165, 235], my = 40, mw = 60, mh = 70;
+      var mach, pending, money, level, over, awarded, spawnT, arriveEvery, washF, nextLvl, msg, msgT, spin;
+      function reset() {
+        mach = []; for (var i = 0; i < N; i++) mach.push({ on: false, prog: 0 });
+        pending = 1; money = 0; level = 1; over = false; awarded = false;
+        arriveEvery = 150; washF = 170; nextLvl = 14; spawnT = arriveEvery; msg = ""; msgT = 0; spin = 0;
+      }
+      function coinsFor() { return Math.floor(money / 6); }
+      function pay() { return 2 + level; }
+      function load(i) { var m = mach[i]; if (!m.on && pending > 0) { pending--; m.on = true; m.prog = 0; Ambient.blip(520, 0.05); } }
+      function levelUp() {
+        if (money < nextLvl) return;
+        level++; nextLvl += 16 + level * 8; arriveEvery = Math.max(55, arriveEvery - 16); washF = Math.max(100, washF - 10);
+        msg = "LEVEL " + level + "!"; msgT = 100; Ambient.blip(700, 0.12);
+      }
+      function basket(x, y, danger) {
+        ctx.fillStyle = danger ? "#e07b3a" : "#c98b4a";
+        ctx.beginPath(); ctx.moveTo(x - 10, y - 7); ctx.lineTo(x + 10, y - 7); ctx.lineTo(x + 8, y + 7); ctx.lineTo(x - 8, y + 7); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#efe6d2"; ctx.beginPath(); ctx.arc(x - 3, y - 7, 4.5, Math.PI, 0); ctx.arc(x + 4, y - 7, 4, Math.PI, 0); ctx.fill();
+        ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.fillRect(x - 10, y - 2, 20, 2);
+      }
+      function machine(i) {
+        var x = mx[i], m = mach[i], cx = x + mw / 2, cy = my + 44, R = 20;
+        ctx.fillStyle = "#9aa6b6"; rrect(x - 2, my - 2, mw + 4, mh + 4, 8);
+        ctx.fillStyle = "#eef1f6"; rrect(x, my, mw, mh, 6);
+        ctx.fillStyle = "#c2cad6"; rrect(x + 6, my + 6, mw - 12, 12, 3);
+        ctx.fillStyle = "#8a93a2"; ctx.beginPath(); ctx.arc(x + 14, my + 12, 2.5, 0, 7); ctx.arc(x + 22, my + 12, 2.5, 0, 7); ctx.fill();
+        ctx.fillStyle = m.on ? "#7ad17a" : "#5a6472"; ctx.fillRect(x + mw - 22, my + 9, 14, 6);
+        ctx.fillStyle = "#8893a4"; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();
+        ctx.fillStyle = m.on ? "#28323f" : "#20262f"; ctx.beginPath(); ctx.arc(cx, cy, R - 4, 0, 7); ctx.fill();
+        if (m.on) {
+          var cols = ["#ff6b6b", "#6bb0ff", "#ffd86b"];
+          for (var k = 0; k < 3; k++) { var a = spin * 0.35 + k * 2.094; ctx.fillStyle = cols[k]; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * 7, cy + Math.sin(a) * 7, 4, 0, 7); ctx.fill(); }
+          ctx.strokeStyle = "#7ad17a"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(cx, cy, R + 1, -Math.PI / 2, -Math.PI / 2 + m.prog * Math.PI * 2); ctx.stroke();
+        } else {
+          ctx.fillStyle = "rgba(255,255,255,.12)"; ctx.beginPath(); ctx.arc(cx - 5, cy - 5, 5, 0, 7); ctx.fill();
         }
       }
-    };
-
-    function reset() {
-      paddle = { x: W / 2, w: 52, y: H - 18 };
-      items = []; score = 0; lives = 3; spawnT = 0; speed = 1.4; over = false; awarded = false; keyDir = 0;
-    }
-    function coinsFor() { return Math.floor(score / 3); }
-    function award() { if (awarded) return; awarded = true; var c = coinsFor(); if (c > 0) { addCoins(c); save(); } }
-
-    function update() {
-      if (over) return;
-      paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, paddle.x + keyDir * 5));
-      if (--spawnT <= 0) {
-        var it = mode.spawn();
-        it.x = 16 + Math.random() * (W - 32); it.y = -12; it.vy = speed + Math.random() * 0.8; it.r = 8; it.t = Math.random() * 6;
-        items.push(it); spawnT = Math.max(20, 58 - score);
-      }
-      speed += 0.001;
-      for (var i = items.length - 1; i >= 0; i--) {
-        var s = items[i]; s.y += s.vy; s.t += 0.1;
-        if (s.y >= paddle.y - 8 && s.y <= paddle.y + 10 && Math.abs(s.x - paddle.x) < paddle.w / 2 + s.r) {
-          mode.onCatch(s); items.splice(i, 1); continue;
+      return {
+        title: "🧺 Aqsa's Laundromat",
+        hint: "Tap a free machine (or press 1-4) to load a basket. Don't let the orders pile up!",
+        init: reset,
+        update: function () {
+          if (over) return;
+          spin++;
+          if (--spawnT <= 0) { pending++; spawnT = arriveEvery; Ambient.blip(860, 0.04, "triangle"); }
+          if (pending > MAXQ) { over = true; if (!awarded) { awarded = true; award(coinsFor()); } return; }
+          for (var i = 0; i < N; i++) { var m = mach[i]; if (m.on) { m.prog += 1 / washF; if (m.prog >= 1) { m.on = false; m.prog = 0; money += pay(); Ambient.blip(1000, 0.08); levelUp(); } } }
+          if (msgT > 0) msgT--;
+        },
+        draw: function () {
+          ctx.fillStyle = "#a7c5e2"; ctx.fillRect(0, 0, W, H);       // wall
+          var fy = 112; ctx.fillStyle = "#cdd5e0"; ctx.fillRect(0, fy, W, H - fy);   // floor
+          ctx.fillStyle = "#bcc6d4";
+          for (var ty = fy; ty < H; ty += 20) for (var tx = (((ty - fy) / 20) % 2 ? 20 : 0); tx < W; tx += 40) ctx.fillRect(tx, ty, 20, 20);
+          for (var i = 0; i < N; i++) machine(i);
+          var danger = pending >= 7;
+          for (var q = 0; q < pending && q < MAXQ; q++) basket(22 + q * 29, 148, danger);
+          ctx.fillStyle = "rgba(0,0,0,.45)"; ctx.fillRect(0, 0, W, 20);
+          ctx.font = "bold 13px monospace"; ctx.textAlign = "left"; ctx.fillStyle = "#ffe06b"; ctx.fillText("$" + money, 8, 15);
+          ctx.textAlign = "center"; ctx.fillStyle = "#cfeecb"; ctx.fillText("LEVEL " + level, W / 2, 15);
+          ctx.textAlign = "right"; ctx.fillStyle = danger ? "#ff7b7b" : "#cfeecb"; ctx.fillText("ORDERS " + pending + "/" + MAXQ, W - 8, 15);
+          if (msgT > 0) { ctx.textAlign = "center"; ctx.fillStyle = "#ffd86b"; ctx.font = "bold 20px monospace"; ctx.fillText(msg, W / 2, 100); }
+          if (over) gameOverText("CLOSING TIME!", "Earned $" + money + "  ·  +" + coinsFor() + " coins");
+        },
+        pointer: function (x, y, type) {
+          if (type !== "down") return;
+          if (over) { reset(); return; }
+          for (var i = 0; i < N; i++) if (x >= mx[i] && x <= mx[i] + mw && y >= my && y <= my + mh) { load(i); return; }
+        },
+        key: function (e) {
+          if (e.key >= "1" && e.key <= "4") { if (over) reset(); else load(parseInt(e.key, 10) - 1); e.preventDefault(); }
+          else if (e.key === " " || e.code === "Space") { if (over) reset(); e.preventDefault(); }
         }
-        if (s.y > H + 12) { mode.onMiss(s); items.splice(i, 1); }
-      }
-      if (lives <= 0) { over = true; award(); }
+      };
     }
-    function drawPaddle() {
-      ctx.fillStyle = mode.paddleColor;
-      var x = paddle.x, w = paddle.w, y = paddle.y;
-      ctx.beginPath();
-      ctx.moveTo(x - w / 2, y); ctx.lineTo(x + w / 2, y);
-      ctx.lineTo(x + w / 2 - 6, y + 14); ctx.lineTo(x - w / 2 + 6, y + 14);
-      ctx.closePath(); ctx.fill();
-      ctx.fillStyle = "rgba(255,255,255,.25)"; ctx.fillRect(x - w / 2, y - 3, w, 4);
-    }
-    function draw() {
-      ctx.fillStyle = "#07140e"; ctx.fillRect(0, 0, W, H);
-      items.forEach(function (s) { mode.drawItem(s); });
-      drawPaddle();
-      ctx.fillStyle = "#9be36b"; ctx.font = "bold 14px monospace"; ctx.textAlign = "left";
-      ctx.fillText("SCORE " + score, 8, 18);
-      ctx.textAlign = "right"; ctx.fillStyle = "#ff6b6b";
-      ctx.fillText(new Array(Math.max(0, lives) + 1).join("♥"), W - 8, 18);
-      if (over) {
-        ctx.fillStyle = "rgba(0,0,0,.6)"; ctx.fillRect(0, 0, W, H); ctx.textAlign = "center";
-        ctx.fillStyle = "#ffd86b"; ctx.font = "bold 22px monospace"; ctx.fillText("GAME OVER", W / 2, H / 2 - 12);
-        ctx.fillStyle = "#9be36b"; ctx.font = "bold 13px monospace";
-        ctx.fillText("Score " + score + "  ·  +" + coinsFor() + " coins", W / 2, H / 2 + 12);
-        ctx.fillStyle = "#cfeecb"; ctx.font = "12px monospace"; ctx.fillText("tap / press space to play again", W / 2, H / 2 + 34);
-      }
-    }
-    function loop() { if (!running) return; update(); draw(); raf = requestAnimationFrame(loop); }
 
-    function setFromPointer(e) {
-      var pt = e.touches ? e.touches[0] : e, rect = canvas.getBoundingClientRect();
-      paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, (pt.clientX - rect.left) / rect.width * W));
-      if (e.cancelable) e.preventDefault();
-    }
-    function onKey(e) {
-      if (e.key === "ArrowLeft") { keyDir = -1; e.preventDefault(); }
-      else if (e.key === "ArrowRight") { keyDir = 1; e.preventDefault(); }
-      else if (e.key === " " || e.code === "Space") { if (over) reset(); e.preventDefault(); }
-    }
-    function onKeyUp(e) { if (e.key === "ArrowLeft" && keyDir < 0) keyDir = 0; if (e.key === "ArrowRight" && keyDir > 0) keyDir = 0; }
-    function onTouchStart(e) { setFromPointer(e); if (over) reset(); }
-    function onClick() { if (over) reset(); }
+    // ---- harness: loop, input forwarding, menu --------------------------------
+    function loop() { if (!running) return; if (game) { game.update(); game.draw(); } raf = requestAnimationFrame(loop); }
+    function xy(e) { var pt = e.touches ? e.touches[0] : e, r = canvas.getBoundingClientRect(); return { x: (pt.clientX - r.left) / r.width * W, y: (pt.clientY - r.top) / r.height * H }; }
+    function onMove(e) { if (game && game.pointer) { var p = xy(e); game.pointer(p.x, p.y, "move"); } if (e.cancelable) e.preventDefault(); }
+    function onDown(e) { if (game && game.pointer) { var p = xy(e); game.pointer(p.x, p.y, "down"); } if (e.cancelable) e.preventDefault(); }
+    function onKey(e) { if (game && game.key) game.key(e); }
+    function onKeyUp(e) { if (game && game.keyUp) game.keyUp(e); }
     function bindInput() {
       if (inputBound) return; inputBound = true;
-      canvas.addEventListener("mousemove", setFromPointer);
-      canvas.addEventListener("touchmove", setFromPointer, { passive: false });
-      canvas.addEventListener("touchstart", onTouchStart, { passive: false });
-      canvas.addEventListener("click", onClick);
+      canvas.addEventListener("mousemove", onMove);
+      canvas.addEventListener("touchmove", onMove, { passive: false });
+      canvas.addEventListener("mousedown", onDown);
+      canvas.addEventListener("touchstart", onDown, { passive: false });
       window.addEventListener("keydown", onKey);
       window.addEventListener("keyup", onKeyUp);
     }
     function unbindInput() {
       if (!inputBound) return; inputBound = false;
-      canvas.removeEventListener("mousemove", setFromPointer);
-      canvas.removeEventListener("touchmove", setFromPointer);
-      canvas.removeEventListener("touchstart", onTouchStart);
-      canvas.removeEventListener("click", onClick);
+      canvas.removeEventListener("mousemove", onMove);
+      canvas.removeEventListener("touchmove", onMove);
+      canvas.removeEventListener("mousedown", onDown);
+      canvas.removeEventListener("touchstart", onDown);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("keyup", onKeyUp);
     }
-
-    function stopLoop() { running = false; if (raf) cancelAnimationFrame(raf); unbindInput(); }
+    function stopLoop() { running = false; if (raf) cancelAnimationFrame(raf); unbindInput(); game = null; }
     function showMenu() {
       stopLoop();
       $("gameTitle").textContent = "💻 Computer";
       $("gameMenu").style.display = ""; $("gameScreen").style.display = "none";
     }
     function select(m) {
-      mode = MODES[m]; if (!mode) return;
       canvas = $("gameCanvas"); ctx = canvas.getContext("2d");
-      $("gameTitle").textContent = mode.title;
-      $("gameHint").textContent = mode.hint;
+      game = m === "laundromat" ? Laundromat() : StarCatcher();
+      $("gameTitle").textContent = game.title;
+      $("gameHint").textContent = game.hint;
       $("gameMenu").style.display = "none"; $("gameScreen").style.display = "";
-      reset(); bindInput(); running = true; loop();
+      game.init(); bindInput(); running = true; loop();
     }
     function open() { ov = $("ovGame"); ov.classList.add("show"); showMenu(); }
     function close() { stopLoop(); if (ov) ov.classList.remove("show"); }

@@ -364,13 +364,16 @@
   .wardrobe .stickers span { position: absolute; font-size: 15px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
 
   /* Cozy bed with a plush + sticker */
-  .bed { width: 168px; height: 78px; }
+  /* Bed — a purchasable item now (colour via CSS vars). Default = pink. */
+  .item.beditem { font-size: 0; filter: drop-shadow(0 7px 6px rgba(0,0,0,0.4)); }
+  .bed { width: 168px; height: 78px;
+    --bed-1: #e98aa8; --bed-2: #cf6f93; --bed-h1: #8a6aa0; --bed-h2: #6f5286; }
   .bed .head { position: absolute; left: 0; bottom: 0; width: 22px; height: 66px;
-    background: linear-gradient(180deg,#8a6aa0,#6f5286); border-radius: 8px 8px 4px 4px; }
+    background: linear-gradient(180deg, var(--bed-h1), var(--bed-h2)); border-radius: 8px 8px 4px 4px; }
   .bed .mattress { position: absolute; left: 18px; bottom: 4px; right: 0; height: 36px;
     background: #f4eee2; border-radius: 6px; box-shadow: 0 8px 12px rgba(0,0,0,.3); }
   .bed .blanket { position: absolute; left: 78px; bottom: 4px; right: 0; height: 36px;
-    background: linear-gradient(180deg,#e98aa8,#cf6f93); border-radius: 0 6px 6px 0; overflow: hidden; }
+    background: linear-gradient(180deg, var(--bed-1), var(--bed-2)); border-radius: 0 6px 6px 0; overflow: hidden; }
   .bed .blanket::after { content:""; position: absolute; inset: 0;
     background: repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 4px, transparent 4px 12px); }
   .bed .pillow { position: absolute; left: 26px; bottom: 12px; width: 40px; height: 24px;
@@ -689,15 +692,6 @@
           <span style="top:30%; left:74%">🐱</span>
         </div>
       </div>
-      <!-- Cozy bed -->
-      <div class="furn bed" data-furn="bed" data-room="main" title="Drag me anywhere">
-        <div class="head"></div>
-        <div class="mattress"></div>
-        <div class="blanket"></div>
-        <div class="pillow"></div>
-        <div class="plush">🧸</div>
-        <div class="bedsticker">⭐</div>
-      </div>
       <!-- Desk with a chunky 90s beige computer -->
       <div class="furn deskunit" data-furn="desk" data-room="main" title="Drag me anywhere">
         <div class="crt">
@@ -866,6 +860,14 @@
     // --- Boudoir ---
     { id: "vanity",    name: "Dressing Table", ic: "🪞", price: 34, unlockAt: 0, set: "Boudoir", render: "vanity" },
 
+    // --- Beds (different colours) ---
+    { id: "bed_pink",   name: "Pink Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "pink" },
+    { id: "bed_blue",   name: "Blue Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "blue" },
+    { id: "bed_green",  name: "Green Bed",  ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "green" },
+    { id: "bed_yellow", name: "Yellow Bed", ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "yellow" },
+    { id: "bed_lilac",  name: "Lilac Bed",  ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "lilac" },
+    { id: "bed_teal",   name: "Teal Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "teal" },
+
     // --- Unlocks at 3 Mondays ---
     { id: "lava",     name: "Lava Lamp",    ic: "🔮", price: 18, unlockAt: 3, set: "Glow Up" },
     { id: "poster",   name: "Poster",       ic: "🖼️", price: 13, unlockAt: 3, set: "Glow Up" },
@@ -919,7 +921,8 @@
     version: 1,
     sessions: 0,            // total Mondays played (the heart of continuity)
     coins: 20,             // a little starter pocket money
-    placed: [],            // [{uid, itemId, x, y}]  x,y as % of room
+    // a starter (removable) pink bed in the bedroom
+    placed: [{ uid: "bed_start", itemId: "bed_pink", x: 27.5, y: 82, room: "main", scale: 1 }],
     plant: 0,              // plant growth stages
     unlockedGames: ["hidden", "match"],
     seenAreas: [],         // area milestones already celebrated
@@ -930,7 +933,6 @@
     // Drag a piece upward (smaller y) to send it to the back of the room.
     furniture: [
       { id: "wardrobe",  x: 8.5,  y: 91 },
-      { id: "bed",       x: 27.5, y: 95 },
       { id: "desk",      x: 79,   y: 94 }
     ],
     // Where the three friends are standing (x = centre %, y = floor-contact %).
@@ -944,7 +946,7 @@
     updatedAt: null
   };
   // Fallback positions if a save is missing a piece / friend.
-  var FURN_DEFAULTS = { wardrobe: { x: 8.5, y: 91 }, bed: { x: 27.5, y: 95 }, desk: { x: 79, y: 94 } };
+  var FURN_DEFAULTS = { wardrobe: { x: 8.5, y: 91 }, desk: { x: 79, y: 94 } };
   var CHAR_DEFAULTS = { jas: { x: 17, y: 88 }, aqsa: { x: 47.5, y: 88 }, adam: { x: 79, y: 88 } };
 
   var state = load();
@@ -955,12 +957,25 @@
       if (raw) {
         var s = JSON.parse(raw);
         // shallow-merge onto defaults so older saves keep working
-        return Object.assign({}, clone(DEFAULT_STATE), s);
+        var merged = Object.assign({}, clone(DEFAULT_STATE), s);
+        migrateBed(merged);
+        return merged;
       }
     } catch (e) { console.warn("load failed", e); }
     var fresh = clone(DEFAULT_STATE);
     fresh.createdAt = Date.now();
     return fresh;
+  }
+  // Older saves had the bed as built-in furniture; turn it into a removable
+  // placed item (a pink bed) at its old spot so nobody loses their bed. New
+  // games never have built-in bed furniture, so this only runs for old saves.
+  function migrateBed(s) {
+    var bed = (s.furniture || []).filter(function (f) { return f.id === "bed"; })[0];
+    if (!bed) return;
+    s.furniture = s.furniture.filter(function (f) { return f.id !== "bed"; });
+    s.placed = s.placed || [];
+    s.placed.push({ uid: "bedmig" + Date.now(), itemId: "bed_pink",
+      x: bed.x, y: Math.min(86, bed.y - 8), room: "main", scale: 1 });
   }
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
 
@@ -1138,6 +1153,35 @@
     return wrap;
   }
 
+  // Bed colours: [blanket1, blanket2, headboard1, headboard2]
+  var BED_TINTS = {
+    pink:   ["#e98aa8", "#cf6f93", "#8a6aa0", "#6f5286"],
+    blue:   ["#8ab4e9", "#6f93cf", "#5a6a9a", "#465480"],
+    green:  ["#8ad1a0", "#5fae7e", "#5a8a6a", "#46704f"],
+    yellow: ["#f0d068", "#d8b24a", "#9a8a4a", "#7c6e36"],
+    lilac:  ["#c0a3e0", "#9678c0", "#6a5288", "#52406a"],
+    teal:   ["#7fc9c0", "#5aa39a", "#477a72", "#365e58"]
+  };
+  function buildBed(tint) {
+    var t = BED_TINTS[tint] || BED_TINTS.pink;
+    var wrap = document.createElement("div");
+    wrap.className = "bed";
+    wrap.style.setProperty("--bed-1", t[0]); wrap.style.setProperty("--bed-2", t[1]);
+    wrap.style.setProperty("--bed-h1", t[2]); wrap.style.setProperty("--bed-h2", t[3]);
+    wrap.innerHTML = '<div class="head"></div><div class="mattress"></div><div class="blanket"></div>' +
+      '<div class="pillow"></div><div class="plush">🧸</div><div class="bedsticker">⭐</div>';
+    return wrap;
+  }
+  function bedIcon(tint) {
+    var t = BED_TINTS[tint] || BED_TINTS.pink;
+    return '<svg width="46" height="28" viewBox="0 0 46 28">' +
+      '<rect x="2" y="5" width="6" height="19" rx="2" fill="' + t[2] + '"/>' +
+      '<rect x="6" y="14" width="38" height="10" rx="2" fill="#f4eee2"/>' +
+      '<rect x="23" y="14" width="21" height="10" rx="2" fill="' + t[0] + '"/>' +
+      '<rect x="9" y="11" width="11" height="6" rx="2.5" fill="#fff"/>' +
+      '</svg>';
+  }
+
   // An ornate white dressing table — oval mirror with a crest + finial,
   // scalloped apron, drawers with little gold knobs, and curved cabriole legs.
   var VANITY_SVG =
@@ -1231,6 +1275,7 @@
       else if (def.render === "map") { el.classList.add("mapitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildMap()); }
       else if (def.render === "vanity") { el.classList.add("vanity"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVanity()); }
       else if (def.render === "vase") { el.classList.add("vase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVase()); }
+      else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint)); }
       else { el.style.zIndex = depthZ(p.y); el.textContent = def.ic; }
       applyItemTransform();
 
@@ -1453,6 +1498,7 @@
                    : it.render === "map" ? MAP_SVG
                    : it.render === "vanity" ? VANITY_ICON
                    : it.render === "vase" ? VASE_SVG
+                   : it.render === "bed" ? bedIcon(it.tint)
                    : it.ic;
         html += '<div class="ic">' + icHtml + '</div><div class="nm">' + it.name + '</div>';
         html += unlocked ? '<div class="pr">🪙 ' + it.price + '</div>'

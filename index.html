@@ -453,38 +453,46 @@
   /* ---- Two rooms: a door on the right wall leads to "the snug" ---------- */
   #room { transition: opacity .16s ease; }              /* gentle fade on room change */
 
-  .door-next, .door-back { position: absolute; bottom: 0; width: 78px; height: 214px; z-index: 3;
+  .door-next, .door-back, .door-ward, .door-wardback { position: absolute; bottom: 0; width: 78px; height: 214px; z-index: 3;
     cursor: pointer; pointer-events: auto; }
-  .door-next { right: 6px; } .door-back { left: 6px; }
-  .door-next .leaf, .door-back .leaf { position: absolute; inset: 0;
+  .door-next, .door-wardback { right: 6px; }   /* right-hung */
+  .door-back, .door-ward { left: 6px; }         /* left-hung */
+  .door-next .leaf, .door-back .leaf, .door-ward .leaf, .door-wardback .leaf { position: absolute; inset: 0;
     background: linear-gradient(180deg,#7a5230,#5a3a20); border: 4px solid #44301c; border-radius: 8px 8px 0 0; }
-  .door-next .leaf { box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), -8px 0 16px rgba(0,0,0,.32); }
-  .door-back .leaf { box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), 8px 0 16px rgba(0,0,0,.32); }
-  .door-next .dpanel, .door-back .dpanel { position: absolute; left: 12px; right: 12px; top: 14px; bottom: 38px;
+  .door-next .leaf, .door-wardback .leaf { box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), -8px 0 16px rgba(0,0,0,.32); }
+  .door-back .leaf, .door-ward .leaf { box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), 8px 0 16px rgba(0,0,0,.32); }
+  .door-next .dpanel, .door-back .dpanel, .door-ward .dpanel, .door-wardback .dpanel { position: absolute; left: 12px; right: 12px; top: 14px; bottom: 38px;
     background: linear-gradient(180deg,#6b482a,#503620); border: 3px solid rgba(0,0,0,.18); border-radius: 5px; }
-  .door-next .knob, .door-back .knob { position: absolute; top: 54%; width: 9px; height: 9px; border-radius: 50%;
+  .door-next .knob, .door-back .knob, .door-ward .knob, .door-wardback .knob { position: absolute; top: 54%; width: 9px; height: 9px; border-radius: 50%;
     background: radial-gradient(circle at 35% 35%, #ffe39a, #c79436); box-shadow: 0 0 6px rgba(255,210,120,.6); }
-  .door-next .knob { left: 12px; } .door-back .knob { right: 12px; }
-  .door-next .sign, .door-back .sign { position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+  .door-next .knob, .door-wardback .knob { left: 12px; }
+  .door-back .knob, .door-ward .knob { right: 12px; }
+  .door-next .sign, .door-back .sign, .door-ward .sign, .door-wardback .sign { position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
     white-space: nowrap; font-size: 11px; font-weight: 800; color: #ffe7c0; text-shadow: 0 1px 2px rgba(0,0,0,.6);
     background: rgba(0,0,0,.4); padding: 2px 9px; border-radius: 999px; animation: doorhint 2.2s ease-in-out infinite; }
   @keyframes doorhint { 0%,100%{ opacity: .65; transform: translateX(-50%) translateY(0);} 50%{ opacity: 1; transform: translateX(-50%) translateY(-2px);} }
-  .door-next:hover .leaf, .door-back:hover .leaf, .door-next:active .leaf, .door-back:active .leaf { filter: brightness(1.12); }
+  .door-next:hover .leaf, .door-back:hover .leaf, .door-ward:hover .leaf, .door-wardback:hover .leaf,
+  .door-next:active .leaf, .door-back:active .leaf, .door-ward:active .leaf, .door-wardback:active .leaf { filter: brightness(1.12); }
 
-  /* Second room ("the snug") — warmer green theme + its own fixtures */
-  #room.room-two { background: linear-gradient(180deg,#2e514a,#427563 64%); }
-  #room.room-two .floor { background: linear-gradient(180deg,#9a7445,#7c5a32); }
-  /* hide the bedroom's wall fixtures while viewing the snug (friends + cat
-     come along, so they're NOT hidden) */
-  #room.room-two .window, #room.room-two .curtain, #room.room-two .curtain-rod,
-  #room.room-two .poster-dracula, #room.room-two .nook-label, #room.room-two .door-next { display: none; }
-  /* furniture is per-room: each piece shows only in its own room */
-  #room.room-two .furn[data-room="main"] { display: none; }
-  #room:not(.room-two) .furn[data-room="two"] { display: none; }
+  /* Other rooms: theme by data-room. "two" = the snug, "wardrobe" = Wardrobe */
+  #room[data-room="two"] { background: linear-gradient(180deg,#2e514a,#427563 64%); }
+  #room[data-room="two"] .floor { background: linear-gradient(180deg,#9a7445,#7c5a32); }
+  #room[data-room="wardrobe"] { background: linear-gradient(180deg,#4a3a52,#6f5570 64%); }
+  #room[data-room="wardrobe"] .floor { background: linear-gradient(180deg,#a98a6a,#876a4a); }
+  /* hide the bedroom's fixtures + furniture whenever you're not in the bedroom
+     (friends + cat come along, so they're NOT hidden) */
+  #room:not([data-room="main"]) .window, #room:not([data-room="main"]) .curtain,
+  #room:not([data-room="main"]) .curtain-rod, #room:not([data-room="main"]) .poster-dracula,
+  #room:not([data-room="main"]) .nook-label, #room:not([data-room="main"]) .door-next,
+  #room:not([data-room="main"]) .door-ward, #room:not([data-room="main"]) .furn { display: none; }
 
   /* Beige vintage map — a purchasable, removable item */
   .item.mapitem { font-size: 0; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.35)); }
   .item.mapitem .map-svg { display: block; }
+
+  /* Empty clear glass vase */
+  .item.vase { font-size: 0; filter: drop-shadow(0 6px 5px rgba(0,0,0,0.3)); }
+  .item.vase .vase-svg { display: block; }
 
   /* Ornate white dressing table */
   .item.vanity { font-size: 0; filter: drop-shadow(0 8px 8px rgba(0,0,0,0.4)); }
@@ -522,9 +530,10 @@
   .bookcase-art .foot { position: absolute; bottom: -8px; width: 14px; height: 10px;
     background: linear-gradient(180deg,#6e4526,#46301c); border-radius: 0 0 5px 5px; }
   .bookcase-art .foot.l { left: 6px; } .bookcase-art .foot.r { right: 6px; }
-  /* the snug's own fixtures appear only there */
-  .two-only { display: none; }
-  #room.room-two .two-only { display: block; }
+  /* each other room's own fixtures appear only there */
+  .two-only, .ward-only { display: none; }
+  #room[data-room="two"] .two-only { display: block; }
+  #room[data-room="wardrobe"] .ward-only { display: block; }
   .window2 { position: absolute; top: 44px; left: 50%; transform: translateX(-50%);
     width: 148px; height: 148px; border-radius: 50%; border: 8px solid #eaddc4; overflow: hidden;
     background: #1f2740; box-shadow: inset 0 0 0 2px #cdbb9c, 0 10px 22px rgba(0,0,0,.35); }
@@ -713,10 +722,15 @@
         </div>
       </div>
 
-      <!-- Door on the right wall → leads to the second room -->
+      <!-- Door on the right wall → leads to the snug -->
       <div class="door-next" id="doorNext" title="Go to the snug">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
         <div class="sign">the snug →</div>
+      </div>
+      <!-- Door on the left wall → leads to the Wardrobe -->
+      <div class="door-ward" id="doorWard" title="Go to the Wardrobe">
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
+        <div class="sign">← wardrobe</div>
       </div>
 
       <!-- ===== SECOND ROOM ("the snug") — shown only when you're in it ===== -->
@@ -729,6 +743,13 @@
       <div class="door-back two-only" id="doorBack" title="Back to the bedroom">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
         <div class="sign">← bedroom</div>
+      </div>
+
+      <!-- ===== WARDROBE ROOM — shown only when you're in it ===== -->
+      <div class="label2 ward-only" style="left:50%; transform:translateX(-50%)">👗 Wardrobe</div>
+      <div class="door-wardback ward-only" id="doorWardBack" title="Back to the bedroom">
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
+        <div class="sign">bedroom →</div>
       </div>
 
       <!-- Placed items get injected here -->
@@ -797,6 +818,7 @@
     { id: "sprout",    name: "Tiny Sprout",      ic: "🌱", price: 6,  unlockAt: 0, set: "Greenery" },
     { id: "succulent", name: "Mini Succulent",   ic: "🌵", price: 9,  unlockAt: 0, set: "Greenery" },
     { id: "flowers",   name: "Vase of Flowers",  ic: "💐", price: 12, unlockAt: 0, set: "Greenery" },
+    { id: "vase",      name: "Glass Vase",       ic: "🏺", price: 10, unlockAt: 0, set: "Greenery", render: "vase" },
     { id: "bamboo",    name: "Lucky Bamboo",     ic: "🎍", price: 11, unlockAt: 0, set: "Greenery" },
     { id: "herb",      name: "Herb Pot",         ic: "🌿", price: 8,  unlockAt: 0, set: "Greenery" },
     { id: "tulip",     name: "Potted Tulip",     ic: "🌷", price: 10, unlockAt: 0, set: "Greenery" },
@@ -892,9 +914,9 @@
     ],
     // Where the three friends are standing (x = centre %, y = floor-contact %).
     characters: [
-      { id: "jas",  x: 9.5,  y: 88 },
+      { id: "jas",  x: 17,   y: 88 },
       { id: "aqsa", x: 47.5, y: 88 },
-      { id: "adam", x: 83.5, y: 88 }
+      { id: "adam", x: 79,   y: 88 }
     ],
     currentRoom: "main",   // which room is on screen ("main" bedroom or "two" snug)
     createdAt: null,
@@ -902,7 +924,7 @@
   };
   // Fallback positions if a save is missing a piece / friend.
   var FURN_DEFAULTS = { wardrobe: { x: 8.5, y: 91 }, bed: { x: 27.5, y: 95 }, desk: { x: 79, y: 94 } };
-  var CHAR_DEFAULTS = { jas: { x: 9.5, y: 88 }, aqsa: { x: 47.5, y: 88 }, adam: { x: 83.5, y: 88 } };
+  var CHAR_DEFAULTS = { jas: { x: 17, y: 88 }, aqsa: { x: 47.5, y: 88 }, adam: { x: 79, y: 88 } };
 
   var state = load();
 
@@ -1078,6 +1100,23 @@
     return wrap;
   }
 
+  // An empty clear glass vase for flowers.
+  var VASE_SVG =
+    '<svg class="vase-svg" width="48" height="66" viewBox="0 0 48 66">' +
+    '<path d="M15 14 C9 26 8 40 14 53 C18 61 30 61 34 53 C40 40 39 26 33 14 C31 11 17 11 15 14 Z" fill="rgba(198,224,235,0.42)" stroke="rgba(255,255,255,0.55)" stroke-width="1.4"/>' +
+    '<ellipse cx="24" cy="13" rx="9" ry="3" fill="rgba(214,236,246,0.5)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>' +
+    '<ellipse cx="24" cy="13" rx="5.6" ry="1.7" fill="rgba(120,160,180,0.4)"/>' +
+    '<path d="M18 18 C14 30 14 44 18 51" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>' +
+    '<path d="M29 20 C32 30 32 42 30 49" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.3" stroke-linecap="round"/>' +
+    '<ellipse cx="24" cy="59" rx="10" ry="2.6" fill="rgba(150,180,195,0.28)"/>' +
+    '</svg>';
+  function buildVase() {
+    var wrap = document.createElement("div");
+    wrap.className = "vase-art";
+    wrap.innerHTML = VASE_SVG;
+    return wrap;
+  }
+
   // An ornate white dressing table — oval mirror with a crest + finial,
   // scalloped apron, drawers with little gold knobs, and curved cabriole legs.
   var VANITY_SVG =
@@ -1143,7 +1182,7 @@
     '</svg>';
 
   function applyRoomClass() {
-    room.classList.toggle("room-two", state.currentRoom === "two");
+    room.dataset.room = state.currentRoom || "main";
   }
 
   function renderRoom() {
@@ -1170,6 +1209,7 @@
       else if (def.render === "bookcase") { el.classList.add("bookcase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBookcase()); }
       else if (def.render === "map") { el.classList.add("mapitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildMap()); }
       else if (def.render === "vanity") { el.classList.add("vanity"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVanity()); }
+      else if (def.render === "vase") { el.classList.add("vase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVase()); }
       else { el.style.zIndex = depthZ(p.y); el.textContent = def.ic; }
       applyItemTransform();
 
@@ -1391,6 +1431,7 @@
                    : it.render === "bookcase" ? BOOKCASE_ICON
                    : it.render === "map" ? MAP_SVG
                    : it.render === "vanity" ? VANITY_ICON
+                   : it.render === "vase" ? VASE_SVG
                    : it.ic;
         html += '<div class="ic">' + icHtml + '</div><div class="nm">' + it.name + '</div>';
         html += unlocked ? '<div class="pr">🪙 ' + it.price + '</div>'
@@ -2213,19 +2254,23 @@
   }
 
   // =====================================================================
-  //  ROOMS — a door on each wall switches between the bedroom and the snug.
+  //  ROOMS — doors on the walls switch between the bedroom, snug & wardrobe.
   // =====================================================================
+  var ROOM_TOASTS = {
+    two: "🚪 The snug — decorate it too! Tap ← to head back.",
+    wardrobe: "👗 The Wardrobe — make it yours! Tap → to head back.",
+    main: "🏠 Back in the bedroom."
+  };
   function goToRoom(name) {
     if (state.currentRoom === name) return;
     room.style.opacity = "0";
     setTimeout(function () {
       state.currentRoom = name;
       selectedUid = null;
-      renderRoom();              // also flips the room-two theme class
+      renderRoom();              // also applies the room's theme (data-room)
       room.style.opacity = "1";
       save();
-      toast(name === "two" ? "🚪 The snug — decorate it too! Tap ← to head back."
-                           : "🏠 Back in the bedroom.");
+      toast(ROOM_TOASTS[name] || "🚪 A new room to decorate!");
     }, 160);
   }
 
@@ -2242,6 +2287,8 @@
   $("btnMute").addEventListener("click", function () { Ambient.toggle(); });
   $("doorNext").addEventListener("click", function () { goToRoom("two"); });
   $("doorBack").addEventListener("click", function () { goToRoom("main"); });
+  $("doorWard").addEventListener("click", function () { goToRoom("wardrobe"); });
+  $("doorWardBack").addEventListener("click", function () { goToRoom("main"); });
 
   // Browsers block autoplay, so the music begins on the first interaction.
   function armAudio() {

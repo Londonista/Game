@@ -2726,19 +2726,22 @@
       }
       function tillAndAqsa() {
         var tx = 240, ax = 294;
-        // Aqsa, drawn like her bedroom self (teal blob + her face), standing
-        // tall so her head rises above the counter she's working behind
-        blobChar(ax, 122, 26, 48, "#7fbfb0", "◕‿◕", Math.abs(Math.sin(spin * 0.05)) * 1.5);
-        // counter the friends stand behind
-        ctx.fillStyle = "#a87a5a"; rrect(tx, 120, 76, 64, 4);
-        ctx.fillStyle = "#c39068"; rrect(tx, 120, 76, 10, 4);
-        ctx.fillStyle = "rgba(255,236,210,.35)"; rrect(tx + 2, 121, 72, 4, 2);
-        // cash register tucked at the near corner of the counter
-        ctx.fillStyle = "#e8ddcf"; rrect(tx + 4, 100, 34, 24, 4);
-        ctx.fillStyle = "#cdbfae"; rrect(tx + 8, 104, 26, 10, 2);
-        ctx.fillStyle = "#9be36b"; ctx.fillRect(tx + 10, 106, 22, 6);      // little screen
-        ctx.fillStyle = "#a89c8a"; ctx.fillRect(tx + 9, 117, 24, 4);       // keys
-        ctx.fillStyle = "#ffe06b"; ctx.font = "bold 16px monospace"; ctx.textAlign = "center"; ctx.fillText("$", tx + 58, 152);
+        // a little stool for Aqsa to perch on (legs peek out below the counter)
+        ctx.fillStyle = "#9b6b4a"; ctx.fillRect(ax - 7, 150, 3, 22); ctx.fillRect(ax + 4, 150, 3, 22);
+        ctx.fillStyle = "#b07f57"; ctx.beginPath(); ctx.ellipse(ax, 150, 10, 3.5, 0, 0, 7); ctx.fill();
+        // Aqsa, drawn like her bedroom self (teal blob + her face) at her normal
+        // proportions, sitting behind the till
+        blobChar(ax, 150, 26, 30, "#7fbfb0", "◕‿◕", Math.abs(Math.sin(spin * 0.05)) * 1.2);
+        // a short counter she works behind
+        ctx.fillStyle = "#a87a5a"; rrect(tx, 142, 76, 22, 4);
+        ctx.fillStyle = "#c39068"; rrect(tx, 142, 76, 7, 4);
+        ctx.fillStyle = "rgba(255,236,210,.35)"; rrect(tx + 2, 143, 72, 3, 2);
+        // cash register sitting on the counter top
+        ctx.fillStyle = "#e8ddcf"; rrect(tx + 4, 120, 34, 22, 4);
+        ctx.fillStyle = "#cdbfae"; rrect(tx + 8, 124, 26, 9, 2);
+        ctx.fillStyle = "#9be36b"; ctx.fillRect(tx + 10, 126, 22, 5);      // little screen
+        ctx.fillStyle = "#a89c8a"; ctx.fillRect(tx + 9, 135, 24, 4);       // keys
+        ctx.fillStyle = "#ffe06b"; ctx.font = "bold 15px monospace"; ctx.textAlign = "center"; ctx.fillText("$", tx + 60, 159);
       }
       return {
         title: "🧺 Aqsa's Laundromat",

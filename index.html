@@ -2273,7 +2273,53 @@
       o.start(t); o.stop(t + (dur || 0.08) + 0.02);
     }
 
+    // A bright "cha-ching!" for a laundromat sale (two ascending bell notes).
+    function chaching() {
+      var c = getCtx(); if (!c) return;
+      if (c.state === "suspended") c.resume();
+      var bell = function (delay, f) {
+        var t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+        o.type = "triangle"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.13, t + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.26);
+        o.connect(g); g.connect(c.destination);
+        o.start(t); o.stop(t + 0.3);
+      };
+      bell(0, 1318.51); bell(0.08, 1760.0);
+    }
+
+    // A simple looping 8-bit tune for the laundromat game (original melody).
+    var tuneTimer = null, tuneStep = 0;
+    var TUNE = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880.0, 698.46,
+                523.25, 659.25, 783.99, 1046.5, 587.33, 493.88, 587.33, 392.0];
+    var BASS = [130.81, 174.61, 146.83, 196.0];
+    function note(f, dur, type, vol) {
+      var c = ctx; if (!c) return;
+      var t = c.currentTime, o = c.createOscillator(), g = c.createGain();
+      o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(master || c.destination);
+      o.start(t); o.stop(t + dur + 0.02);
+    }
+    function startTune() {
+      if (tuneTimer) return;
+      if (!started) start();
+      ensureRunning();
+      tuneStep = 0;
+      tuneTimer = setInterval(function () {
+        if (muted || !ctx) return;
+        note(TUNE[tuneStep % TUNE.length], 0.12, "square", 0.045);
+        if (tuneStep % 4 === 0) note(BASS[(tuneStep / 4) % BASS.length], 0.22, "triangle", 0.06);
+        tuneStep++;
+      }, 150);
+    }
+    function stopTune() { if (tuneTimer) { clearInterval(tuneTimer); tuneTimer = null; } }
+
     return { start: start, toggle: toggle, squeak: squeak, charSqueak: charSqueak, blip: blip,
+             chaching: chaching, startTune: startTune, stopTune: stopTune,
              updateBtn: updateBtn, level: level, isMuted: function () { return muted; },
              ctxState: function () { return ctx ? ctx.state : "none"; } };
   })();
@@ -2560,69 +2606,225 @@
     // level the customers arrive faster, so you must work quicker — and if the
     // orders pile up past the limit, it's closing time.
     function Laundromat() {
-      var N = 4, MAXQ = 10, mx = [25, 95, 165, 235], my = 40, mw = 60, mh = 70;
-      var mach, pending, money, level, over, awarded, spawnT, arriveEvery, washF, nextLvl, msg, msgT, spin;
+      var N = 4, MAXQ = 8;
+      var mw = 50, mh = 52, my = 38, mx = [10, 67, 124, 181];
+      var qY = 150, laneY = 200;
+      // customers are drawn like the bedroom friends — soft blob bodies in warm,
+      // feminine tones, each with a little face.
+      var CHARS = [
+        { col: "#e98aa8", face: "^‿^" }, { col: "#f0a6b6", face: "◕‿◕" },
+        { col: "#e7b3a0", face: "•ᴗ•" }, { col: "#d79ec8", face: "^‿^" },
+        { col: "#f3c08a", face: "◕ᴗ◕" }, { col: "#caa0d6", face: "•‿•" }
+      ];
+      var mach, pending, customers, pops, money, level, over, awarded;
+      var spawnT, arriveEvery, washF, nextLvl, msg, msgT, spin, curMode;
+
+      // sorting difficulty: 0 = accept anything, 1 = lights vs darks, 2 = + colours
+      function sortMode(lv) { return lv <= 2 ? 0 : lv <= 5 ? 1 : 2; }
+      function randType() {
+        if (curMode === 0) return "any";
+        if (curMode === 1) return Math.random() < 0.5 ? "light" : "dark";
+        var r = Math.random(); return r < 0.34 ? "light" : r < 0.67 ? "dark" : "colour";
+      }
+      function assignAccepts() {
+        var set = curMode === 0 ? ["any", "any", "any", "any"]
+                : curMode === 1 ? ["light", "dark", "light", "dark"]
+                : ["light", "dark", "colour", "light"];
+        for (var i = 0; i < N; i++) mach[i].accept = set[i];
+      }
       function reset() {
-        mach = []; for (var i = 0; i < N; i++) mach.push({ on: false, prog: 0 });
-        pending = 1; money = 0; level = 1; over = false; awarded = false;
-        arriveEvery = 150; washF = 170; nextLvl = 14; spawnT = arriveEvery; msg = ""; msgT = 0; spin = 0;
+        mach = []; for (var i = 0; i < N; i++) mach.push({ on: false, prog: 0, load: "any", flash: 0, accept: "any" });
+        curMode = sortMode(1); assignAccepts();
+        pending = []; customers = []; pops = [];
+        money = 0; level = 1; over = false; awarded = false;
+        arriveEvery = 150; washF = 170; nextLvl = 14; spawnT = 70; msg = ""; msgT = 0; spin = 0;
       }
       function coinsFor() { return Math.floor(money / 6); }
       function pay() { return 2 + level; }
-      function load(i) { var m = mach[i]; if (!m.on && pending > 0) { pending--; m.on = true; m.prog = 0; Ambient.blip(520, 0.05); } }
+      function clothCol(t) { return t === "dark" ? "#33405a" : t === "colour" ? "#e85aa0" : t === "light" ? "#f4f1e8" : "#dcdfe6"; }
+      function typeLabel(t) { return t === "dark" ? "D" : t === "colour" ? "C" : t === "light" ? "L" : "★"; }
+      function accepts(m, t) { return m.accept === "any" || t === "any" || m.accept === t; }
+
+      function spawnCustomer() {
+        var ch = CHARS[(Math.random() * CHARS.length) | 0];
+        customers.push({ x: -14, y: laneY, dir: 1, col: ch.col, face: ch.face,
+                         target: 90 + Math.random() * 120, basket: randType(), dropped: false });
+      }
+      function load(i) {
+        var m = mach[i]; if (m.on) return;
+        for (var q = 0; q < pending.length; q++) {
+          if (accepts(m, pending[q].type)) {
+            m.load = pending[q].type; pending.splice(q, 1);
+            m.on = true; m.prog = 0; Ambient.blip(520, 0.05); return;
+          }
+        }
+        m.flash = 16; Ambient.blip(150, 0.12, "square");   // nothing this machine can take
+      }
       function levelUp() {
         if (money < nextLvl) return;
-        level++; nextLvl += 16 + level * 8; arriveEvery = Math.max(55, arriveEvery - 16); washF = Math.max(100, washF - 10);
-        msg = "LEVEL " + level + "!"; msgT = 100; Ambient.blip(700, 0.12);
+        level++; nextLvl += 16 + level * 8;
+        arriveEvery = Math.max(55, arriveEvery - 16); washF = Math.max(100, washF - 10);
+        var nm = sortMode(level);
+        if (nm !== curMode) { curMode = nm; assignAccepts(); msg = nm === 1 ? "SORT: LIGHTS vs DARKS" : "SORT: + COLOURS!"; }
+        else { msg = "LEVEL " + level + "!"; }
+        msgT = 120; Ambient.blip(700, 0.12);
       }
-      function basket(x, y, danger) {
-        ctx.fillStyle = danger ? "#e07b3a" : "#c98b4a";
-        ctx.beginPath(); ctx.moveTo(x - 10, y - 7); ctx.lineTo(x + 10, y - 7); ctx.lineTo(x + 8, y + 7); ctx.lineTo(x - 8, y + 7); ctx.closePath(); ctx.fill();
-        ctx.fillStyle = "#efe6d2"; ctx.beginPath(); ctx.arc(x - 3, y - 7, 4.5, Math.PI, 0); ctx.arc(x + 4, y - 7, 4, Math.PI, 0); ctx.fill();
-        ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.fillRect(x - 10, y - 2, 20, 2);
+
+      function basket(x, y, type, danger) {
+        ctx.fillStyle = clothCol(type);   // bundle of clothes peeking out
+        ctx.beginPath(); ctx.arc(x - 3, y - 8, 5, Math.PI, 0); ctx.arc(x + 4, y - 8, 4.5, Math.PI, 0); ctx.fill();
+        ctx.fillStyle = danger ? "#e07b3a" : "#c98b4a";   // wicker body
+        ctx.beginPath(); ctx.moveTo(x - 10, y - 6); ctx.lineTo(x + 10, y - 6); ctx.lineTo(x + 8, y + 8); ctx.lineTo(x - 8, y + 8); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "rgba(0,0,0,.16)"; ctx.fillRect(x - 9, y - 1, 18, 2); ctx.fillRect(x - 8, y + 3, 16, 2);
+      }
+      // a soft warm pool of light (used for the hanging lamps)
+      function lampGlow(cx, cy, r) {
+        var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        g.addColorStop(0, "rgba(255,224,178,.55)"); g.addColorStop(0.5, "rgba(255,206,160,.20)"); g.addColorStop(1, "rgba(255,206,160,0)");
+        ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill(); ctx.restore();
+      }
+      // a bedroom-style "blob" character: rounded body + little face, with a
+      // soft top-light highlight and a contact shadow. (x,y) is the foot point.
+      function blobChar(x, y, w, h, col, face, hop) {
+        ctx.fillStyle = "rgba(90,40,55,.18)";   // contact shadow on the floor
+        ctx.beginPath(); ctx.ellipse(x, y + 1, w * 0.55, 3.5, 0, 0, 7); ctx.fill();
+        y -= hop || 0;
+        var rt = w * 0.5, rb = w * 0.34;
+        ctx.beginPath();
+        ctx.moveTo(x - w / 2, y - h + rt);
+        ctx.arcTo(x - w / 2, y - h, x, y - h, rt);
+        ctx.arcTo(x + w / 2, y - h, x + w / 2, y - h + rt, rt);
+        ctx.lineTo(x + w / 2, y - rb);
+        ctx.arcTo(x + w / 2, y, x, y, rb);
+        ctx.arcTo(x - w / 2, y, x - w / 2, y - rb, rb);
+        ctx.closePath();
+        var g = ctx.createLinearGradient(0, y - h, 0, y);   // warm top light
+        g.addColorStop(0, "rgba(255,255,255,.45)"); g.addColorStop(0.4, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(0,0,0,.16)");
+        ctx.fillStyle = col; ctx.fill();
+        ctx.save(); ctx.clip(); ctx.fillStyle = g; ctx.fillRect(x - w / 2, y - h, w, h);
+        ctx.fillStyle = "rgba(255,236,210,.6)"; ctx.beginPath(); ctx.ellipse(x - w * 0.22, y - h * 0.72, w * 0.16, h * 0.18, 0, 0, 7); ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = "rgba(70,40,55,.82)"; ctx.font = "bold " + Math.round(h * 0.3) + "px monospace";
+        ctx.textAlign = "center"; ctx.fillText(face, x, y - h * 0.52);
       }
       function machine(i) {
-        var x = mx[i], m = mach[i], cx = x + mw / 2, cy = my + 44, R = 20;
-        ctx.fillStyle = "#9aa6b6"; rrect(x - 2, my - 2, mw + 4, mh + 4, 8);
-        ctx.fillStyle = "#eef1f6"; rrect(x, my, mw, mh, 6);
-        ctx.fillStyle = "#c2cad6"; rrect(x + 6, my + 6, mw - 12, 12, 3);
-        ctx.fillStyle = "#8a93a2"; ctx.beginPath(); ctx.arc(x + 14, my + 12, 2.5, 0, 7); ctx.arc(x + 22, my + 12, 2.5, 0, 7); ctx.fill();
-        ctx.fillStyle = m.on ? "#7ad17a" : "#5a6472"; ctx.fillRect(x + mw - 22, my + 9, 14, 6);
-        ctx.fillStyle = "#8893a4"; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();
-        ctx.fillStyle = m.on ? "#28323f" : "#20262f"; ctx.beginPath(); ctx.arc(cx, cy, R - 4, 0, 7); ctx.fill();
+        var x = mx[i], m = mach[i], cx = x + mw / 2, cy = my + 30, R = 15;
+        var flashing = m.flash > 0 && (m.flash % 6 < 3);
+        ctx.fillStyle = flashing ? "#e06b8a" : "#d8b3ad"; rrect(x - 2, my - 2, mw + 4, mh + 4, 8);
+        ctx.fillStyle = "#f7efe9"; rrect(x, my, mw, mh, 6);
+        var bg = ctx.createLinearGradient(0, my, 0, my + mh);   // warm sheen
+        bg.addColorStop(0, "rgba(255,255,255,.5)"); bg.addColorStop(0.5, "rgba(255,255,255,0)");
+        ctx.fillStyle = bg; rrect(x, my, mw, mh, 6);
+        ctx.fillStyle = "#efcdd2"; rrect(x + 5, my + 5, mw - 10, 9, 3);     // detergent tray (rose)
+        ctx.fillStyle = "#c99aa0"; ctx.beginPath(); ctx.arc(x + 12, my + 9, 2, 0, 7); ctx.arc(x + 19, my + 9, 2, 0, 7); ctx.fill();
+        ctx.fillStyle = m.on ? "#8fd6a0" : "#c2a39c"; ctx.fillRect(x + mw - 18, my + 7, 11, 5);
+        ctx.fillStyle = "#bfa39c"; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();   // chrome ring
+        ctx.fillStyle = m.on ? "#2a2026" : "#241c20"; ctx.beginPath(); ctx.arc(cx, cy, R - 4, 0, 7); ctx.fill();
         if (m.on) {
-          var cols = ["#ff6b6b", "#6bb0ff", "#ffd86b"];
-          for (var k = 0; k < 3; k++) { var a = spin * 0.35 + k * 2.094; ctx.fillStyle = cols[k]; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * 7, cy + Math.sin(a) * 7, 4, 0, 7); ctx.fill(); }
-          ctx.strokeStyle = "#7ad17a"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(cx, cy, R + 1, -Math.PI / 2, -Math.PI / 2 + m.prog * Math.PI * 2); ctx.stroke();
+          ctx.fillStyle = clothCol(m.load);
+          for (var k = 0; k < 3; k++) { var a = spin * 0.35 + k * 2.094; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * 6, cy + Math.sin(a) * 6, 3.4, 0, 7); ctx.fill(); }
+          ctx.strokeStyle = "#ffce82"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(cx, cy, R + 2, -Math.PI / 2, -Math.PI / 2 + m.prog * Math.PI * 2); ctx.stroke();
         } else {
-          ctx.fillStyle = "rgba(255,255,255,.12)"; ctx.beginPath(); ctx.arc(cx - 5, cy - 5, 5, 0, 7); ctx.fill();
+          ctx.fillStyle = "rgba(255,240,230,.18)"; ctx.beginPath(); ctx.arc(cx - 4, cy - 4, 4, 0, 7); ctx.fill();
         }
+        if (m.accept !== "any") {   // accept chip floats above the machine
+          var chy = my - 8;
+          ctx.fillStyle = clothCol(m.accept); rrect(cx - 11, chy - 7, 22, 14, 4);
+          ctx.strokeStyle = "rgba(90,50,60,.4)"; ctx.lineWidth = 1; ctx.strokeRect(cx - 11, chy - 7, 22, 14);
+          ctx.fillStyle = m.accept === "light" ? "#7a6450" : "#fff";
+          ctx.font = "bold 10px monospace"; ctx.textAlign = "center"; ctx.fillText(typeLabel(m.accept), cx, chy + 4);
+        }
+      }
+      function customer(c) {
+        var x = Math.round(c.x), y = c.y;
+        var hop = c.dropped ? Math.abs(Math.sin(spin * 0.22 + c.x * 0.2)) * 2.5
+                            : Math.abs(Math.sin(spin * 0.2 + c.x * 0.2)) * 2.5;
+        if (!c.dropped) basket(x + 13, y - 7 - hop, c.basket, false);   // basket carried in front
+        blobChar(x, y, 16, 21, c.col, c.face, hop);
+      }
+      function tillAndAqsa() {
+        var tx = 240, ax = 294;
+        // Aqsa, drawn like her bedroom self (teal blob + her face), standing
+        // tall so her head rises above the counter she's working behind
+        blobChar(ax, 122, 26, 48, "#7fbfb0", "◕‿◕", Math.abs(Math.sin(spin * 0.05)) * 1.5);
+        // counter the friends stand behind
+        ctx.fillStyle = "#a87a5a"; rrect(tx, 120, 76, 64, 4);
+        ctx.fillStyle = "#c39068"; rrect(tx, 120, 76, 10, 4);
+        ctx.fillStyle = "rgba(255,236,210,.35)"; rrect(tx + 2, 121, 72, 4, 2);
+        // cash register tucked at the near corner of the counter
+        ctx.fillStyle = "#e8ddcf"; rrect(tx + 4, 100, 34, 24, 4);
+        ctx.fillStyle = "#cdbfae"; rrect(tx + 8, 104, 26, 10, 2);
+        ctx.fillStyle = "#9be36b"; ctx.fillRect(tx + 10, 106, 22, 6);      // little screen
+        ctx.fillStyle = "#a89c8a"; ctx.fillRect(tx + 9, 117, 24, 4);       // keys
+        ctx.fillStyle = "#ffe06b"; ctx.font = "bold 16px monospace"; ctx.textAlign = "center"; ctx.fillText("$", tx + 58, 152);
       }
       return {
         title: "🧺 Aqsa's Laundromat",
-        hint: "Tap a free machine (or press 1-4) to load a basket. Don't let the orders pile up!",
+        hint: "Tap a free machine (or 1-4) to load the right basket. Sort lights/darks/colours as levels rise!",
         init: reset,
         update: function () {
           if (over) return;
           spin++;
-          if (--spawnT <= 0) { pending++; spawnT = arriveEvery; Ambient.blip(860, 0.04, "triangle"); }
-          if (pending > MAXQ) { over = true; if (!awarded) { awarded = true; award(coinsFor()); } return; }
-          for (var i = 0; i < N; i++) { var m = mach[i]; if (m.on) { m.prog += 1 / washF; if (m.prog >= 1) { m.on = false; m.prog = 0; money += pay(); Ambient.blip(1000, 0.08); levelUp(); } } }
+          if (--spawnT <= 0) { spawnCustomer(); spawnT = arriveEvery; }
+          for (var ci = customers.length - 1; ci >= 0; ci--) {
+            var c = customers[ci];
+            if (!c.dropped) {
+              c.x += 0.9;
+              if (c.x >= c.target) {
+                c.dropped = true; c.dir = -1;
+                pending.push({ type: c.basket }); Ambient.blip(440, 0.05, "triangle");
+                if (pending.length > MAXQ) { over = true; if (!awarded) { awarded = true; award(coinsFor()); } return; }
+              }
+            } else { c.x -= 1.2; if (c.x < -18) customers.splice(ci, 1); }
+          }
+          for (var i = 0; i < N; i++) {
+            var m = mach[i]; if (m.flash > 0) m.flash--;
+            if (m.on) { m.prog += 1 / washF; if (m.prog >= 1) { m.on = false; m.prog = 0; money += pay(); pops.push({ x: mx[i] + mw / 2, y: my + 28, life: 44, txt: "+$" + pay() }); Ambient.chaching(); levelUp(); } }
+          }
+          for (var pi = pops.length - 1; pi >= 0; pi--) { pops[pi].y -= 0.6; if (--pops[pi].life <= 0) pops.splice(pi, 1); }
           if (msgT > 0) msgT--;
         },
         draw: function () {
-          ctx.fillStyle = "#a7c5e2"; ctx.fillRect(0, 0, W, H);       // wall
-          var fy = 112; ctx.fillStyle = "#cdd5e0"; ctx.fillRect(0, fy, W, H - fy);   // floor
-          ctx.fillStyle = "#bcc6d4";
+          var fy = 112;
+          var wall = ctx.createLinearGradient(0, 0, 0, fy);   // warm blush wall
+          wall.addColorStop(0, "#f7dcd6"); wall.addColorStop(0.6, "#efc4cb"); wall.addColorStop(1, "#e7b2bd");
+          ctx.fillStyle = wall; ctx.fillRect(0, 0, W, fy);
+          var floor = ctx.createLinearGradient(0, fy, 0, H);   // warm rose-cream floor
+          floor.addColorStop(0, "#ecd6cc"); floor.addColorStop(1, "#e2c2c4");
+          ctx.fillStyle = floor; ctx.fillRect(0, fy, W, H - fy);
+          ctx.fillStyle = "rgba(196,150,150,.35)";
           for (var ty = fy; ty < H; ty += 20) for (var tx = (((ty - fy) / 20) % 2 ? 20 : 0); tx < W; tx += 40) ctx.fillRect(tx, ty, 20, 20);
+          // a little pink neon "OPEN" heart-sign glowing on the back wall
+          var nx = 150, ny = 30; lampGlow(nx, ny, 34);
+          ctx.fillStyle = "#ff8fc0"; ctx.font = "bold 13px monospace"; ctx.textAlign = "center";
+          ctx.fillStyle = "rgba(255,143,192,.9)"; ctx.fillText("♥ OPEN ♥", nx, ny + 4);
+          // hanging pendant lamps over the machines
+          for (var li = 0; li < N; li++) {
+            var lx = mx[li] + mw / 2;
+            ctx.strokeStyle = "rgba(120,80,70,.5)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, 8); ctx.stroke();
+            ctx.fillStyle = "#caa07a"; ctx.beginPath(); ctx.moveTo(lx - 6, 14); ctx.lineTo(lx + 6, 14); ctx.lineTo(lx + 3, 8); ctx.lineTo(lx - 3, 8); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = "#fff3d6"; ctx.fillRect(lx - 4, 13, 8, 3);
+          }
+          ctx.fillStyle = "#b88f6e"; ctx.fillRect(0, 92, 16, 88);    // entrance door (left)
+          ctx.fillStyle = "#a07a5c"; ctx.fillRect(2, 96, 12, 80);
+          ctx.fillStyle = "#ffe06b"; ctx.fillRect(11, 134, 2, 6);
           for (var i = 0; i < N; i++) machine(i);
-          var danger = pending >= 7;
-          for (var q = 0; q < pending && q < MAXQ; q++) basket(22 + q * 29, 148, danger);
-          ctx.fillStyle = "rgba(0,0,0,.45)"; ctx.fillRect(0, 0, W, 20);
+          for (var li2 = 0; li2 < N; li2++) lampGlow(mx[li2] + mw / 2, my + 18, 46);   // warm pools on the machines
+          tillAndAqsa();
+          var danger = pending.length >= MAXQ - 1;
+          for (var q = 0; q < pending.length && q < MAXQ; q++) basket(20 + q * 26, qY, pending[q].type, danger);
+          customers.forEach(customer);
+          ctx.font = "bold 11px monospace"; ctx.textAlign = "center";
+          pops.forEach(function (p) { ctx.fillStyle = "rgba(255,224,107," + Math.min(1, p.life / 30) + ")"; ctx.fillText(p.txt, p.x, p.y); });
+          var vig = ctx.createRadialGradient(W / 2, H / 2, 70, W / 2, H / 2, 200);   // soft warm vignette
+          vig.addColorStop(0, "rgba(80,30,45,0)"); vig.addColorStop(1, "rgba(80,30,45,.28)");
+          ctx.fillStyle = vig; ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = "rgba(0,0,0,.4)"; ctx.fillRect(0, 0, W, 20);
           ctx.font = "bold 13px monospace"; ctx.textAlign = "left"; ctx.fillStyle = "#ffe06b"; ctx.fillText("$" + money, 8, 15);
           ctx.textAlign = "center"; ctx.fillStyle = "#cfeecb"; ctx.fillText("LEVEL " + level, W / 2, 15);
-          ctx.textAlign = "right"; ctx.fillStyle = danger ? "#ff7b7b" : "#cfeecb"; ctx.fillText("ORDERS " + pending + "/" + MAXQ, W - 8, 15);
-          if (msgT > 0) { ctx.textAlign = "center"; ctx.fillStyle = "#ffd86b"; ctx.font = "bold 20px monospace"; ctx.fillText(msg, W / 2, 100); }
+          ctx.textAlign = "right"; ctx.fillStyle = danger ? "#ff7b7b" : "#cfeecb"; ctx.fillText("ORDERS " + pending.length + "/" + MAXQ, W - 8, 15);
+          if (msgT > 0) { ctx.textAlign = "center"; ctx.fillStyle = "#ffd86b"; ctx.font = "bold 18px monospace"; ctx.fillText(msg, W / 2, 104); }
           if (over) gameOverText("CLOSING TIME!", "Earned $" + money + "  ·  +" + coinsFor() + " coins");
         },
         pointer: function (x, y, type) {
@@ -2662,7 +2864,7 @@
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("keyup", onKeyUp);
     }
-    function stopLoop() { running = false; if (raf) cancelAnimationFrame(raf); unbindInput(); game = null; }
+    function stopLoop() { running = false; if (raf) cancelAnimationFrame(raf); unbindInput(); game = null; Ambient.stopTune(); }
     function showMenu() {
       stopLoop();
       $("gameTitle").textContent = "💻 Computer";
@@ -2675,6 +2877,7 @@
       $("gameHint").textContent = game.hint;
       $("gameMenu").style.display = "none"; $("gameScreen").style.display = "";
       game.init(); bindInput(); running = true; loop();
+      if (m === "laundromat") Ambient.startTune();
     }
     function open() { ov = $("ovGame"); ov.classList.add("show"); showMenu(); }
     function close() { stopLoop(); if (ov) ov.classList.remove("show"); }

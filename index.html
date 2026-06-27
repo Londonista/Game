@@ -544,6 +544,26 @@
     background: radial-gradient(circle at 40% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 16px rgba(255,240,200,.6); }
   .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(255,255,255,.78);
     text-shadow: 0 1px 2px rgba(0,0,0,.4); pointer-events: none; }
+
+  /* ---- House overview (floor plan of all rooms) ------------------------ */
+  .house-plan { display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
+  .house-door { font-size: 18px; opacity: .7; align-self: center; }
+  .house-room { width: 150px; cursor: pointer; text-align: center; }
+  .house-room .hr-scene { transition: outline-color .1s; outline: 2px solid transparent; }
+  .house-room:hover .hr-scene { outline-color: var(--accent); }
+  .house-room.here .hr-scene { outline: 3px solid var(--coin); }
+  .hr-name { font-size: 12px; font-weight: 800; margin-bottom: 4px; color: #5a3d2a; }
+  .hr-scene { position: relative; width: 150px; height: 100px; border-radius: 8px; overflow: hidden;
+    border: 2px solid #cbb389; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .hr-floor { position: absolute; left: 0; right: 0; bottom: 0; height: 32%; }
+  .hr-item { position: absolute; transform: translate(-50%,-50%); font-size: 13px; line-height: 1;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
+  .hr-friend { position: absolute; transform: translate(-50%,-100%); width: 9px; height: 12px;
+    border-radius: 5px 5px 3px 3px; box-shadow: 0 1px 1px rgba(0,0,0,.35); }
+  .hr-friend.cat { background: #26262c; width: 9px; height: 7px; border-radius: 4px; }
+  .hr-here { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 800;
+    background: rgba(0,0,0,.55); color: #fff; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
+  .hr-count { font-size: 11px; color: #9a7a52; margin-top: 3px; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -556,6 +576,7 @@
     <span class="chip coins" id="coinChip">🪙 0</span>
     <span class="spacer"></span>
     <button class="btn ghost small" id="btnMute" title="Toggle music">🎵</button>
+    <button class="btn ghost small" id="btnHouse">🏠 House</button>
     <button class="btn ghost small" id="btnMemory">📖 Memories</button>
     <button class="btn ghost small" id="btnSave">💾 Save</button>
   </div>
@@ -2274,6 +2295,47 @@
     }, 160);
   }
 
+  // House overview — a little floor plan of every room (left to right, the way
+  // the doors connect: Wardrobe · Bedroom · Snug). Tap a room to go there.
+  var HOUSE_ROOMS = [
+    { id: "wardrobe", name: "👗 Wardrobe", wall: "linear-gradient(180deg,#4a3a52,#6f5570)", floor: "linear-gradient(180deg,#a98a6a,#876a4a)" },
+    { id: "main",     name: "🛏️ Bedroom",  wall: "linear-gradient(180deg,#4a3a63,#6b5184)", floor: "linear-gradient(180deg,#8a6a4f,#74573f)" },
+    { id: "two",      name: "🛋️ The Snug", wall: "linear-gradient(180deg,#2e514a,#427563)", floor: "linear-gradient(180deg,#9a7445,#7c5a32)" }
+  ];
+  var FURN_EMOJI = { wardrobe: "🗄️", bed: "🛏️", desk: "🖥️" };
+
+  function openHouse() {
+    function dot(emoji, x, y) { return '<span class="hr-item" style="left:' + x + '%; top:' + y + '%">' + emoji + '</span>'; }
+    var html = '<p class="muted">Your little house — every room at a glance. Tap a room to step into it.</p>';
+    html += '<div class="house-plan">';
+    HOUSE_ROOMS.forEach(function (rm, i) {
+      if (i > 0) html += '<div class="house-door">🚪</div>';
+      var here = (state.currentRoom || "main") === rm.id;
+      var items = state.placed.filter(function (p) { return (p.room || "main") === rm.id; });
+      html += '<div class="house-room' + (here ? " here" : "") + '" data-go="' + rm.id + '">';
+      html += '<div class="hr-name">' + rm.name + '</div>';
+      html += '<div class="hr-scene" style="background:' + rm.wall + '">';
+      html += '<div class="hr-floor" style="background:' + rm.floor + '"></div>';
+      if (rm.id === "main") {                      // bedroom's built-in bits
+        html += dot("🪟", 50, 26);
+        state.furniture.forEach(function (f) { if (FURN_EMOJI[f.id]) html += dot(FURN_EMOJI[f.id], f.x, f.y - 12); });
+      }
+      items.forEach(function (p) { var def = itemDef(p.itemId); if (def) html += dot(def.ic, p.x, p.y); });
+      state.characters.forEach(function (c) {      // friends roam every room
+        html += '<span class="hr-friend" style="left:' + c.x + '%; top:' + c.y + '%; background:var(--' + c.id + ')"></span>';
+      });
+      html += '<span class="hr-friend cat" style="left:62%; top:86%"></span>';
+      if (here) html += '<div class="hr-here">You are here</div>';
+      html += '</div><div class="hr-count">' + items.length + ' item' + (items.length === 1 ? "" : "s") + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    openPanel("🏠 House Overview", html, [{ label: "Close", cls: "primary", onClick: closePanel }]);
+    Array.prototype.slice.call($("gBody").querySelectorAll("[data-go]")).forEach(function (card) {
+      card.addEventListener("click", function () { var id = card.dataset.go; closePanel(); goToRoom(id); });
+    });
+  }
+
   // =====================================================================
   //  WIRING
   // =====================================================================
@@ -2289,6 +2351,7 @@
   $("doorBack").addEventListener("click", function () { goToRoom("main"); });
   $("doorWard").addEventListener("click", function () { goToRoom("wardrobe"); });
   $("doorWardBack").addEventListener("click", function () { goToRoom("main"); });
+  $("btnHouse").addEventListener("click", openHouse);
 
   // Browsers block autoplay, so the music begins on the first interaction.
   function armAudio() {

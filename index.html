@@ -776,23 +776,28 @@
     background: radial-gradient(circle at 40% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 16px rgba(255,240,200,.6); }
   .snug .s-window .s-cross::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #eaddc4; transform: translateX(-50%); z-index: 2; }
   .snug .s-window .s-cross::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #eaddc4; transform: translateY(-50%); z-index: 2; }
-  /* warm floor lamp */
-  .snug .s-lamp { position: absolute; left: 78px; bottom: 78px; width: 6px; height: 128px; border-radius: 3px;
-    background: linear-gradient(90deg,#5a4632,#7a5e42,#5a4632); }
-  .snug .s-lamp::before { content:""; position: absolute; top: -26px; left: 50%; transform: translateX(-50%); width: 34px; height: 28px;
-    border-radius: 6px 6px 14px 14px; background: linear-gradient(180deg,#ffe6a8,#f4c46a); box-shadow: 0 0 28px 7px rgba(255,224,150,.45); }
-  .snug .s-lamp::after { content:""; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); width: 26px; height: 6px; border-radius: 50%; background: #4a3a28; }
   /* round patterned rug */
   .snug .s-rug { position: absolute; left: 50%; transform: translateX(-50%); bottom: 22px; width: 300px; height: 48px; border-radius: 50%;
     background: radial-gradient(circle, #b8704a 0 38%, #9c5d3c 39% 58%, #b8704a 59% 78%, #8f5536 79%); opacity: .92; }
-  /* cosy sofa */
-  .snug .s-sofa { position: absolute; left: 50%; transform: translateX(-50%); bottom: 50px; width: 250px; height: 90px; }
-  .snug .s-sofa .back { position: absolute; top: 0; left: 8px; right: 8px; height: 52px; border-radius: 14px 14px 6px 6px; background: linear-gradient(180deg,#b5683f,#8f4f2c); }
-  .snug .s-sofa .arm { position: absolute; bottom: 0; width: 28px; height: 64px; border-radius: 10px; background: linear-gradient(180deg,#a85e38,#854829); }
-  .snug .s-sofa .arm.l { left: 0; } .snug .s-sofa .arm.r { right: 0; }
-  .snug .s-sofa .seat { position: absolute; bottom: 0; left: 24px; right: 24px; height: 44px; border-radius: 9px; background: linear-gradient(180deg,#c47a4e,#a5613a); }
-  .snug .s-sofa .cush { position: absolute; bottom: 22px; width: 64px; height: 40px; border-radius: 9px; background: #cf8a5e; box-shadow: inset 0 -4px 0 rgba(0,0,0,.12); }
-  .snug .s-sofa .cush.c1 { left: 40px; } .snug .s-sofa .cush.c2 { right: 40px; }
+
+  /* Cosy sofa — a purchasable, draggable item */
+  .item.sofa { font-size: 0; filter: drop-shadow(0 7px 6px rgba(0,0,0,0.4)); }
+  .sofa-art { position: relative; width: 230px; height: 96px; }
+  .sofa-art .back { position: absolute; top: 0; left: 8px; right: 8px; height: 54px; border-radius: 14px 14px 6px 6px; background: linear-gradient(180deg,#b5683f,#8f4f2c); }
+  .sofa-art .arm { position: absolute; bottom: 0; width: 30px; height: 66px; border-radius: 10px; background: linear-gradient(180deg,#a85e38,#854829); }
+  .sofa-art .arm.l { left: 0; } .sofa-art .arm.r { right: 0; }
+  .sofa-art .seat { position: absolute; bottom: 0; left: 26px; right: 26px; height: 46px; border-radius: 9px; background: linear-gradient(180deg,#c47a4e,#a5613a); }
+  .sofa-art .cush { position: absolute; bottom: 24px; width: 60px; height: 40px; border-radius: 9px; background: #cf8a5e; box-shadow: inset 0 -4px 0 rgba(0,0,0,.12); }
+  .sofa-art .cush.c1 { left: 40px; } .sofa-art .cush.c2 { right: 40px; }
+
+  /* Warm floor lamp — a purchasable, draggable item */
+  .item.lamp { font-size: 0; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.35)); }
+  .lamp-art { position: relative; width: 40px; height: 152px; }
+  .lamp-art .pole { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 6px; height: 124px; border-radius: 3px;
+    background: linear-gradient(90deg,#5a4632,#7a5e42,#5a4632); }
+  .lamp-art::before { content:""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 36px; height: 30px;
+    border-radius: 6px 6px 16px 16px; background: linear-gradient(180deg,#ffe6a8,#f4c46a); box-shadow: 0 0 30px 8px rgba(255,224,150,.45); }
+  .lamp-art::after { content:""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 28px; height: 7px; border-radius: 50%; background: #4a3a28; }
 
   .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(90,55,30,.85);
     text-shadow: 0 1px 2px rgba(255,255,255,.4); pointer-events: none; }
@@ -1036,12 +1041,7 @@
       <!-- ===== THE SNUG — between the bedroom and the kitchen ===== -->
       <div class="snug snug-only">
         <div class="s-window"><div class="s-moon"></div><div class="s-cross"></div></div>
-        <div class="s-lamp"></div>
         <div class="s-rug"></div>
-        <div class="s-sofa">
-          <span class="back"></span><span class="arm l"></span><span class="arm r"></span>
-          <span class="seat"></span><span class="cush c1"></span><span class="cush c2"></span>
-        </div>
       </div>
       <div class="label2 snug-only" style="left:50%; transform:translateX(-50%)">🛋️ The Snug</div>
       <div class="door-back snug-only" id="doorSnugBack" title="Back to the bedroom">
@@ -1236,6 +1236,10 @@
     { id: "vanity",    name: "Dressing Table", ic: "🪞", price: 34, unlockAt: 0, set: "Boudoir", render: "vanity" },
     { id: "wardrobe_white", name: "Ornate Wardrobe", ic: "👗", price: 40, unlockAt: 0, set: "Boudoir", render: "wardrobe" },
 
+    // --- Snug (cosy seating) ---
+    { id: "sofa_rust", name: "Cosy Sofa", ic: "🛋️", price: 36, unlockAt: 0, set: "Snug", render: "sofa" },
+    { id: "lamp_floor", name: "Floor Lamp", ic: "🪔", price: 18, unlockAt: 0, set: "Snug", render: "lamp" },
+
     // --- Outfits (worn by the friends via the ornate wardrobe) ---
     { id: "hat_tiara",   name: "Tiara",        ic: "👑", price: 10, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👑", art: "tiara" } },
     { id: "hat_bow",     name: "Hair Bow",     ic: "🎀", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🎀", art: "bow" } },
@@ -1346,6 +1350,7 @@
 
   var state = load();
   normalizeWardrobe(state);
+  save();   // persist any first-run normalisation (e.g. the snug furnishing)
   // Make sure the wardrobe/outfit fields exist on older saves.
   function normalizeWardrobe(s) {
     s.closet = s.closet || [];
@@ -1354,6 +1359,14 @@
     s.scores = s.scores || {};
     ["starcatcher", "laundromat"].forEach(function (id) { s.scores[id] = s.scores[id] || []; });
     if (typeof s.gardenDoorX !== "number") s.gardenDoorX = 68;
+    // furnish the snug once with a (now removable/movable) sofa + floor lamp
+    if (!s.snugFurnished) {
+      s.placed = s.placed || [];
+      var hasU = function (u) { return s.placed.some(function (p) { return p.uid === u; }); };
+      if (!hasU("snug_sofa")) s.placed.push({ uid: "snug_sofa", itemId: "sofa_rust", x: 50, y: 84, room: "snug", scale: 1 });
+      if (!hasU("snug_lamp")) s.placed.push({ uid: "snug_lamp", itemId: "lamp_floor", x: 14, y: 78, room: "snug", scale: 1 });
+      s.snugFurnished = true;
+    }
   }
 
   function load() {
@@ -1677,6 +1690,20 @@
     return wrap;
   }
 
+  function buildSofa() {
+    var wrap = document.createElement("div");
+    wrap.className = "sofa-art";
+    wrap.innerHTML = '<span class="back"></span><span class="arm l"></span><span class="arm r"></span>' +
+      '<span class="seat"></span><span class="cush c1"></span><span class="cush c2"></span>';
+    return wrap;
+  }
+  function buildLamp() {
+    var wrap = document.createElement("div");
+    wrap.className = "lamp-art";
+    wrap.innerHTML = '<span class="pole"></span>';
+    return wrap;
+  }
+
   // Compact wardrobe icon for the shop card.
   var WARDROBE_ICON =
     '<svg width="34" height="52" viewBox="0 0 34 52">' +
@@ -1745,6 +1772,8 @@
       else if (def.render === "map") { el.classList.add("mapitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildMap()); }
       else if (def.render === "vanity") { el.classList.add("vanity"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVanity()); }
       else if (def.render === "wardrobe") { el.classList.add("wardrobeitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildWardrobe()); }
+      else if (def.render === "sofa") { el.classList.add("sofa"); el.style.zIndex = depthZ(p.y); el.appendChild(buildSofa()); }
+      else if (def.render === "lamp") { el.classList.add("lamp"); el.style.zIndex = depthZ(p.y); el.appendChild(buildLamp()); }
       else if (def.render === "vase") { el.classList.add("vase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVase()); }
       else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint, def.size, p.orient)); }
       else { el.style.zIndex = depthZ(p.y); el.textContent = def.ic; }

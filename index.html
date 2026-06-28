@@ -700,8 +700,69 @@
     border-radius: 4px 4px 7px 7px; background: linear-gradient(180deg,#cfe0ec,#9fbdd2); box-shadow: inset 1px 2px 2px rgba(255,255,255,.5); }
   .kitchen .k-table .k-vase .stem { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); width: 3px; height: 15px; background: #4f8a3a; border-radius: 2px; }
   .kitchen .k-table .k-vase .bloom { position: absolute; top: -3px; left: 50%; transform: translateX(-50%); font-size: 20px; line-height: 1; }
+
+  /* ---- Brown glass-pane garden door (kitchen → garden, and back) -------- */
+  .door-garden, .door-gardenback { position: absolute; bottom: 0; width: 78px; height: 214px; z-index: 3;
+    cursor: pointer; pointer-events: auto; }
+  .door-garden { right: 6px; } .door-gardenback { left: 6px; }
+  .gdoor .leaf { position: absolute; inset: 0; background: linear-gradient(180deg,#6e4a2c,#4f3318);
+    border: 4px solid #3a2613; border-radius: 8px 8px 0 0; box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), -8px 0 16px rgba(0,0,0,.3); }
+  .door-gardenback .leaf { box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), 8px 0 16px rgba(0,0,0,.3); }
+  .gdoor .panes { position: absolute; top: 14px; left: 11px; right: 11px; height: 100px; display: grid;
+    grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 5px; padding: 5px; background: #4f3318; border-radius: 4px; }
+  .gdoor .panes i { border-radius: 2px; background: linear-gradient(135deg,#cdeacf 0%,#a7d2b0 45%,#9cc7da 100%);
+    box-shadow: inset 0 0 5px rgba(255,255,255,.55); }
+  .gdoor .lower { position: absolute; top: 124px; left: 11px; right: 11px; bottom: 14px; border-radius: 4px;
+    background: linear-gradient(180deg,#5e3e22,#46301a); border: 2px solid rgba(0,0,0,.22); }
+  .gdoor .knob { position: absolute; top: 150px; width: 9px; height: 9px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffe39a, #c79436); box-shadow: 0 0 6px rgba(255,210,120,.6); }
+  .door-garden .knob { left: 14px; } .door-gardenback .knob { right: 14px; }
+  .gdoor .sign { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+    font-size: 11px; font-weight: 800; color: #ffe7c0; text-shadow: 0 1px 2px rgba(0,0,0,.6);
+    background: rgba(0,0,0,.4); padding: 2px 9px; border-radius: 999px; animation: doorhint 2.2s ease-in-out infinite; }
+  .gdoor:hover .leaf, .gdoor:active .leaf { filter: brightness(1.12); }
+
+  /* ---- Garden room (data-room="garden") -------------------------------- */
+  #room[data-room="garden"] { background: linear-gradient(180deg,#202a4c,#36406a 62%); }
+  #room[data-room="garden"] .floor { background: linear-gradient(180deg,#3f6f3c,#2c5230); }
+  .garden-only { display: none; }
+  #room[data-room="garden"] .garden-only { display: block; }
+  .garden { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .garden::before { content:""; position: absolute; inset: 0; opacity: .9; background:
+    radial-gradient(1.5px 1.5px at 12% 16%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 30% 26%, #fff, transparent),
+    radial-gradient(1px 1px at 46% 12%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 62% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 80% 14%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 90% 30%, #fff, transparent); }
+  .garden .g-moon { position: absolute; top: 38px; right: 96px; width: 46px; height: 46px; border-radius: 50%;
+    background: radial-gradient(circle at 38% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 26px rgba(255,240,200,.5); }
+  /* a string of warm fairy lights */
+  .garden .g-lights { position: absolute; top: 30px; left: 22px; right: 22px; height: 14px; border-top: 2px solid rgba(30,22,14,.55);
+    background: radial-gradient(circle at 13px 8px, #ffd87a 0 3px, transparent 4px) repeat-x; background-size: 50px 14px;
+    filter: drop-shadow(0 0 3px rgba(255,210,120,.7)); }
+  /* tree */
+  .garden .g-tree { position: absolute; left: 70px; top: 150px; width: 130px; height: 212px; }
+  .garden .g-tree .g-trunk { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 22px; height: 112px;
+    background: linear-gradient(90deg,#4f3318,#6e4a2c,#4f3318); border-radius: 4px; }
+  .garden .g-tree .g-leaves { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 130px; height: 130px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #3f7a44, #275030); box-shadow: -30px 20px 0 -10px #356a3a, 32px 16px 0 -8px #356a3a, 0 -12px 0 -6px #428048; }
+  /* picket fence along the back */
+  .garden .g-fence { position: absolute; left: 0; right: 0; top: 300px; height: 56px; }
+  .garden .g-fence::before { content:""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #8a5e36 0 18px, transparent 18px 30px); }
+  .garden .g-fence::after { content:""; position: absolute; left: 0; right: 0; top: 12px; height: 7px; background: #7a5230; box-shadow: 0 22px 0 #7a5230; }
+  /* flower bushes */
+  .garden .g-bush { position: absolute; top: 332px; height: 48px; border-radius: 42% 42% 30% 30%;
+    background: radial-gradient(circle at 40% 30%, #43804a, #2c5a32); box-shadow: inset 0 -6px 0 rgba(0,0,0,.15); }
+  .garden .g-bush.b1 { left: 36px; width: 78px; }
+  .garden .g-bush.b2 { right: 150px; width: 96px; }
+  .garden .g-bush::after { content:""; position: absolute; inset: 0; border-radius: inherit; background:
+    radial-gradient(4px 4px at 22% 42%, #ff8fb0 0 50%, transparent 51%),
+    radial-gradient(4px 4px at 52% 28%, #ffd86b 0 50%, transparent 51%),
+    radial-gradient(4px 4px at 78% 48%, #c6a0ff 0 50%, transparent 51%); }
   .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(90,55,30,.85);
     text-shadow: 0 1px 2px rgba(255,255,255,.4); pointer-events: none; }
+  #room[data-room="garden"] .label2 { color: rgba(255,255,255,.85); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
 
   /* ---- House overview (floor plan of all rooms) ------------------------ */
   .house-plan { display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
@@ -950,6 +1011,34 @@
       <div class="door-back two-only" id="doorBack" title="Back to the bedroom">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
         <div class="sign">← bedroom</div>
+      </div>
+      <!-- Glass-pane back door beside the fridge → out to the garden -->
+      <div class="door-garden two-only gdoor" id="doorGarden" title="Out to the garden">
+        <div class="leaf">
+          <div class="panes"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="lower"></div>
+          <div class="knob"></div>
+        </div>
+        <div class="sign">garden →</div>
+      </div>
+
+      <!-- ===== GARDEN ROOM — shown only when you're in it ===== -->
+      <div class="garden garden-only">
+        <div class="g-moon"></div>
+        <div class="g-lights"></div>
+        <div class="g-tree"><div class="g-trunk"></div><div class="g-leaves"></div></div>
+        <div class="g-fence"></div>
+        <div class="g-bush b1"></div>
+        <div class="g-bush b2"></div>
+      </div>
+      <div class="label2 garden-only" style="left:50%; transform:translateX(-50%)">🌷 Garden</div>
+      <div class="door-gardenback garden-only gdoor" id="doorGardenBack" title="Back into the kitchen">
+        <div class="leaf">
+          <div class="panes"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="lower"></div>
+          <div class="knob"></div>
+        </div>
+        <div class="sign">← kitchen</div>
       </div>
 
       <!-- ===== WARDROBE ROOM — shown only when you're in it ===== -->
@@ -2978,6 +3067,7 @@
   // =====================================================================
   var ROOM_TOASTS = {
     two: "🍳 The kitchen — decorate it too! Tap ← to head back.",
+    garden: "🌷 The garden — a breath of night air. Tap ← to head back.",
     wardrobe: "👗 The Wardrobe — make it yours! Tap → to head back.",
     main: "🏠 Back in the bedroom."
   };
@@ -2999,7 +3089,8 @@
   var HOUSE_ROOMS = [
     { id: "wardrobe", name: "👗 Wardrobe", wall: "linear-gradient(180deg,#4a3a52,#6f5570)", floor: "linear-gradient(180deg,#a98a6a,#876a4a)" },
     { id: "main",     name: "🛏️ Bedroom",  wall: "linear-gradient(180deg,#4a3a63,#6b5184)", floor: "linear-gradient(180deg,#8a6a4f,#74573f)" },
-    { id: "two",      name: "🍳 Kitchen", wall: "linear-gradient(180deg,#6a5594,#48366e)", floor: "linear-gradient(180deg,#7a5638,#5f4029)" }
+    { id: "two",      name: "🍳 Kitchen", wall: "linear-gradient(180deg,#6a5594,#48366e)", floor: "linear-gradient(180deg,#7a5638,#5f4029)" },
+    { id: "garden",   name: "🌷 Garden",  wall: "linear-gradient(180deg,#202a4c,#36406a)", floor: "linear-gradient(180deg,#3f6f3c,#2c5230)" }
   ];
   var FURN_EMOJI = { wardrobe: "🗄️", bed: "🛏️", desk: "🖥️" };
 
@@ -3440,6 +3531,8 @@
   $("doorBack").addEventListener("click", function () { goToRoom("main"); });
   $("doorWard").addEventListener("click", function () { goToRoom("wardrobe"); });
   $("doorWardBack").addEventListener("click", function () { goToRoom("main"); });
+  $("doorGarden").addEventListener("click", function () { goToRoom("garden"); });
+  $("doorGardenBack").addEventListener("click", function () { goToRoom("two"); });
   $("btnHouse").addEventListener("click", openHouse);
   $("gameClose").addEventListener("click", function () { ComputerGame.close(); });
   $("ovGame").addEventListener("click", function (e) { if (e.target === $("ovGame")) ComputerGame.close(); });

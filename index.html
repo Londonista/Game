@@ -502,9 +502,10 @@
   .door-next:active .leaf, .door-back:active .leaf, .door-ward:active .leaf, .door-wardback:active .leaf { filter: brightness(1.12); }
 
   /* Other rooms: theme by data-room. "two" = the Kitchen, "wardrobe" = Wardrobe */
-  #room[data-room="two"] { background: linear-gradient(180deg,#f5ead2,#ecd9b4 64%); }
+  #room[data-room="two"] { background: linear-gradient(180deg,#6a5594,#48366e 64%); }
   #room[data-room="two"] .floor { background:
-    repeating-conic-gradient(#d8c3a0 0% 25%, #c6ad82 0% 50%) 0 0 / 46px 46px; }
+    repeating-linear-gradient(90deg, #7a5638 0 40px, #6c4a2e 40px 42px),
+    linear-gradient(180deg,#7a5638,#5f4029); }
   #room[data-room="wardrobe"] { background: linear-gradient(180deg,#4a3a52,#6f5570 64%); }
   #room[data-room="wardrobe"] .floor { background: linear-gradient(180deg,#a98a6a,#876a4a); }
   /* hide the bedroom's fixtures + furniture whenever you're not in the bedroom
@@ -618,45 +619,75 @@
   .two-only, .ward-only { display: none; }
   #room[data-room="two"] .two-only { display: block; }
   #room[data-room="wardrobe"] .ward-only { display: block; }
-  /* ---- Kitchen fixtures (room "two") — pure CSS, behind everything ------ */
+  /* ---- Rustic kitchen fixtures (room "two") — pure CSS, behind everything */
   .kitchen { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-  /* bright window over the counter */
-  .kitchen .k-window { position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
-    width: 108px; height: 78px; border: 7px solid #f3ead4; border-radius: 7px; overflow: hidden;
-    background: #bfe3f2; box-shadow: 0 8px 18px rgba(0,0,0,.28); }
-  .kitchen .k-window .k-sky { position: absolute; inset: 0; background: linear-gradient(180deg,#bfe6f3,#e7f6da); }
-  .kitchen .k-window .k-sky::after { content:""; position: absolute; top: 12px; left: 16px; width: 22px; height: 22px;
-    border-radius: 50%; background: radial-gradient(circle at 40% 38%,#fffdf0,#ffe9a8); box-shadow: 0 0 14px rgba(255,240,200,.6); }
-  .kitchen .k-window .k-pane::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #f3ead4; transform: translateX(-50%); }
-  .kitchen .k-window .k-pane::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #f3ead4; transform: translateY(-50%); }
-  /* upper cabinets flanking the window */
-  .kitchen .k-cabinets { position: absolute; top: 34px; left: 0; right: 0; display: flex; justify-content: center; gap: 150px; }
-  .kitchen .k-cabinets span { width: 50px; height: 54px; position: relative;
-    background: linear-gradient(180deg,#fbf3e2,#ecdcc0); border: 2px solid #d9c6a3; border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,.18); }
-  .kitchen .k-cabinets span::after { content:""; position: absolute; bottom: 9px; left: 50%; transform: translateX(-50%);
-    width: 6px; height: 6px; border-radius: 50%; background: #b98e52; }
-  /* tiled backsplash */
-  .kitchen .k-backsplash { position: absolute; left: 7%; right: 7%; top: 112px; height: 30px; border-radius: 3px;
-    background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(0,0,0,.06) 7px 8px),
-                repeating-linear-gradient(90deg, #eef4f6 0 17px, #e2eaee 17px 18px); }
-  /* worktop + lower cabinets */
-  .kitchen .k-counter { position: absolute; left: 6%; right: 6%; top: 142px; bottom: 0; }
-  .kitchen .k-counter .k-top { position: absolute; top: 0; left: 0; right: 0; height: 15px; border-radius: 5px;
-    background: linear-gradient(180deg,#d3ac82,#b0875b); box-shadow: 0 3px 5px rgba(0,0,0,.3); }
-  .kitchen .k-counter .k-cab { position: absolute; top: 15px; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(180deg,#f3e6cf,#e1cda6); border: 2px solid #cbb487; border-top: none; border-radius: 0 0 5px 5px;
-    background-image: repeating-linear-gradient(90deg, transparent 0 58px, rgba(0,0,0,.14) 58px 60px); }
-  /* sink + faucet sunk into the worktop (left) */
-  .kitchen .k-sink { position: absolute; top: 2px; left: 14%; width: 56px; height: 12px; border-radius: 4px;
-    background: linear-gradient(180deg,#b8bcc2,#9aa0a8); box-shadow: inset 0 2px 3px rgba(0,0,0,.4); }
-  .kitchen .k-sink::before { content:""; position: absolute; top: -16px; right: 8px; width: 5px; height: 18px;
-    border-radius: 3px 3px 0 0; background: #cfd3d8; }
-  .kitchen .k-sink::after { content:""; position: absolute; top: -16px; right: 8px; width: 16px; height: 5px;
-    border-radius: 3px; background: #cfd3d8; }
-  /* stove with four burners (right) */
-  .kitchen .k-stove { position: absolute; top: 1px; right: 14%; width: 54px; height: 13px; border-radius: 4px;
+  /* night window over the sink, in a rustic wood frame */
+  .kitchen .k-window { position: absolute; top: 34px; left: 132px;
+    width: 122px; height: 92px; border: 8px solid #6b4a2e; border-radius: 4px; overflow: hidden;
+    background: #1a1838; box-shadow: 0 8px 18px rgba(0,0,0,.35), inset 0 0 0 2px #4f361f; }
+  .kitchen .k-window .k-sky { position: absolute; inset: 0; background:
+    radial-gradient(1.5px 1.5px at 22% 28%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 68% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 44% 58%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 82% 52%, #fff, transparent),
+    radial-gradient(1px 1px at 30% 74%, #fff, transparent),
+    linear-gradient(180deg,#241f4a,#3a2f5e); background-color: #241f4a; }
+  .kitchen .k-window .k-sky::after { content:""; position: absolute; top: 12px; right: 14px; width: 22px; height: 22px;
+    border-radius: 50%; background: radial-gradient(circle at 38% 38%,#fffdf0,#ffe9a8); box-shadow: 0 0 14px rgba(255,240,200,.5); }
+  .kitchen .k-window .k-pane::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #6b4a2e; transform: translateX(-50%); }
+  .kitchen .k-window .k-pane::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #6b4a2e; transform: translateY(-50%); }
+  /* a rustic wood wall shelf with a couple of jars */
+  .kitchen .k-shelf { position: absolute; top: 96px; left: 300px; width: 96px; height: 8px; border-radius: 2px;
+    background: linear-gradient(180deg,#8a5a30,#6b4423); box-shadow: 0 3px 4px rgba(0,0,0,.3); }
+  .kitchen .k-shelf::before, .kitchen .k-shelf::after { content:""; position: absolute; bottom: 8px; width: 14px; height: 20px; border-radius: 3px 3px 1px 1px; }
+  .kitchen .k-shelf::before { left: 18px; background: linear-gradient(180deg,#cf9b6a,#a9733f); }
+  .kitchen .k-shelf::after { left: 52px; width: 16px; height: 16px; background: linear-gradient(180deg,#8fb0a0,#5f8a78); }
+  /* low rustic counter: butcher-block worktop over plank cabinet doors */
+  .kitchen .k-counter { position: absolute; left: 24px; width: 430px; top: 248px; bottom: 0; }
+  .kitchen .k-counter .k-top { position: absolute; top: 0; left: 0; right: 0; height: 16px; border-radius: 4px;
+    background: linear-gradient(180deg,#b98046,#8f5e30);
+    background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.12) 0 1px, transparent 1px 26px);
+    box-shadow: 0 3px 5px rgba(0,0,0,.35); }
+  .kitchen .k-counter .k-cab { position: absolute; top: 16px; left: 0; right: 0; height: 92px;
+    background: linear-gradient(180deg,#7a5230,#5e3e22); border: 2px solid #4a3019; border-top: none; border-radius: 0 0 4px 4px;
+    background-image: repeating-linear-gradient(90deg, transparent 0 70px, rgba(0,0,0,.28) 70px 73px); }
+  .kitchen .k-counter .k-cab::after { content:""; position: absolute; top: 14px; left: 18px; width: 6px; height: 6px; border-radius: 50%;
+    background: #d8b06a; box-shadow: 70px 0 #d8b06a, 140px 0 #d8b06a, 210px 0 #d8b06a, 280px 0 #d8b06a, 350px 0 #d8b06a; }
+  /* sink + faucet sunk into the worktop (left, under the window) */
+  .kitchen .k-sink { position: absolute; top: 3px; left: 90px; width: 60px; height: 11px; border-radius: 4px;
+    background: linear-gradient(180deg,#aeb2b8,#8e949c); box-shadow: inset 0 2px 3px rgba(0,0,0,.4); }
+  .kitchen .k-sink::before { content:""; position: absolute; top: -15px; right: 10px; width: 5px; height: 17px; border-radius: 3px 3px 0 0; background: #b9bdc2; }
+  .kitchen .k-sink::after { content:""; position: absolute; top: -15px; right: 10px; width: 15px; height: 5px; border-radius: 3px; background: #b9bdc2; }
+  /* stove with four burners (right side of the counter) */
+  .kitchen .k-stove { position: absolute; top: 2px; right: 28px; width: 54px; height: 13px; border-radius: 4px;
     background: linear-gradient(180deg,#3a3a40,#26262b); display: flex; flex-wrap: wrap; gap: 3px; padding: 3px; box-sizing: border-box; }
   .kitchen .k-stove i { width: 10px; height: 3px; border-radius: 50%; background: #6a6a72; }
+  /* white fridge with ABC magnets + a New York postcard */
+  .kitchen .k-fridge { position: absolute; left: 628px; top: 150px; width: 88px; height: 204px; }
+  .kitchen .k-fridge::before { content:""; position: absolute; inset: 0; border-radius: 9px 9px 5px 5px;
+    background: linear-gradient(180deg,#fdfdfb,#e7e7ea); border: 2px solid #ccccd0; box-shadow: 0 7px 16px rgba(0,0,0,.32); }
+  .kitchen .k-fridge .k-fdoor { position: absolute; left: 6px; right: 6px; border: 1px solid #d8d8db; border-radius: 5px; }
+  .kitchen .k-fridge .k-fdoor.top { top: 8px; height: 56px; }
+  .kitchen .k-fridge .k-fdoor.bot { top: 72px; bottom: 8px; }
+  .kitchen .k-fridge .k-handle { position: absolute; left: 12px; width: 5px; border-radius: 3px; background: #bcbcc1; }
+  .kitchen .k-fridge .k-handle.t { top: 16px; height: 36px; }
+  .kitchen .k-fridge .k-handle.b { top: 82px; height: 46px; }
+  .kitchen .k-fridge .k-magnets { position: absolute; top: 92px; left: 26px; display: flex; gap: 4px; z-index: 2; }
+  .kitchen .k-fridge .k-magnets b { width: 15px; height: 17px; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: #fff; border-radius: 3px; background: var(--c);
+    box-shadow: 0 1px 1px rgba(0,0,0,.3); transform: rotate(var(--r,0deg)); }
+  .kitchen .k-fridge .k-postcard { position: absolute; top: 128px; left: 20px; width: 52px; height: 40px;
+    background: #fff7e6; border: 1px solid #e2d2ac; border-radius: 2px; transform: rotate(-5deg); z-index: 2;
+    box-shadow: 0 2px 3px rgba(0,0,0,.28); font-size: 7px; line-height: 1.3; font-weight: 800; color: #9a5536; text-align: center; padding-top: 4px; }
+  /* rustic wooden dining table in the foreground */
+  .kitchen .k-table { position: absolute; left: 50%; top: 372px; transform: translateX(-50%); width: 224px; height: 76px; }
+  .kitchen .k-table .tt { position: absolute; top: 0; left: 0; right: 0; height: 21px; border-radius: 8px;
+    background: linear-gradient(180deg,#a9733f,#8a5a30); box-shadow: 0 5px 7px rgba(0,0,0,.3);
+    background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.1) 0 1px, transparent 1px 36px); }
+  .kitchen .k-table .leg { position: absolute; top: 18px; width: 12px; height: 54px; border-radius: 0 0 3px 3px;
+    background: linear-gradient(180deg,#8a5a30,#664120); }
+  .kitchen .k-table .leg.l { left: 14px; } .kitchen .k-table .leg.r { right: 14px; }
+  .kitchen .k-table .leg.ml { left: 58px; } .kitchen .k-table .leg.mr { right: 58px; }
   .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(90,55,30,.85);
     text-shadow: 0 1px 2px rgba(255,255,255,.4); pointer-events: none; }
 
@@ -880,14 +911,25 @@
 
       <!-- ===== SECOND ROOM (the Kitchen) — shown only when you're in it ===== -->
       <div class="kitchen two-only">
-        <div class="k-cabinets"><span></span><span></span></div>
         <div class="k-window"><div class="k-sky"></div><div class="k-pane"></div></div>
-        <div class="k-backsplash"></div>
+        <div class="k-shelf"></div>
         <div class="k-counter">
           <div class="k-top"></div>
           <div class="k-cab"></div>
           <div class="k-sink"></div>
           <div class="k-stove"><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="k-fridge">
+          <div class="k-fdoor top"></div>
+          <div class="k-fdoor bot"></div>
+          <div class="k-handle t"></div>
+          <div class="k-handle b"></div>
+          <div class="k-magnets"><b style="--c:#e9608a;--r:-8deg">A</b><b style="--c:#4f9fe0;--r:5deg">B</b><b style="--c:#5fbf6a;--r:-4deg">C</b></div>
+          <div class="k-postcard">🗽<br>love from<br>New York</div>
+        </div>
+        <div class="k-table">
+          <div class="leg l"></div><div class="leg r"></div><div class="leg ml"></div><div class="leg mr"></div>
+          <div class="tt"></div>
         </div>
       </div>
       <div class="label2 two-only" style="left:50%; transform:translateX(-50%)">🍳 Kitchen</div>
@@ -2943,7 +2985,7 @@
   var HOUSE_ROOMS = [
     { id: "wardrobe", name: "👗 Wardrobe", wall: "linear-gradient(180deg,#4a3a52,#6f5570)", floor: "linear-gradient(180deg,#a98a6a,#876a4a)" },
     { id: "main",     name: "🛏️ Bedroom",  wall: "linear-gradient(180deg,#4a3a63,#6b5184)", floor: "linear-gradient(180deg,#8a6a4f,#74573f)" },
-    { id: "two",      name: "🍳 Kitchen", wall: "linear-gradient(180deg,#f5ead2,#ecd9b4)", floor: "linear-gradient(180deg,#d8c3a0,#c6ad82)" }
+    { id: "two",      name: "🍳 Kitchen", wall: "linear-gradient(180deg,#6a5594,#48366e)", floor: "linear-gradient(180deg,#7a5638,#5f4029)" }
   ];
   var FURN_EMOJI = { wardrobe: "🗄️", bed: "🛏️", desk: "🖥️" };
 

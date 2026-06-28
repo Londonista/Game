@@ -704,7 +704,8 @@
   /* ---- Brown glass-pane garden door (kitchen → garden, and back) -------- */
   .door-garden, .door-gardenback { position: absolute; bottom: 0; width: 78px; height: 214px; z-index: 3;
     cursor: pointer; pointer-events: auto; }
-  .door-garden { left: 546px; } .door-gardenback { left: 6px; }   /* directly left of the fridge */
+  .door-garden { left: 68%; cursor: grab; } .door-gardenback { left: 6px; }   /* garden door is draggable along the wall */
+  .door-garden:active { cursor: grabbing; }
   .gdoor .leaf { position: absolute; inset: 0; background: linear-gradient(180deg,#6e4a2c,#4f3318);
     border: 4px solid #3a2613; border-radius: 8px 8px 0 0; box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), -8px 0 16px rgba(0,0,0,.3); }
   .door-gardenback .leaf { box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), 8px 0 16px rgba(0,0,0,.3); }
@@ -1083,7 +1084,7 @@
         <div class="sign">← snug</div>
       </div>
       <!-- Glass-pane back door beside the fridge → out to the garden -->
-      <div class="door-garden two-only gdoor" id="doorGarden" title="Out to the garden">
+      <div class="door-garden two-only gdoor" id="doorGarden" title="Drag me along the wall · tap to go to the garden">
         <div class="leaf">
           <div class="panes"><i></i><i></i><i></i><i></i><i></i><i></i></div>
           <div class="lower"></div>
@@ -1332,6 +1333,7 @@
       { id: "adam", x: 79,   y: 88 }
     ],
     currentRoom: "main",   // which room is on screen ("main" bedroom or "two" kitchen)
+    gardenDoorX: 68,       // horizontal % position of the kitchen's garden door (draggable)
     closet: [],            // clothing item ids you've bought
     outfits: { jas: {}, aqsa: {}, adam: {} },   // what each friend is wearing
     scores: { starcatcher: [], laundromat: [] },   // mini-game leaderboards
@@ -1351,6 +1353,7 @@
     ["jas", "aqsa", "adam"].forEach(function (id) { s.outfits[id] = s.outfits[id] || {}; });
     s.scores = s.scores || {};
     ["starcatcher", "laundromat"].forEach(function (id) { s.scores[id] = s.scores[id] || []; });
+    if (typeof s.gardenDoorX !== "number") s.gardenDoorX = 68;
   }
 
   function load() {
@@ -3678,8 +3681,38 @@
   $("doorSnugNext").addEventListener("click", function () { goToRoom("two"); });
   $("doorWard").addEventListener("click", function () { goToRoom("wardrobe"); });
   $("doorWardBack").addEventListener("click", function () { goToRoom("main"); });
-  $("doorGarden").addEventListener("click", function () { goToRoom("garden"); });
   $("doorGardenBack").addEventListener("click", function () { goToRoom("two"); });
+  // The garden door can be dragged along the kitchen wall; a tap (no drag) opens the garden.
+  function initGardenDoorDrag() {
+    var el = $("doorGarden"); if (!el) return;
+    var DOOR_PCT = 78 / 800 * 100;                 // door width as % of the room
+    function setX(pct) {
+      pct = Math.max(0, Math.min(100 - DOOR_PCT, pct));
+      state.gardenDoorX = pct; el.style.left = pct + "%";
+    }
+    setX(state.gardenDoorX);                        // place it from the saved position
+    var dragging = false, moved = false, startX = 0;
+    function down(e) {
+      e.preventDefault(); dragging = true; moved = false;
+      startX = (e.touches ? e.touches[0] : e).clientX;
+      window.addEventListener("mousemove", move); window.addEventListener("touchmove", move, { passive: false });
+      window.addEventListener("mouseup", up); window.addEventListener("touchend", up);
+    }
+    function move(e) {
+      if (!dragging) return; e.preventDefault();
+      var pt = e.touches ? e.touches[0] : e;
+      if (Math.abs(pt.clientX - startX) > 4) moved = true;
+      var rect = room.getBoundingClientRect();
+      setX(((pt.clientX - rect.left) / rect.width) * 100 - DOOR_PCT / 2);   // centre under the pointer
+    }
+    function up() {
+      if (!dragging) return; dragging = false;
+      window.removeEventListener("mousemove", move); window.removeEventListener("touchmove", move);
+      window.removeEventListener("mouseup", up); window.removeEventListener("touchend", up);
+      if (moved) save(); else goToRoom("garden");
+    }
+    el.addEventListener("mousedown", down); el.addEventListener("touchstart", down, { passive: false });
+  }
   $("btnHouse").addEventListener("click", openHouse);
   $("gameClose").addEventListener("click", function () { ComputerGame.close(); });
   $("ovGame").addEventListener("click", function (e) { if (e.target === $("ovGame")) ComputerGame.close(); });
@@ -3705,6 +3738,7 @@
     renderRoom();
     initFurnitureDrag();
     initCharacters();
+    initGardenDoorDrag();
     updateHud();
     Pet.init();
     Ambient.updateBtn();

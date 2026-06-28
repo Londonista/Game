@@ -2580,7 +2580,7 @@
       try { localStorage.setItem("mns.muted", muted ? "1" : "0"); } catch (e) {}
       if (!muted) {
         if (!started) start();
-        else { ensureRunning(); master.gain.setTargetAtTime(LEVEL, ctx.currentTime, 0.5); }
+        else { ensureRunning(); master.gain.setTargetAtTime(padSuppressed ? 0 : LEVEL, ctx.currentTime, 0.5); }
       } else if (started) {
         master.gain.setTargetAtTime(0, ctx.currentTime, 0.4);
       }
@@ -2659,19 +2659,23 @@
       bell(0, 1318.51); bell(0.08, 1760.0);
     }
 
-    // Looping 8-bit tunes for the mini-games (original melodies). Each game
-    // gets its own, layered over the calming ambient pad.
-    var tuneTimer = null, tuneStep = 0, curTune = null;
+    // Looping tunes for the mini-games (original melodies). The laundromat tune
+    // layers over the ambient pad; the Star Catcher tune is a slow, whimsical,
+    // music-box-style pentatonic piece and plays ON ITS OWN (the pad is ducked).
+    var tuneTimer = null, tuneStep = 0, curTune = null, tuneOut = null, padSuppressed = false;
     var TUNES = {
       laundro: {
         mel: [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880.0, 698.46,
               523.25, 659.25, 783.99, 1046.5, 587.33, 493.88, 587.33, 392.0],
         bass: [130.81, 174.61, 146.83, 196.0], step: 150, melType: "square", melVol: 0.045, bassType: "triangle", bassVol: 0.06
       },
-      star: {   // brighter, twinklier arpeggio for Star Catcher
-        mel: [659.25, 987.77, 1318.51, 987.77, 1174.66, 880.0, 1046.5, 1318.51,
-              784.0, 1046.5, 1318.51, 1567.98, 1174.66, 880.0, 987.77, 1318.51],
-        bass: [164.81, 220.0, 196.0, 146.83], step: 132, melType: "triangle", melVol: 0.05, bassType: "sine", bassVol: 0.05
+      star: {   // gentle C-major-pentatonic music box — relaxing & magical
+        mel: [523.25, 659.25, 783.99, 1046.5, 880.0, 783.99, 659.25, 587.33,
+              659.25, 783.99, 1046.5, 1318.51, 1046.5, 880.0, 783.99, 659.25],
+        bass: [130.81, 174.61, 196.0, 174.61], step: 330,
+        melType: "triangle", melVol: 0.05, melDur: 0.95,
+        bassType: "sine", bassVol: 0.038, bassDur: 2.4, solo: true,
+        sparkle: [1567.98, 1760.0, 2093.0, 1318.51]   // occasional high twinkles
       }
     };
     function note(f, dur, type, vol) {
@@ -2679,9 +2683,9 @@
       var t = c.currentTime, o = c.createOscillator(), g = c.createGain();
       o.type = type; o.frequency.value = f;
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      o.connect(g); g.connect(master || c.destination);
+      o.connect(g); g.connect(tuneOut || master || c.destination);
       o.start(t); o.stop(t + dur + 0.02);
     }
     function startTune(which) {
@@ -2691,15 +2695,34 @@
       curTune = which;
       if (!started) start();
       ensureRunning();
+      if (!tuneOut && ctx) { tuneOut = ctx.createGain(); tuneOut.gain.value = 1; tuneOut.connect(ctx.destination); }
+      padSuppressed = !!tn.solo;   // a "solo" tune silences the background pad entirely
+      if (padSuppressed) {
+        if (chordTimer) { clearInterval(chordTimer); chordTimer = null; }
+        if (twinkleTimer) { clearTimeout(twinkleTimer); twinkleTimer = null; }
+        if (master && ctx) master.gain.setTargetAtTime(0, ctx.currentTime, 0.3);
+      }
       tuneStep = 0;
       tuneTimer = setInterval(function () {
         if (muted || !ctx) return;
-        note(tn.mel[tuneStep % tn.mel.length], 0.12, tn.melType, tn.melVol);
-        if (tuneStep % 4 === 0) note(tn.bass[(tuneStep / 4) % tn.bass.length], 0.22, tn.bassType, tn.bassVol);
+        note(tn.mel[tuneStep % tn.mel.length], tn.melDur || 0.12, tn.melType, tn.melVol);
+        if (tuneStep % 4 === 0) note(tn.bass[(tuneStep / 4) % tn.bass.length], tn.bassDur || 0.22, tn.bassType, tn.bassVol);
+        if (tn.sparkle && Math.random() < 0.22) note(tn.sparkle[(Math.random() * tn.sparkle.length) | 0], 0.7, "sine", 0.03);
         tuneStep++;
       }, tn.step);
     }
-    function stopTune() { if (tuneTimer) { clearInterval(tuneTimer); tuneTimer = null; } curTune = null; }
+    function stopTune() {
+      if (tuneTimer) { clearInterval(tuneTimer); tuneTimer = null; }
+      curTune = null;
+      if (padSuppressed) {   // bring the ambient pad back
+        if (master && ctx) master.gain.setTargetAtTime(muted ? 0 : LEVEL, ctx.currentTime, 0.6);
+        if (started) {
+          if (!chordTimer) { playChord(); chordTimer = setInterval(playChord, 9000); }
+          if (!twinkleTimer) scheduleTwinkle();
+        }
+      }
+      padSuppressed = false;
+    }
 
     return { start: start, toggle: toggle, squeak: squeak, charSqueak: charSqueak, blip: blip,
              chaching: chaching, startTune: startTune, stopTune: stopTune,

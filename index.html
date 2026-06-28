@@ -532,10 +532,11 @@
   .item.wardrobe .del { top: -6px; right: -8px; }
 
   /* Clothes worn by the friend avatars (also reused in the wardrobe preview) */
-  .worn-hat { position: absolute; top: -10px; left: 0; right: 0; text-align: center;
-    font-size: 23px; line-height: 1; pointer-events: none; z-index: 2; }
-  .worn-glasses { position: absolute; top: 13px; left: 0; right: 0; text-align: center;
-    font-size: 16px; line-height: 1; pointer-events: none; z-index: 3; }
+  .worn-hat { position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+    line-height: 0; pointer-events: none; z-index: 2; }
+  .worn-glasses { position: absolute; top: 13px; left: 50%; transform: translateX(-50%);
+    line-height: 0; pointer-events: none; z-index: 3; }
+  .worn-hat svg, .worn-glasses svg { display: block; }
 
   /* Wardrobe chooser modal */
   .ward-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
@@ -965,13 +966,13 @@
     { id: "wardrobe_white", name: "Ornate Wardrobe", ic: "👗", price: 40, unlockAt: 0, set: "Boudoir", render: "wardrobe" },
 
     // --- Outfits (worn by the friends via the ornate wardrobe) ---
-    { id: "hat_tiara",   name: "Tiara",        ic: "👑", price: 10, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👑" } },
-    { id: "hat_bow",     name: "Hair Bow",     ic: "🎀", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🎀" } },
-    { id: "hat_sun",     name: "Sun Hat",      ic: "👒", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👒" } },
-    { id: "hat_flower",  name: "Flower Crown", ic: "🌸", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🌸" } },
-    { id: "hat_cap",     name: "Beanie",       ic: "🧢", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🧢" } },
-    { id: "gl_shades",   name: "Sunglasses",   ic: "🕶️", price: 7,  unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "🕶️" } },
-    { id: "gl_reading",  name: "Reading Glasses", ic: "👓", price: 7, unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "👓" } },
+    { id: "hat_tiara",   name: "Tiara",        ic: "👑", price: 10, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👑", art: "tiara" } },
+    { id: "hat_bow",     name: "Hair Bow",     ic: "🎀", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🎀", art: "bow" } },
+    { id: "hat_sun",     name: "Sun Hat",      ic: "👒", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👒", art: "sunhat" } },
+    { id: "hat_flower",  name: "Flower Crown", ic: "🌸", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🌸", art: "flower" } },
+    { id: "hat_cap",     name: "Beanie",       ic: "🧢", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🧢", art: "beanie" } },
+    { id: "gl_shades",   name: "Sunglasses",   ic: "🕶️", price: 7,  unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "🕶️", art: "shades" } },
+    { id: "gl_reading",  name: "Reading Glasses", ic: "👓", price: 7, unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "👓", art: "reading" } },
 
     // --- Beds (different colours) ---
     { id: "bed_pink",   name: "Pink Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "pink" },
@@ -1819,13 +1820,53 @@
   function ownedClothes() {
     return (state.closet || []).map(itemDef).filter(function (d) { return d && d.wear; });
   }
+  // Hand-drawn hats & glasses so they sit straight, are wider than the head,
+  // and the glasses are just lens fronts (no temple arms).
+  function wearSVG(art) {
+    switch (art) {
+      case "sunhat": return '<svg width="54" height="24" viewBox="0 0 54 24">' +
+        '<ellipse cx="27" cy="18" rx="25" ry="5.5" fill="#ecc987" stroke="#cda765" stroke-width="1.4"/>' +
+        '<path d="M13 18 Q27 -1 41 18 Z" fill="#f2d59a" stroke="#cda765" stroke-width="1.4"/>' +
+        '<ellipse cx="27" cy="16.5" rx="13" ry="3" fill="#d9a86a"/></svg>';
+      case "tiara": return '<svg width="50" height="20" viewBox="0 0 50 20">' +
+        '<path d="M5 17 Q25 9 45 17" fill="none" stroke="#e6b94a" stroke-width="3" stroke-linecap="round"/>' +
+        '<path d="M9 16 L14 7 L19 15 L25 4 L31 15 L36 7 L41 16 Z" fill="#ffe08a" stroke="#d8b24a" stroke-width="1.2" stroke-linejoin="round"/>' +
+        '<circle cx="25" cy="7" r="2.4" fill="#ff8fb0" stroke="#d8b24a" stroke-width="0.8"/>' +
+        '<circle cx="14" cy="10" r="1.5" fill="#8fc7ff"/><circle cx="36" cy="10" r="1.5" fill="#8fc7ff"/></svg>';
+      case "bow": return '<svg width="46" height="22" viewBox="0 0 46 22">' +
+        '<path d="M23 11 L5 3 Q0 11 5 19 Z" fill="#ec6fa0" stroke="#c64f80" stroke-width="1.3"/>' +
+        '<path d="M23 11 L41 3 Q46 11 41 19 Z" fill="#ec6fa0" stroke="#c64f80" stroke-width="1.3"/>' +
+        '<circle cx="23" cy="11" r="4.5" fill="#d85a8f" stroke="#c64f80" stroke-width="1.3"/></svg>';
+      case "flower": return '<svg width="52" height="18" viewBox="0 0 52 18">' +
+        '<path d="M4 14 Q26 7 48 14" fill="none" stroke="#6fae6f" stroke-width="3" stroke-linecap="round"/>' +
+        [9, 20, 31, 42].map(function (cx, i) {
+          var col = ["#ff9ec2", "#ffd86b", "#c6a0ff", "#ff9ec2"][i];
+          return '<g>' + [0, 1, 2, 3, 4].map(function (k) {
+            var a = k * 1.2566; return '<circle cx="' + (cx + Math.cos(a) * 3.2).toFixed(1) + '" cy="' + (10 + Math.sin(a) * 3.2).toFixed(1) + '" r="2.1" fill="' + col + '"/>';
+          }).join("") + '<circle cx="' + cx + '" cy="10" r="1.6" fill="#fff2b0"/></g>';
+        }).join("") + '</svg>';
+      case "beanie": return '<svg width="50" height="24" viewBox="0 0 50 24">' +
+        '<path d="M4 20 Q4 3 25 3 Q46 3 46 20 Z" fill="#7f9bd8" stroke="#5f7bc0" stroke-width="1.4"/>' +
+        '<rect x="4" y="17.5" width="42" height="5.5" rx="2.7" fill="#6f8bc8" stroke="#5f7bc0" stroke-width="1"/>' +
+        '<circle cx="25" cy="3" r="3" fill="#aabdf0"/></svg>';
+      case "shades": return '<svg width="34" height="15" viewBox="0 0 34 15">' +
+        '<rect x="2" y="2" width="12" height="10" rx="4.5" fill="#2b2b34" stroke="#15151a" stroke-width="1"/>' +
+        '<rect x="20" y="2" width="12" height="10" rx="4.5" fill="#2b2b34" stroke="#15151a" stroke-width="1"/>' +
+        '<path d="M14 5 L20 5" stroke="#2b2b34" stroke-width="2.6"/></svg>';
+      case "reading": return '<svg width="34" height="15" viewBox="0 0 34 15">' +
+        '<circle cx="8.5" cy="7.5" r="6" fill="rgba(255,255,255,.16)" stroke="#3a2e22" stroke-width="1.7"/>' +
+        '<circle cx="25.5" cy="7.5" r="6" fill="rgba(255,255,255,.16)" stroke="#3a2e22" stroke-width="1.7"/>' +
+        '<path d="M14.5 7.5 L19.5 7.5" stroke="#3a2e22" stroke-width="1.7"/></svg>';
+    }
+    return "";
+  }
   // paint one worn layer onto a parent, creating/removing the node as needed
   function setWorn(parent, cls, clothingId) {
     var node = parent.querySelector("." + cls);
     var def = clothingId ? itemDef(clothingId) : null;
     if (!def || !def.wear) { if (node) node.remove(); return; }
     if (!node) { node = document.createElement("div"); node.className = cls; parent.appendChild(node); }
-    node.textContent = def.wear.emoji;
+    node.innerHTML = wearSVG(def.wear.art);
   }
   // refresh the clothes shown on every friend avatar from saved outfits
   function applyOutfits() {

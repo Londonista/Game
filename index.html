@@ -808,7 +808,7 @@
   .garden-reveal { position: absolute; inset: 0; z-index: 75; background: #04060c; pointer-events: none;
     animation: gardenreveal 2.8s ease forwards; }
   @keyframes gardenreveal { 0% { opacity: 1; } 30% { opacity: 1; } 100% { opacity: 0; } }
-  .garden-reveal .gv { position: absolute; width: 54%; max-width: 250px; height: 54%; max-height: 250px;
+  .garden-reveal .gv { position: absolute; width: 64%; max-width: 300px; height: 64%; max-height: 300px;
     filter: drop-shadow(0 0 6px rgba(255,255,255,.3)); }
   .garden-reveal .gv.tl { top: 0; left: 0; }
   .garden-reveal .gv.tr { top: 0; right: 0; transform: scaleX(-1); }
@@ -3236,25 +3236,42 @@
     function leaf(cx, cy, rot, sz) {
       return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + sz + '" ry="' + (sz * 0.5).toFixed(1) + '" transform="rotate(' + rot + ' ' + cx + ' ' + cy + ')"/>';
     }
-    var stems = '<g stroke="#2f7a46" stroke-width="3.4" fill="none" stroke-linecap="round">' +
-      '<path d="M2 22 C 54 28, 96 56, 132 116"/>' +
-      '<path d="M22 2 C 28 54, 56 96, 116 132"/>' +
-      '<path d="M2 6 C 40 16, 70 40, 86 78"/>' +
-      '<path d="M6 2 C 16 40, 40 70, 78 86"/>' +
-      '<path d="M2 46 C 34 56, 56 84, 66 124"/>' +
-      '<path d="M46 2 C 56 34, 84 56, 124 66"/>' +
-      '<path d="M2 92 C 26 96, 44 110, 52 140"/>' +
-      '<path d="M92 2 C 96 26, 110 44, 140 52"/></g>';
+    function bud(cx, cy, r, g) {
+      return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#' + p + g + ')"/>' +
+        '<circle cx="' + (cx - r * 0.3).toFixed(1) + '" cy="' + (cy - r * 0.3).toFixed(1) + '" r="' + (r * 0.3).toFixed(1) + '" fill="rgba(255,255,255,.6)"/>';
+    }
+    // two layers of stems that cross/weave, for a webby, intertwined corner
+    var stemsBack = '<g stroke="#2a6e3f" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".92">' +
+      '<path d="M2 34 C 64 26, 118 62, 196 118"/><path d="M34 2 C 26 64, 62 118, 118 196"/>' +
+      '<path d="M2 96 C 70 86, 104 118, 150 196"/><path d="M96 2 C 86 70, 118 104, 196 150"/>' +
+      '<path d="M2 160 C 50 150, 84 172, 104 198"/><path d="M160 2 C 150 50, 172 84, 198 104"/></g>';
+    var stemsFront = '<g stroke="#3a915a" stroke-width="3.2" fill="none" stroke-linecap="round">' +
+      '<path d="M2 10 C 56 44, 96 30, 162 78"/><path d="M10 2 C 44 56, 30 96, 78 162"/>' +
+      '<path d="M2 60 C 60 50, 92 92, 120 150"/><path d="M60 2 C 50 60, 92 92, 150 120"/>' +
+      '<path d="M2 120 C 44 116, 70 140, 80 184"/><path d="M120 2 C 116 44, 140 70, 184 80"/></g>';
+    var curls = '<g stroke="#4aa56a" stroke-width="2" fill="none" stroke-linecap="round">' +
+      '<path d="M150 80 c 10 -6 16 4 8 12 c -5 5 -12 1 -9 -6"/>' +
+      '<path d="M80 150 c -6 10 4 16 12 8 c 5 -5 1 -12 -6 -9"/>' +
+      '<path d="M110 110 c 8 6 2 16 -7 12 c -6 -3 -4 -11 3 -10"/>' +
+      '<path d="M52 96 c -8 4 -6 14 3 13 c 6 -1 6 -9 0 -11"/>' +
+      '<path d="M96 52 c 4 -8 14 -6 13 3 c -1 6 -9 6 -11 0"/></g>';
     var leaves = '<g fill="#3a915a">' +
-      leaf(50, 34, 30, 10) + leaf(34, 50, 64, 10) + leaf(84, 66, 36, 9) + leaf(66, 86, 60, 9) +
-      leaf(108, 92, 34, 9) + leaf(92, 110, 60, 9) + leaf(30, 96, 70, 8) + leaf(96, 30, 24, 8) +
-      leaf(124, 132, 40, 9) + leaf(132, 124, 50, 9) + '</g>';
+      leaf(40, 18, 20, 9) + leaf(70, 40, 14, 9) + leaf(110, 34, -10, 8) + leaf(150, 66, 26, 9) + leaf(176, 104, 40, 9) +
+      leaf(18, 40, 70, 9) + leaf(40, 70, 76, 9) + leaf(34, 110, 100, 8) + leaf(66, 150, 64, 9) + leaf(104, 176, 50, 9) +
+      leaf(60, 60, 40, 9) + leaf(96, 96, 30, 9) + leaf(124, 120, 55, 9) + leaf(150, 150, 45, 9) +
+      leaf(84, 124, 80, 8) + leaf(124, 84, 10, 8) + '</g>';
+    var leavesDk = '<g fill="#2f7a46">' +
+      leaf(54, 32, 50, 7) + leaf(32, 54, 28, 7) + leaf(120, 60, 70, 7) + leaf(60, 120, 16, 7) +
+      leaf(160, 130, 35, 7) + leaf(130, 160, 60, 7) + '</g>';
     var flowers =
-      flower(132, 116, 14, 'am') + flower(116, 132, 13, 'sa') + flower(86, 78, 12, 'em') +
-      flower(78, 86, 11, 'ru') + flower(124, 66, 12, 'to') + flower(66, 124, 11, 'ro') +
-      flower(16, 18, 10, 'sa') + flower(44, 48, 9, 'to') + flower(150, 150, 13, 'em') +
-      flower(104, 40, 9, 'am') + flower(40, 104, 9, 'ru');
-    return '<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">' + defs + stems + leaves + flowers + '</svg>';
+      flower(162, 78, 14, 'am') + flower(78, 162, 14, 'sa') + flower(196, 118, 12, 'em') +
+      flower(118, 196, 12, 'ru') + flower(184, 80, 11, 'to') + flower(80, 184, 11, 'ro') +
+      flower(110, 110, 15, 'am') + flower(60, 60, 11, 'em') + flower(150, 120, 12, 'ru') +
+      flower(120, 150, 12, 'to') + flower(52, 96, 9, 'sa') + flower(96, 52, 9, 'ro') + flower(16, 18, 11, 'to');
+    var buds = bud(132, 58, 4, 'ro') + bud(58, 132, 4, 'am') + bud(172, 142, 4, 'sa') +
+      bud(142, 172, 4, 'em') + bud(34, 74, 3.5, 'ru') + bud(74, 34, 3.5, 'to') + bud(100, 30, 3.5, 'am');
+    return '<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">' + defs +
+      stemsBack + leavesDk + stemsFront + curls + leaves + flowers + buds + '</svg>';
   }
   // Enter the garden: play the flourish and drop a black screen framed with
   // jewel vines in the corners, which fades out as one to reveal the garden.

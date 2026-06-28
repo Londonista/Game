@@ -527,9 +527,9 @@
   .item.vanity .del { top: -6px; right: -8px; }
 
   /* Ornate white wardrobe (opens a clothes chooser when tapped) */
-  .item.wardrobe { font-size: 0; filter: drop-shadow(0 9px 8px rgba(0,0,0,0.4)); cursor: pointer; }
-  .item.wardrobe .wardrobe-svg { display: block; }
-  .item.wardrobe .del { top: -6px; right: -8px; }
+  .item.wardrobeitem { font-size: 0; filter: drop-shadow(0 9px 8px rgba(0,0,0,0.4)); cursor: pointer; }
+  .item.wardrobeitem .wardrobe-svg { display: block; }
+  .item.wardrobeitem .del { top: -6px; right: -8px; }
 
   /* Clothes worn by the friend avatars (also reused in the wardrobe preview) */
   .worn-hat { position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
@@ -1468,7 +1468,7 @@
       else if (def.render === "bookcase") { el.classList.add("bookcase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBookcase()); }
       else if (def.render === "map") { el.classList.add("mapitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildMap()); }
       else if (def.render === "vanity") { el.classList.add("vanity"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVanity()); }
-      else if (def.render === "wardrobe") { el.classList.add("wardrobe"); el.style.zIndex = depthZ(p.y); el.appendChild(buildWardrobe()); }
+      else if (def.render === "wardrobe") { el.classList.add("wardrobeitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildWardrobe()); }
       else if (def.render === "vase") { el.classList.add("vase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVase()); }
       else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint, def.size, p.orient)); }
       else { el.style.zIndex = depthZ(p.y); el.textContent = def.ic; }
@@ -2849,34 +2849,66 @@
 
     // ===== Game 1: Star Catcher (catch falling stars) ========================
     function StarCatcher() {
-      var paddle, items, score, lives, spawnT, speed, over, awarded, keyDir;
-      function reset() { paddle = { x: W / 2, w: 52, y: H - 18 }; items = []; score = 0; lives = 3; spawnT = 0; speed = 1.4; over = false; awarded = false; keyDir = 0; }
-      function coinsFor() { return Math.floor(score / 3); }
+      var paddle, items, pops, score, lives, spawnT, speed, over, awarded, keyDir, tick;
+      // star kinds: the plain gold star is the common one; smaller / faster /
+      // rarer stars (and the rainbow) are worth more points.
+      var TYPES = [
+        { key: "gold",    col: "#ffd86b", pts: 1, r: 8,  vk: 1.0,  w: 58 },
+        { key: "green",   col: "#9be36b", pts: 2, r: 13, vk: 0.72, w: 12 },  // big & slow
+        { key: "blue",    col: "#6bb0ff", pts: 3, r: 7,  vk: 1.25, w: 14 },
+        { key: "pink",    col: "#ff8fc0", pts: 5, r: 6,  vk: 1.45, w: 9 },   // small & quick
+        { key: "rainbow", col: "rainbow", pts: 8, r: 9,  vk: 1.15, w: 7 }    // rare bonus
+      ];
+      var TOTAL_W = 0; TYPES.forEach(function (t) { TOTAL_W += t.w; });
+      function pickType() { var r = Math.random() * TOTAL_W; for (var i = 0; i < TYPES.length; i++) { r -= TYPES[i].w; if (r <= 0) return TYPES[i]; } return TYPES[0]; }
+      function reset() { paddle = { x: W / 2, w: 52, y: H - 18 }; items = []; pops = []; score = 0; lives = 3; spawnT = 0; speed = 1.4; over = false; awarded = false; keyDir = 0; tick = 0; }
+      function coinsFor() { return Math.floor(score / 5); }
+      function colFor(s) { return s.type.col === "rainbow" ? "hsl(" + Math.floor((tick * 5 + s.x * 2) % 360) + ",90%,66%)" : s.type.col; }
       function star(x, y, r, t) {
         ctx.save(); ctx.translate(x, y); ctx.rotate(t * 0.25); ctx.beginPath();
         for (var i = 0; i < 5; i++) { var a = -Math.PI / 2 + i * 2 * Math.PI / 5; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); var a2 = a + Math.PI / 5; ctx.lineTo(Math.cos(a2) * r * 0.45, Math.sin(a2) * r * 0.45); }
         ctx.closePath(); ctx.fill(); ctx.restore();
       }
+      function catchSound(pts) {
+        if (pts >= 8) { Ambient.blip(880, 0.05, "triangle"); Ambient.blip(1320, 0.07, "triangle"); }   // rainbow sparkle
+        else Ambient.blip(540 + pts * 95, 0.05, "triangle");
+      }
       return {
         title: "⭐ Star Catcher",
-        hint: "Move the dish (mouse / finger or ← →) and catch the falling stars!",
+        hint: "Catch the falling stars! Smaller, rarer & rainbow stars are worth more points.",
         init: reset,
         update: function () {
           if (over) return;
+          tick++;
           paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, paddle.x + keyDir * 5));
-          if (--spawnT <= 0) { items.push({ x: 16 + Math.random() * (W - 32), y: -12, vy: speed + Math.random() * 0.8, r: 8, t: Math.random() * 6 }); spawnT = Math.max(20, 58 - score); }
-          speed += 0.001;
+          if (--spawnT <= 0) {
+            var ty = pickType();
+            items.push({ x: 16 + Math.random() * (W - 32), y: -12, vy: (speed + Math.random() * 0.8) * ty.vk, type: ty, t: Math.random() * 6 });
+            spawnT = Math.max(18, 54 - Math.floor(tick / 110));
+          }
+          speed += 0.0008;
           for (var i = items.length - 1; i >= 0; i--) {
             var s = items[i]; s.y += s.vy; s.t += 0.1;
-            if (s.y >= paddle.y - 8 && s.y <= paddle.y + 10 && Math.abs(s.x - paddle.x) < paddle.w / 2 + s.r) { score++; items.splice(i, 1); Ambient.blip(720, 0.05); continue; }
+            if (s.y >= paddle.y - 8 && s.y <= paddle.y + 10 && Math.abs(s.x - paddle.x) < paddle.w / 2 + s.type.r) {
+              score += s.type.pts; items.splice(i, 1);
+              pops.push({ x: s.x, y: s.y - 6, txt: "+" + s.type.pts, col: colFor(s), life: 44 });
+              catchSound(s.type.pts); continue;
+            }
             if (s.y > H + 12) { items.splice(i, 1); lives--; Ambient.blip(150, 0.13, "square"); }
           }
+          for (var p = pops.length - 1; p >= 0; p--) { pops[p].y -= 0.7; if (--pops[p].life <= 0) pops.splice(p, 1); }
           if (lives <= 0) { over = true; if (!awarded) { awarded = true; award(coinsFor()); } }
         },
         draw: function () {
           ctx.fillStyle = "#07140e"; ctx.fillRect(0, 0, W, H);
-          ctx.fillStyle = "#9be36b"; items.forEach(function (s) { star(s.x, s.y, s.r, s.t); });
+          items.forEach(function (s) {
+            ctx.save(); ctx.fillStyle = colFor(s);
+            ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = s.type.key === "rainbow" ? 10 : 4;
+            star(s.x, s.y, s.type.r, s.t); ctx.restore();
+          });
           ctx.fillStyle = "#cfeecb"; ctx.beginPath(); ctx.moveTo(paddle.x - paddle.w / 2, paddle.y); ctx.quadraticCurveTo(paddle.x, paddle.y + 13, paddle.x + paddle.w / 2, paddle.y); ctx.lineTo(paddle.x + paddle.w / 2 - 4, paddle.y - 5); ctx.lineTo(paddle.x - paddle.w / 2 + 4, paddle.y - 5); ctx.closePath(); ctx.fill();
+          ctx.font = "bold 12px monospace"; ctx.textAlign = "center";
+          pops.forEach(function (p) { ctx.save(); ctx.globalAlpha = Math.min(1, p.life / 28); ctx.fillStyle = p.col; ctx.fillText(p.txt, p.x, p.y); ctx.restore(); });
           ctx.fillStyle = "#9be36b"; ctx.font = "bold 14px monospace"; ctx.textAlign = "left"; ctx.fillText("SCORE " + score, 8, 18);
           ctx.textAlign = "right"; ctx.fillStyle = "#ff6b6b"; ctx.fillText(new Array(Math.max(0, lives) + 1).join("♥"), W - 8, 18);
           if (over) gameOverText("GAME OVER", "Score " + score + "  ·  +" + coinsFor() + " coins");

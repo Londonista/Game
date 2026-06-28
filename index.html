@@ -477,7 +477,7 @@
     pointer-events: none; animation: squeakfloat .9s ease-out forwards; }
   @keyframes squeakfloat { 0%{ opacity:0; transform: translate(-50%,0) scale(.6);} 20%{ opacity:1;} 100%{ opacity:0; transform: translate(-50%,-28px) scale(1.05);} }
 
-  /* ---- Two rooms: a door on the right wall leads to "the snug" ---------- */
+  /* ---- Two rooms: a door on the right wall leads to "the kitchen" ------- */
   #room { transition: opacity .16s ease; }              /* gentle fade on room change */
 
   .door-next, .door-back, .door-ward, .door-wardback { position: absolute; bottom: 0; width: 78px; height: 214px; z-index: 3;
@@ -501,9 +501,10 @@
   .door-next:hover .leaf, .door-back:hover .leaf, .door-ward:hover .leaf, .door-wardback:hover .leaf,
   .door-next:active .leaf, .door-back:active .leaf, .door-ward:active .leaf, .door-wardback:active .leaf { filter: brightness(1.12); }
 
-  /* Other rooms: theme by data-room. "two" = the snug, "wardrobe" = Wardrobe */
-  #room[data-room="two"] { background: linear-gradient(180deg,#2e514a,#427563 64%); }
-  #room[data-room="two"] .floor { background: linear-gradient(180deg,#9a7445,#7c5a32); }
+  /* Other rooms: theme by data-room. "two" = the Kitchen, "wardrobe" = Wardrobe */
+  #room[data-room="two"] { background: linear-gradient(180deg,#f5ead2,#ecd9b4 64%); }
+  #room[data-room="two"] .floor { background:
+    repeating-conic-gradient(#d8c3a0 0% 25%, #c6ad82 0% 50%) 0 0 / 46px 46px; }
   #room[data-room="wardrobe"] { background: linear-gradient(180deg,#4a3a52,#6f5570 64%); }
   #room[data-room="wardrobe"] .floor { background: linear-gradient(180deg,#a98a6a,#876a4a); }
   /* hide the bedroom's fixtures + furniture whenever you're not in the bedroom
@@ -617,16 +618,47 @@
   .two-only, .ward-only { display: none; }
   #room[data-room="two"] .two-only { display: block; }
   #room[data-room="wardrobe"] .ward-only { display: block; }
-  .window2 { position: absolute; top: 44px; left: 50%; transform: translateX(-50%);
-    width: 148px; height: 148px; border-radius: 50%; border: 8px solid #eaddc4; overflow: hidden;
-    background: #1f2740; box-shadow: inset 0 0 0 2px #cdbb9c, 0 10px 22px rgba(0,0,0,.35); }
-  .window2 .sky2 { position: absolute; inset: 0; background: linear-gradient(180deg,#22304c,#3a3358); }
-  .window2 .cross::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #eaddc4; transform: translateX(-50%); }
-  .window2 .cross::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #eaddc4; transform: translateY(-50%); }
-  .window2 .moon2 { position: absolute; width: 30px; height: 30px; border-radius: 50%; top: 24px; left: 28px;
-    background: radial-gradient(circle at 40% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 16px rgba(255,240,200,.6); }
-  .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(255,255,255,.78);
-    text-shadow: 0 1px 2px rgba(0,0,0,.4); pointer-events: none; }
+  /* ---- Kitchen fixtures (room "two") — pure CSS, behind everything ------ */
+  .kitchen { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  /* bright window over the counter */
+  .kitchen .k-window { position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+    width: 108px; height: 78px; border: 7px solid #f3ead4; border-radius: 7px; overflow: hidden;
+    background: #bfe3f2; box-shadow: 0 8px 18px rgba(0,0,0,.28); }
+  .kitchen .k-window .k-sky { position: absolute; inset: 0; background: linear-gradient(180deg,#bfe6f3,#e7f6da); }
+  .kitchen .k-window .k-sky::after { content:""; position: absolute; top: 12px; left: 16px; width: 22px; height: 22px;
+    border-radius: 50%; background: radial-gradient(circle at 40% 38%,#fffdf0,#ffe9a8); box-shadow: 0 0 14px rgba(255,240,200,.6); }
+  .kitchen .k-window .k-pane::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #f3ead4; transform: translateX(-50%); }
+  .kitchen .k-window .k-pane::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #f3ead4; transform: translateY(-50%); }
+  /* upper cabinets flanking the window */
+  .kitchen .k-cabinets { position: absolute; top: 34px; left: 0; right: 0; display: flex; justify-content: center; gap: 150px; }
+  .kitchen .k-cabinets span { width: 50px; height: 54px; position: relative;
+    background: linear-gradient(180deg,#fbf3e2,#ecdcc0); border: 2px solid #d9c6a3; border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,.18); }
+  .kitchen .k-cabinets span::after { content:""; position: absolute; bottom: 9px; left: 50%; transform: translateX(-50%);
+    width: 6px; height: 6px; border-radius: 50%; background: #b98e52; }
+  /* tiled backsplash */
+  .kitchen .k-backsplash { position: absolute; left: 7%; right: 7%; top: 112px; height: 30px; border-radius: 3px;
+    background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(0,0,0,.06) 7px 8px),
+                repeating-linear-gradient(90deg, #eef4f6 0 17px, #e2eaee 17px 18px); }
+  /* worktop + lower cabinets */
+  .kitchen .k-counter { position: absolute; left: 6%; right: 6%; top: 142px; bottom: 0; }
+  .kitchen .k-counter .k-top { position: absolute; top: 0; left: 0; right: 0; height: 15px; border-radius: 5px;
+    background: linear-gradient(180deg,#d3ac82,#b0875b); box-shadow: 0 3px 5px rgba(0,0,0,.3); }
+  .kitchen .k-counter .k-cab { position: absolute; top: 15px; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg,#f3e6cf,#e1cda6); border: 2px solid #cbb487; border-top: none; border-radius: 0 0 5px 5px;
+    background-image: repeating-linear-gradient(90deg, transparent 0 58px, rgba(0,0,0,.14) 58px 60px); }
+  /* sink + faucet sunk into the worktop (left) */
+  .kitchen .k-sink { position: absolute; top: 2px; left: 14%; width: 56px; height: 12px; border-radius: 4px;
+    background: linear-gradient(180deg,#b8bcc2,#9aa0a8); box-shadow: inset 0 2px 3px rgba(0,0,0,.4); }
+  .kitchen .k-sink::before { content:""; position: absolute; top: -16px; right: 8px; width: 5px; height: 18px;
+    border-radius: 3px 3px 0 0; background: #cfd3d8; }
+  .kitchen .k-sink::after { content:""; position: absolute; top: -16px; right: 8px; width: 16px; height: 5px;
+    border-radius: 3px; background: #cfd3d8; }
+  /* stove with four burners (right) */
+  .kitchen .k-stove { position: absolute; top: 1px; right: 14%; width: 54px; height: 13px; border-radius: 4px;
+    background: linear-gradient(180deg,#3a3a40,#26262b); display: flex; flex-wrap: wrap; gap: 3px; padding: 3px; box-sizing: border-box; }
+  .kitchen .k-stove i { width: 10px; height: 3px; border-radius: 50%; background: #6a6a72; }
+  .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(90,55,30,.85);
+    text-shadow: 0 1px 2px rgba(255,255,255,.4); pointer-events: none; }
 
   /* ---- House overview (floor plan of all rooms) ------------------------ */
   .house-plan { display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
@@ -835,10 +867,10 @@
         </div>
       </div>
 
-      <!-- Door on the right wall → leads to the snug -->
-      <div class="door-next" id="doorNext" title="Go to the snug">
+      <!-- Door on the right wall → leads to the kitchen -->
+      <div class="door-next" id="doorNext" title="Go to the kitchen">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">the snug →</div>
+        <div class="sign">kitchen →</div>
       </div>
       <!-- Door on the left wall → leads to the Wardrobe -->
       <div class="door-ward" id="doorWard" title="Go to the Wardrobe">
@@ -846,13 +878,19 @@
         <div class="sign">← wardrobe</div>
       </div>
 
-      <!-- ===== SECOND ROOM ("the snug") — shown only when you're in it ===== -->
-      <div class="window2 two-only">
-        <div class="sky2"></div>
-        <div class="moon2"></div>
-        <div class="cross"></div>
+      <!-- ===== SECOND ROOM (the Kitchen) — shown only when you're in it ===== -->
+      <div class="kitchen two-only">
+        <div class="k-cabinets"><span></span><span></span></div>
+        <div class="k-window"><div class="k-sky"></div><div class="k-pane"></div></div>
+        <div class="k-backsplash"></div>
+        <div class="k-counter">
+          <div class="k-top"></div>
+          <div class="k-cab"></div>
+          <div class="k-sink"></div>
+          <div class="k-stove"><i></i><i></i><i></i><i></i></div>
+        </div>
       </div>
-      <div class="label2 two-only" style="left:50%; transform:translateX(-50%)">🛋️ The Snug</div>
+      <div class="label2 two-only" style="left:50%; transform:translateX(-50%)">🍳 Kitchen</div>
       <div class="door-back two-only" id="doorBack" title="Back to the bedroom">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
         <div class="sign">← bedroom</div>
@@ -1078,7 +1116,7 @@
       { id: "aqsa", x: 47.5, y: 88 },
       { id: "adam", x: 79,   y: 88 }
     ],
-    currentRoom: "main",   // which room is on screen ("main" bedroom or "two" snug)
+    currentRoom: "main",   // which room is on screen ("main" bedroom or "two" kitchen)
     closet: [],            // clothing item ids you've bought
     outfits: { jas: {}, aqsa: {}, adam: {} },   // what each friend is wearing
     scores: { starcatcher: [], laundromat: [] },   // mini-game leaderboards
@@ -2880,10 +2918,10 @@
   }
 
   // =====================================================================
-  //  ROOMS — doors on the walls switch between the bedroom, snug & wardrobe.
+  //  ROOMS — doors on the walls switch between the bedroom, kitchen & wardrobe.
   // =====================================================================
   var ROOM_TOASTS = {
-    two: "🚪 The snug — decorate it too! Tap ← to head back.",
+    two: "🍳 The kitchen — decorate it too! Tap ← to head back.",
     wardrobe: "👗 The Wardrobe — make it yours! Tap → to head back.",
     main: "🏠 Back in the bedroom."
   };
@@ -2901,11 +2939,11 @@
   }
 
   // House overview — a little floor plan of every room (left to right, the way
-  // the doors connect: Wardrobe · Bedroom · Snug). Tap a room to go there.
+  // the doors connect: Wardrobe · Bedroom · Kitchen). Tap a room to go there.
   var HOUSE_ROOMS = [
     { id: "wardrobe", name: "👗 Wardrobe", wall: "linear-gradient(180deg,#4a3a52,#6f5570)", floor: "linear-gradient(180deg,#a98a6a,#876a4a)" },
     { id: "main",     name: "🛏️ Bedroom",  wall: "linear-gradient(180deg,#4a3a63,#6b5184)", floor: "linear-gradient(180deg,#8a6a4f,#74573f)" },
-    { id: "two",      name: "🛋️ The Snug", wall: "linear-gradient(180deg,#2e514a,#427563)", floor: "linear-gradient(180deg,#9a7445,#7c5a32)" }
+    { id: "two",      name: "🍳 Kitchen", wall: "linear-gradient(180deg,#f5ead2,#ecd9b4)", floor: "linear-gradient(180deg,#d8c3a0,#c6ad82)" }
   ];
   var FURN_EMOJI = { wardrobe: "🗄️", bed: "🛏️", desk: "🖥️" };
 

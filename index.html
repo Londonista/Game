@@ -704,7 +704,7 @@
   /* ---- Brown glass-pane garden door (kitchen → garden, and back) -------- */
   .door-garden, .door-gardenback { position: absolute; bottom: 0; width: 78px; height: 214px; z-index: 3;
     cursor: pointer; pointer-events: auto; }
-  .door-garden { right: 6px; } .door-gardenback { left: 6px; }
+  .door-garden { left: 546px; } .door-gardenback { left: 6px; }   /* directly left of the fridge */
   .gdoor .leaf { position: absolute; inset: 0; background: linear-gradient(180deg,#6e4a2c,#4f3318);
     border: 4px solid #3a2613; border-radius: 8px 8px 0 0; box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), -8px 0 16px rgba(0,0,0,.3); }
   .door-gardenback .leaf { box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), 8px 0 16px rgba(0,0,0,.3); }
@@ -760,9 +760,43 @@
     radial-gradient(4px 4px at 22% 42%, #ff8fb0 0 50%, transparent 51%),
     radial-gradient(4px 4px at 52% 28%, #ffd86b 0 50%, transparent 51%),
     radial-gradient(4px 4px at 78% 48%, #c6a0ff 0 50%, transparent 51%); }
+
+  /* ---- The Snug (data-room="snug") — a cosy sitting room ---------------- */
+  #room[data-room="snug"] { background: linear-gradient(180deg,#2e514a,#427563 64%); }
+  #room[data-room="snug"] .floor { background: linear-gradient(180deg,#9a7445,#7c5a32); }
+  .snug-only { display: none; }
+  #room[data-room="snug"] .snug-only { display: block; }
+  .snug { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  /* round night window */
+  .snug .s-window { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 150px; height: 150px;
+    border-radius: 50%; border: 8px solid #eaddc4; overflow: hidden; background: #1f2740; box-shadow: inset 0 0 0 2px #cdbb9c, 0 10px 22px rgba(0,0,0,.35); }
+  .snug .s-window::before { content:""; position: absolute; inset: 0; background: linear-gradient(180deg,#22304c,#3a3358); }
+  .snug .s-window .s-moon { position: absolute; width: 30px; height: 30px; border-radius: 50%; top: 26px; left: 30px; z-index: 1;
+    background: radial-gradient(circle at 40% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 16px rgba(255,240,200,.6); }
+  .snug .s-window .s-cross::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #eaddc4; transform: translateX(-50%); z-index: 2; }
+  .snug .s-window .s-cross::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #eaddc4; transform: translateY(-50%); z-index: 2; }
+  /* warm floor lamp */
+  .snug .s-lamp { position: absolute; left: 78px; bottom: 78px; width: 6px; height: 128px; border-radius: 3px;
+    background: linear-gradient(90deg,#5a4632,#7a5e42,#5a4632); }
+  .snug .s-lamp::before { content:""; position: absolute; top: -26px; left: 50%; transform: translateX(-50%); width: 34px; height: 28px;
+    border-radius: 6px 6px 14px 14px; background: linear-gradient(180deg,#ffe6a8,#f4c46a); box-shadow: 0 0 28px 7px rgba(255,224,150,.45); }
+  .snug .s-lamp::after { content:""; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); width: 26px; height: 6px; border-radius: 50%; background: #4a3a28; }
+  /* round patterned rug */
+  .snug .s-rug { position: absolute; left: 50%; transform: translateX(-50%); bottom: 22px; width: 300px; height: 48px; border-radius: 50%;
+    background: radial-gradient(circle, #b8704a 0 38%, #9c5d3c 39% 58%, #b8704a 59% 78%, #8f5536 79%); opacity: .92; }
+  /* cosy sofa */
+  .snug .s-sofa { position: absolute; left: 50%; transform: translateX(-50%); bottom: 50px; width: 250px; height: 90px; }
+  .snug .s-sofa .back { position: absolute; top: 0; left: 8px; right: 8px; height: 52px; border-radius: 14px 14px 6px 6px; background: linear-gradient(180deg,#b5683f,#8f4f2c); }
+  .snug .s-sofa .arm { position: absolute; bottom: 0; width: 28px; height: 64px; border-radius: 10px; background: linear-gradient(180deg,#a85e38,#854829); }
+  .snug .s-sofa .arm.l { left: 0; } .snug .s-sofa .arm.r { right: 0; }
+  .snug .s-sofa .seat { position: absolute; bottom: 0; left: 24px; right: 24px; height: 44px; border-radius: 9px; background: linear-gradient(180deg,#c47a4e,#a5613a); }
+  .snug .s-sofa .cush { position: absolute; bottom: 22px; width: 64px; height: 40px; border-radius: 9px; background: #cf8a5e; box-shadow: inset 0 -4px 0 rgba(0,0,0,.12); }
+  .snug .s-sofa .cush.c1 { left: 40px; } .snug .s-sofa .cush.c2 { right: 40px; }
+
   .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(90,55,30,.85);
     text-shadow: 0 1px 2px rgba(255,255,255,.4); pointer-events: none; }
   #room[data-room="garden"] .label2 { color: rgba(255,255,255,.85); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+  #room[data-room="snug"] .label2 { color: rgba(255,255,255,.82); text-shadow: 0 1px 2px rgba(0,0,0,.45); }
 
   /* ---- House overview (floor plan of all rooms) ------------------------ */
   .house-plan { display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
@@ -972,14 +1006,34 @@
       </div>
 
       <!-- Door on the right wall → leads to the kitchen -->
-      <div class="door-next" id="doorNext" title="Go to the kitchen">
+      <div class="door-next" id="doorNext" title="Go to the snug">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">kitchen →</div>
+        <div class="sign">snug →</div>
       </div>
       <!-- Door on the left wall → leads to the Wardrobe -->
       <div class="door-ward" id="doorWard" title="Go to the Wardrobe">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
         <div class="sign">← wardrobe</div>
+      </div>
+
+      <!-- ===== THE SNUG — between the bedroom and the kitchen ===== -->
+      <div class="snug snug-only">
+        <div class="s-window"><div class="s-moon"></div><div class="s-cross"></div></div>
+        <div class="s-lamp"></div>
+        <div class="s-rug"></div>
+        <div class="s-sofa">
+          <span class="back"></span><span class="arm l"></span><span class="arm r"></span>
+          <span class="seat"></span><span class="cush c1"></span><span class="cush c2"></span>
+        </div>
+      </div>
+      <div class="label2 snug-only" style="left:50%; transform:translateX(-50%)">🛋️ The Snug</div>
+      <div class="door-back snug-only" id="doorSnugBack" title="Back to the bedroom">
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
+        <div class="sign">← bedroom</div>
+      </div>
+      <div class="door-wardback snug-only" id="doorSnugNext" title="Go to the kitchen">
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
+        <div class="sign">kitchen →</div>
       </div>
 
       <!-- ===== SECOND ROOM (the Kitchen) — shown only when you're in it ===== -->
@@ -1008,9 +1062,9 @@
         </div>
       </div>
       <div class="label2 two-only" style="left:50%; transform:translateX(-50%)">🍳 Kitchen</div>
-      <div class="door-back two-only" id="doorBack" title="Back to the bedroom">
+      <div class="door-back two-only" id="doorBack" title="Back to the snug">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">← bedroom</div>
+        <div class="sign">← snug</div>
       </div>
       <!-- Glass-pane back door beside the fridge → out to the garden -->
       <div class="door-garden two-only gdoor" id="doorGarden" title="Out to the garden">
@@ -3066,6 +3120,7 @@
   //  ROOMS — doors on the walls switch between the bedroom, kitchen & wardrobe.
   // =====================================================================
   var ROOM_TOASTS = {
+    snug: "🛋️ The snug — get cosy & decorate it! ← bedroom · kitchen →",
     two: "🍳 The kitchen — decorate it too! Tap ← to head back.",
     garden: "🌷 The garden — a breath of night air. Tap ← to head back.",
     wardrobe: "👗 The Wardrobe — make it yours! Tap → to head back.",
@@ -3089,6 +3144,7 @@
   var HOUSE_ROOMS = [
     { id: "wardrobe", name: "👗 Wardrobe", wall: "linear-gradient(180deg,#4a3a52,#6f5570)", floor: "linear-gradient(180deg,#a98a6a,#876a4a)" },
     { id: "main",     name: "🛏️ Bedroom",  wall: "linear-gradient(180deg,#4a3a63,#6b5184)", floor: "linear-gradient(180deg,#8a6a4f,#74573f)" },
+    { id: "snug",     name: "🛋️ The Snug", wall: "linear-gradient(180deg,#2e514a,#427563)", floor: "linear-gradient(180deg,#9a7445,#7c5a32)" },
     { id: "two",      name: "🍳 Kitchen", wall: "linear-gradient(180deg,#6a5594,#48366e)", floor: "linear-gradient(180deg,#7a5638,#5f4029)" },
     { id: "garden",   name: "🌷 Garden",  wall: "linear-gradient(180deg,#202a4c,#36406a)", floor: "linear-gradient(180deg,#3f6f3c,#2c5230)" }
   ];
@@ -3527,8 +3583,10 @@
   $("btnMemory").addEventListener("click", openMemories);
   $("btnSave").addEventListener("click", openSaveMenu);
   $("btnMute").addEventListener("click", function () { Ambient.toggle(); });
-  $("doorNext").addEventListener("click", function () { goToRoom("two"); });
-  $("doorBack").addEventListener("click", function () { goToRoom("main"); });
+  $("doorNext").addEventListener("click", function () { goToRoom("snug"); });
+  $("doorBack").addEventListener("click", function () { goToRoom("snug"); });
+  $("doorSnugBack").addEventListener("click", function () { goToRoom("main"); });
+  $("doorSnugNext").addEventListener("click", function () { goToRoom("two"); });
   $("doorWard").addEventListener("click", function () { goToRoom("wardrobe"); });
   $("doorWardBack").addEventListener("click", function () { goToRoom("main"); });
   $("doorGarden").addEventListener("click", function () { goToRoom("garden"); });

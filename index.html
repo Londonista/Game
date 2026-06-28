@@ -796,6 +796,22 @@
   .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(90,55,30,.85);
     text-shadow: 0 1px 2px rgba(255,255,255,.4); pointer-events: none; }
   #room[data-room="garden"] .label2 { color: rgba(255,255,255,.85); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+
+  /* jewel flowers & vines that bloom in the corners when you enter the garden */
+  .gardenfx { position: absolute; width: 46%; max-width: 190px; height: 46%; max-height: 190px; z-index: 70; pointer-events: none; }
+  .gardenfx.tl { top: 0; left: 0; }
+  .gardenfx.tr { top: 0; right: 0; transform: scaleX(-1); }
+  .gardenfx.bl { bottom: 0; left: 0; transform: scaleY(-1); }
+  .gardenfx.br { bottom: 0; right: 0; transform: scale(-1,-1); }
+  .gardenfx .gfx-in { width: 100%; height: 100%; transform-origin: 0 0; opacity: 0;
+    filter: drop-shadow(0 0 6px rgba(255,255,255,.25)); animation: gfxbloom 4.4s ease forwards; }
+  .gardenfx .gfx-in svg { width: 100%; height: 100%; display: block; }
+  @keyframes gfxbloom {
+    0%   { opacity: 0; transform: scale(.4) rotate(-7deg); }
+    22%  { opacity: 1; }
+    55%  { opacity: 1; transform: scale(1) rotate(0deg); }
+    100% { opacity: 0; transform: scale(1.08) rotate(3deg); }
+  }
   #room[data-room="snug"] .label2 { color: rgba(255,255,255,.82); text-shadow: 0 1px 2px rgba(0,0,0,.45); }
 
   /* ---- House overview (floor plan of all rooms) ------------------------ */
@@ -2961,8 +2977,36 @@
       padSuppressed = false;
     }
 
+    // A lush, magical transition flourish — an ascending shimmer over a soft
+    // chord swell, drenched in reverb (used when stepping into the garden).
+    function flourish() {
+      var c = getCtx(); if (!c || muted) return;
+      if (c.state === "suspended") c.resume();
+      if (!started) start();
+      ensureRunning();
+      var run = [523.25, 659.25, 783.99, 987.77, 1174.66, 1318.51, 1567.98, 1864.66, 1567.98, 2093.0];
+      run.forEach(function (f, i) {
+        var t = c.currentTime + 0.05 + i * 0.12, o = c.createOscillator(), g = c.createGain();
+        o.type = "triangle"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.06, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
+        o.connect(g); g.connect(master || c.destination); if (convolver) g.connect(convolver);
+        o.start(t); o.stop(t + 1.6);
+      });
+      [392.0, 493.88, 587.33, 783.99].forEach(function (f) {   // warm chord swell underneath
+        var t = c.currentTime, o = c.createOscillator(), g = c.createGain();
+        o.type = "sine"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.045, t + 0.7);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 3.4);
+        o.connect(g); g.connect(master || c.destination); if (convolver) g.connect(convolver);
+        o.start(t); o.stop(t + 3.5);
+      });
+    }
+
     return { start: start, toggle: toggle, squeak: squeak, charSqueak: charSqueak, blip: blip,
-             chaching: chaching, startTune: startTune, stopTune: stopTune,
+             chaching: chaching, startTune: startTune, stopTune: stopTune, flourish: flourish,
              updateBtn: updateBtn, level: level, isMuted: function () { return muted; },
              ctxState: function () { return ctx ? ctx.state : "none"; } };
   })();
@@ -3136,7 +3180,52 @@
       room.style.opacity = "1";
       save();
       toast(ROOM_TOASTS[name] || "🚪 A new room to decorate!");
+      if (name === "garden") gardenFlourish();
     }, 160);
+  }
+
+  // One ornate corner of jewel-coloured flowers on a leafy vine (SVG). The
+  // gradient ids are suffixed per corner so the four copies don't collide.
+  function cornerVine(idx) {
+    var p = "jw" + idx + "-";
+    function grad(id, a, b, c) {
+      return '<radialGradient id="' + p + id + '" cx="35%" cy="30%" r="78%">' +
+        '<stop offset="0" stop-color="' + a + '"/><stop offset="0.45" stop-color="' + b + '"/><stop offset="1" stop-color="' + c + '"/></radialGradient>';
+    }
+    var defs = '<defs>' +
+      grad('am', '#e6c2ff', '#9b59b6', '#5e2a86') + grad('sa', '#c3dbff', '#2e6fd6', '#163b80') +
+      grad('em', '#bff6db', '#1ea672', '#0c5a3e') + grad('ru', '#ffc7d8', '#d6336c', '#841842') +
+      grad('to', '#ffe9ad', '#e0a83a', '#9a6b14') + '</defs>';
+    function flower(cx, cy, r, g) {
+      var s = "";
+      for (var i = 0; i < 6; i++) {
+        var a = i * Math.PI / 3, px = (cx + Math.cos(a) * r * 0.72).toFixed(1), py = (cy + Math.sin(a) * r * 0.72).toFixed(1);
+        s += '<circle cx="' + px + '" cy="' + py + '" r="' + (r * 0.52).toFixed(1) + '" fill="url(#' + p + g + ')"/>';
+      }
+      return s + '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.42).toFixed(1) + '" fill="#fff6d2"/>';
+    }
+    var stems = '<g stroke="#2f7a46" stroke-width="3.2" fill="none" stroke-linecap="round">' +
+      '<path d="M2 16 C 38 22, 66 42, 96 82"/><path d="M16 2 C 22 36, 42 64, 80 94"/><path d="M2 4 C 28 12, 46 28, 58 52"/></g>';
+    var leaves = '<g fill="#3a915a">' +
+      '<ellipse cx="44" cy="30" rx="9" ry="4.6" transform="rotate(30 44 30)"/>' +
+      '<ellipse cx="30" cy="46" rx="9" ry="4.6" transform="rotate(64 30 46)"/>' +
+      '<ellipse cx="72" cy="60" rx="8" ry="4.2" transform="rotate(36 72 60)"/>' +
+      '<ellipse cx="60" cy="84" rx="8" ry="4.2" transform="rotate(60 60 84)"/></g>';
+    var flowers = flower(96, 82, 12, 'am') + flower(80, 96, 11, 'sa') + flower(58, 52, 10, 'em') +
+      flower(15, 16, 9, 'ru') + flower(40, 70, 8, 'to');
+    return '<svg viewBox="0 0 170 170" preserveAspectRatio="xMidYMid meet">' + defs + stems + leaves + flowers + '</svg>';
+  }
+  // play the entry flourish + bloom jewel vines in all four corners, then fade
+  function gardenFlourish() {
+    Ambient.flourish();
+    Array.prototype.slice.call(room.querySelectorAll(".gardenfx")).forEach(function (n) { n.remove(); });
+    ["tl", "tr", "bl", "br"].forEach(function (cn, i) {
+      var d = document.createElement("div");
+      d.className = "gardenfx " + cn;
+      d.innerHTML = '<div class="gfx-in">' + cornerVine(i) + '</div>';
+      room.appendChild(d);
+      setTimeout(function () { if (d.parentNode) d.remove(); }, 4500);
+    });
   }
 
   // House overview — a little floor plan of every room (left to right, the way

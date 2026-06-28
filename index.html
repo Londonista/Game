@@ -803,13 +803,13 @@
     text-shadow: 0 1px 2px rgba(255,255,255,.4); pointer-events: none; }
   #room[data-room="garden"] .label2 { color: rgba(255,255,255,.85); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
 
-  /* Entering the garden: a black screen framed with jewel flowers & vines in
-     the corners, which fades out as one to reveal the garden. */
-  .garden-reveal { position: absolute; inset: 0; z-index: 75; background: #04060c; pointer-events: none;
-    animation: gardenreveal 2.8s ease forwards; }
-  @keyframes gardenreveal { 0% { opacity: 1; } 30% { opacity: 1; } 100% { opacity: 0; } }
-  .garden-reveal .gv { position: absolute; width: 64%; max-width: 300px; height: 64%; max-height: 300px;
-    filter: drop-shadow(0 0 6px rgba(255,255,255,.3)); }
+  /* Entering the garden: dainty jewel flowers & vines fill the corners and
+     gently fade away (no backdrop — the garden shows through). */
+  .garden-reveal { position: absolute; inset: 0; z-index: 75; pointer-events: none;
+    animation: gardenreveal 2.6s ease forwards; }
+  @keyframes gardenreveal { 0% { opacity: 0; } 14% { opacity: 1; } 46% { opacity: 1; } 100% { opacity: 0; } }
+  .garden-reveal .gv { position: absolute; width: 38%; max-width: 176px; height: 38%; max-height: 176px;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,.35)); }
   .garden-reveal .gv.tl { top: 0; left: 0; }
   .garden-reveal .gv.tr { top: 0; right: 0; transform: scaleX(-1); }
   .garden-reveal .gv.bl { bottom: 0; left: 0; transform: scaleY(-1); }
@@ -3213,68 +3213,60 @@
     }, 160);
   }
 
-  // A lush corner of jewel-coloured flowers on leafy vines (SVG). The gradient
-  // ids are suffixed per corner so the four copies don't collide.
+  // A dainty corner spray of jewel-coloured flowers on slender leafy vines
+  // (SVG). The gradient ids are suffixed per corner so the copies don't collide.
   function cornerVine(idx) {
     var p = "jw" + idx + "-";
     function grad(id, a, b, c) {
-      return '<radialGradient id="' + p + id + '" cx="35%" cy="30%" r="78%">' +
-        '<stop offset="0" stop-color="' + a + '"/><stop offset="0.45" stop-color="' + b + '"/><stop offset="1" stop-color="' + c + '"/></radialGradient>';
+      return '<radialGradient id="' + p + id + '" cx="36%" cy="30%" r="80%">' +
+        '<stop offset="0" stop-color="' + a + '"/><stop offset="0.5" stop-color="' + b + '"/><stop offset="1" stop-color="' + c + '"/></radialGradient>';
     }
     var defs = '<defs>' +
-      grad('am', '#e6c2ff', '#9b59b6', '#5e2a86') + grad('sa', '#c3dbff', '#2e6fd6', '#163b80') +
-      grad('em', '#bff6db', '#1ea672', '#0c5a3e') + grad('ru', '#ffc7d8', '#d6336c', '#841842') +
-      grad('to', '#ffe9ad', '#e0a83a', '#9a6b14') + grad('ro', '#ffd0e6', '#e85aa0', '#8f2a5e') + '</defs>';
+      grad('am', '#eccdff', '#a96bc4', '#6b3593') + grad('sa', '#cfe1ff', '#4d86e0', '#22468f') +
+      grad('em', '#c9f7e1', '#2fb585', '#13654a') + grad('ru', '#ffd4e2', '#e0507f', '#8f2350') +
+      grad('to', '#ffeec0', '#ebb852', '#9a6b14') + grad('ro', '#ffd9ec', '#ef7ab2', '#9a356a') + '</defs>';
+    // a slender five-petal bloom — daintier than fat circle-clusters
     function flower(cx, cy, r, g) {
-      var s = "";
-      for (var i = 0; i < 6; i++) {
-        var a = i * Math.PI / 3, px = (cx + Math.cos(a) * r * 0.72).toFixed(1), py = (cy + Math.sin(a) * r * 0.72).toFixed(1);
-        s += '<circle cx="' + px + '" cy="' + py + '" r="' + (r * 0.52).toFixed(1) + '" fill="url(#' + p + g + ')"/>';
+      var rot = (cx * 13 + cy * 7) % 36;
+      var s = '<g transform="rotate(' + rot.toFixed(0) + ' ' + cx + ' ' + cy + ')">';
+      for (var i = 0; i < 5; i++) {
+        s += '<ellipse cx="' + cx + '" cy="' + (cy - r * 0.6).toFixed(1) + '" rx="' + (r * 0.34).toFixed(1) +
+          '" ry="' + (r * 0.62).toFixed(1) + '" transform="rotate(' + (i * 72) + ' ' + cx + ' ' + cy + ')" fill="url(#' + p + g + ')"/>';
       }
-      return s + '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.42).toFixed(1) + '" fill="#fff6d2"/>';
+      return s + '</g><circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.28).toFixed(1) + '" fill="#fff6d2"/>';
     }
     function leaf(cx, cy, rot, sz) {
-      return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + sz + '" ry="' + (sz * 0.5).toFixed(1) + '" transform="rotate(' + rot + ' ' + cx + ' ' + cy + ')"/>';
+      return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + sz + '" ry="' + (sz * 0.46).toFixed(1) + '" transform="rotate(' + rot + ' ' + cx + ' ' + cy + ')"/>';
     }
     function bud(cx, cy, r, g) {
       return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#' + p + g + ')"/>' +
-        '<circle cx="' + (cx - r * 0.3).toFixed(1) + '" cy="' + (cy - r * 0.3).toFixed(1) + '" r="' + (r * 0.3).toFixed(1) + '" fill="rgba(255,255,255,.6)"/>';
+        '<circle cx="' + (cx - r * 0.3).toFixed(1) + '" cy="' + (cy - r * 0.3).toFixed(1) + '" r="' + (r * 0.32).toFixed(1) + '" fill="rgba(255,255,255,.65)"/>';
     }
-    // two layers of stems that cross/weave, for a webby, intertwined corner
-    var stemsBack = '<g stroke="#2a6e3f" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".92">' +
-      '<path d="M2 34 C 64 26, 118 62, 196 118"/><path d="M34 2 C 26 64, 62 118, 118 196"/>' +
-      '<path d="M2 96 C 70 86, 104 118, 150 196"/><path d="M96 2 C 86 70, 118 104, 196 150"/>' +
-      '<path d="M2 160 C 50 150, 84 172, 104 198"/><path d="M160 2 C 150 50, 172 84, 198 104"/></g>';
-    var stemsFront = '<g stroke="#3a915a" stroke-width="3.2" fill="none" stroke-linecap="round">' +
-      '<path d="M2 10 C 56 44, 96 30, 162 78"/><path d="M10 2 C 44 56, 30 96, 78 162"/>' +
-      '<path d="M2 60 C 60 50, 92 92, 120 150"/><path d="M60 2 C 50 60, 92 92, 150 120"/>' +
-      '<path d="M2 120 C 44 116, 70 140, 80 184"/><path d="M120 2 C 116 44, 140 70, 184 80"/></g>';
-    var curls = '<g stroke="#4aa56a" stroke-width="2" fill="none" stroke-linecap="round">' +
-      '<path d="M150 80 c 10 -6 16 4 8 12 c -5 5 -12 1 -9 -6"/>' +
-      '<path d="M80 150 c -6 10 4 16 12 8 c 5 -5 1 -12 -6 -9"/>' +
-      '<path d="M110 110 c 8 6 2 16 -7 12 c -6 -3 -4 -11 3 -10"/>' +
-      '<path d="M52 96 c -8 4 -6 14 3 13 c 6 -1 6 -9 0 -11"/>' +
-      '<path d="M96 52 c 4 -8 14 -6 13 3 c -1 6 -9 6 -11 0"/></g>';
-    var leaves = '<g fill="#3a915a">' +
-      leaf(40, 18, 20, 9) + leaf(70, 40, 14, 9) + leaf(110, 34, -10, 8) + leaf(150, 66, 26, 9) + leaf(176, 104, 40, 9) +
-      leaf(18, 40, 70, 9) + leaf(40, 70, 76, 9) + leaf(34, 110, 100, 8) + leaf(66, 150, 64, 9) + leaf(104, 176, 50, 9) +
-      leaf(60, 60, 40, 9) + leaf(96, 96, 30, 9) + leaf(124, 120, 55, 9) + leaf(150, 150, 45, 9) +
-      leaf(84, 124, 80, 8) + leaf(124, 84, 10, 8) + '</g>';
-    var leavesDk = '<g fill="#2f7a46">' +
-      leaf(54, 32, 50, 7) + leaf(32, 54, 28, 7) + leaf(120, 60, 70, 7) + leaf(60, 120, 16, 7) +
-      leaf(160, 130, 35, 7) + leaf(130, 160, 60, 7) + '</g>';
+    // a couple of slim crossing vines (viewBox 130 — a compact corner)
+    var stemsBack = '<g stroke="#3a915a" stroke-width="1.7" fill="none" stroke-linecap="round" opacity=".85">' +
+      '<path d="M2 22 C 34 20, 64 40, 96 86"/><path d="M22 2 C 20 34, 40 64, 86 96"/>' +
+      '<path d="M2 64 C 40 58, 60 78, 70 116"/><path d="M64 2 C 58 40, 78 60, 116 70"/></g>';
+    var stemsFront = '<g stroke="#4aa56a" stroke-width="2" fill="none" stroke-linecap="round">' +
+      '<path d="M2 8 C 36 28, 62 22, 100 54"/><path d="M8 2 C 28 36, 22 62, 54 100"/>' +
+      '<path d="M2 100 C 30 96, 48 112, 56 126"/><path d="M100 2 C 96 30, 112 48, 126 56"/></g>';
+    var curls = '<g stroke="#5ab57a" stroke-width="1.4" fill="none" stroke-linecap="round">' +
+      '<path d="M96 56 c 7 -4 11 3 5 8 c -3 3 -8 1 -6 -4"/>' +
+      '<path d="M56 96 c -4 7 3 11 8 5 c 3 -3 1 -8 -4 -6"/></g>';
+    var leaves = '<g fill="#3f9a5e">' +
+      leaf(30, 16, 22, 5.5) + leaf(54, 34, 16, 5.5) + leaf(16, 30, 70, 5.5) + leaf(34, 54, 74, 5.5) +
+      leaf(70, 46, 30, 5) + leaf(46, 70, 60, 5) + leaf(96, 78, 38, 5) + leaf(78, 96, 56, 5) +
+      leaf(56, 56, 44, 5) + leaf(112, 60, 24, 5) + leaf(60, 112, 66, 5) + '</g>';
     var flowers =
-      flower(162, 78, 14, 'am') + flower(78, 162, 14, 'sa') + flower(196, 118, 12, 'em') +
-      flower(118, 196, 12, 'ru') + flower(184, 80, 11, 'to') + flower(80, 184, 11, 'ro') +
-      flower(110, 110, 15, 'am') + flower(60, 60, 11, 'em') + flower(150, 120, 12, 'ru') +
-      flower(120, 150, 12, 'to') + flower(52, 96, 9, 'sa') + flower(96, 52, 9, 'ro') + flower(16, 18, 11, 'to');
-    var buds = bud(132, 58, 4, 'ro') + bud(58, 132, 4, 'am') + bud(172, 142, 4, 'sa') +
-      bud(142, 172, 4, 'em') + bud(34, 74, 3.5, 'ru') + bud(74, 34, 3.5, 'to') + bud(100, 30, 3.5, 'am');
-    return '<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">' + defs +
-      stemsBack + leavesDk + stemsFront + curls + leaves + flowers + buds + '</svg>';
+      flower(96, 86, 8, 'am') + flower(86, 96, 8, 'sa') + flower(70, 116, 7, 'em') + flower(116, 70, 7, 'ru') +
+      flower(100, 54, 7, 'to') + flower(54, 100, 7, 'ro') + flower(60, 60, 6.5, 'am') + flower(18, 20, 6.5, 'to') +
+      flower(124, 124, 7, 'em');
+    var buds = bud(40, 28, 2.6, 'ro') + bud(28, 40, 2.6, 'am') + bud(118, 98, 2.6, 'sa') +
+      bud(98, 118, 2.6, 'em') + bud(74, 34, 2.4, 'ru') + bud(34, 74, 2.4, 'to');
+    return '<svg viewBox="0 0 130 130" preserveAspectRatio="xMidYMid meet">' + defs +
+      stemsBack + stemsFront + curls + leaves + flowers + buds + '</svg>';
   }
-  // Enter the garden: play the flourish and drop a black screen framed with
-  // jewel vines in the corners, which fades out as one to reveal the garden.
+  // Enter the garden: play the flourish and let dainty jewel flowers fill the
+  // corners and softly fade away (no backdrop — the garden shows through).
   function gardenFlourish() {
     Ambient.flourish();
     Array.prototype.slice.call(room.querySelectorAll(".garden-reveal")).forEach(function (n) { n.remove(); });

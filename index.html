@@ -507,7 +507,14 @@
     repeating-linear-gradient(90deg, #7a5638 0 40px, #6c4a2e 40px 42px),
     linear-gradient(180deg,#7a5638,#5f4029); }
   #room[data-room="wardrobe"] { background: linear-gradient(180deg,#4a3a52,#6f5570 64%); }
-  #room[data-room="wardrobe"] .floor { background: linear-gradient(180deg,#a98a6a,#876a4a); }
+  /* light lilac, textured "fluffy" carpet */
+  #room[data-room="wardrobe"] .floor { background-color: #dccbef;
+    background-image:
+      radial-gradient(rgba(255,255,255,.55) 1px, transparent 1.7px),
+      radial-gradient(rgba(160,140,196,.45) 1px, transparent 1.7px),
+      radial-gradient(rgba(255,255,255,.3) 1px, transparent 1.5px);
+    background-size: 9px 9px, 9px 9px, 13px 13px;
+    background-position: 0 0, 4px 4px, 2px 6px; }
   /* hide the bedroom's fixtures + furniture whenever you're not in the bedroom
      (friends + cat come along, so they're NOT hidden) */
   #room:not([data-room="main"]) .window, #room:not([data-room="main"]) .curtain,
@@ -776,9 +783,9 @@
     background: radial-gradient(circle at 40% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 16px rgba(255,240,200,.6); }
   .snug .s-window .s-cross::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #eaddc4; transform: translateX(-50%); z-index: 2; }
   .snug .s-window .s-cross::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #eaddc4; transform: translateY(-50%); z-index: 2; }
-  /* round patterned rug */
-  .snug .s-rug { position: absolute; left: 50%; transform: translateX(-50%); bottom: 22px; width: 300px; height: 48px; border-radius: 50%;
-    background: radial-gradient(circle, #b8704a 0 38%, #9c5d3c 39% 58%, #b8704a 59% 78%, #8f5536 79%); opacity: .92; }
+  /* Round patterned rug — a purchasable, draggable item (any room) */
+  .item.rug { font-size: 0; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.3)); }
+  .rug-art { width: 300px; height: 50px; border-radius: 50%; opacity: .96; }
 
   /* Cosy sofa — a purchasable, draggable item */
   .item.sofa { font-size: 0; filter: drop-shadow(0 7px 6px rgba(0,0,0,0.4)); }
@@ -1038,7 +1045,6 @@
       <!-- ===== THE SNUG — between the bedroom and the kitchen ===== -->
       <div class="snug snug-only">
         <div class="s-window"><div class="s-moon"></div><div class="s-cross"></div></div>
-        <div class="s-rug"></div>
       </div>
       <div class="label2 snug-only" style="left:50%; transform:translateX(-50%)">🛋️ The Snug</div>
       <div class="door-back snug-only" id="doorSnugBack" title="Back to the bedroom">
@@ -1237,6 +1243,12 @@
     { id: "sofa_rust", name: "Cosy Sofa", ic: "🛋️", price: 36, unlockAt: 0, set: "Snug", render: "sofa" },
     { id: "lamp_floor", name: "Floor Lamp", ic: "🪔", price: 18, unlockAt: 0, set: "Snug", render: "lamp" },
 
+    // --- Rugs (drag them under your furniture) ---
+    { id: "rug_lilac", name: "Lilac Rug", ic: "🟪", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "lilac" },
+    { id: "rug_rust",  name: "Cosy Rug",  ic: "🟫", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "rust" },
+    { id: "rug_sage",  name: "Sage Rug",  ic: "🟩", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "sage" },
+    { id: "rug_rose",  name: "Rose Rug",  ic: "🌹", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "rose" },
+
     // --- Outfits (worn by the friends via the ornate wardrobe) ---
     { id: "hat_tiara",   name: "Tiara",        ic: "👑", price: 10, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👑", art: "tiara" } },
     { id: "hat_bow",     name: "Hair Bow",     ic: "🎀", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🎀", art: "bow" } },
@@ -1356,13 +1368,19 @@
     s.scores = s.scores || {};
     ["starcatcher", "laundromat"].forEach(function (id) { s.scores[id] = s.scores[id] || []; });
     if (typeof s.gardenDoorX !== "number") s.gardenDoorX = 68;
+    s.placed = s.placed || [];
+    var hasU = function (u) { return s.placed.some(function (p) { return p.uid === u; }); };
     // furnish the snug once with a (now removable/movable) sofa + floor lamp
     if (!s.snugFurnished) {
-      s.placed = s.placed || [];
-      var hasU = function (u) { return s.placed.some(function (p) { return p.uid === u; }); };
       if (!hasU("snug_sofa")) s.placed.push({ uid: "snug_sofa", itemId: "sofa_rust", x: 50, y: 84, room: "snug", scale: 1 });
       if (!hasU("snug_lamp")) s.placed.push({ uid: "snug_lamp", itemId: "lamp_floor", x: 14, y: 78, room: "snug", scale: 1 });
       s.snugFurnished = true;
+    }
+    // add a (movable) rug to the snug and a lilac one to the bedroom, once
+    if (!s.rugsAdded) {
+      if (!hasU("snug_rug")) s.placed.push({ uid: "snug_rug", itemId: "rug_rust", x: 50, y: 88, room: "snug", scale: 1 });
+      if (!hasU("bed_rug")) s.placed.push({ uid: "bed_rug", itemId: "rug_lilac", x: 52, y: 86, room: "main", scale: 1 });
+      s.rugsAdded = true;
     }
   }
 
@@ -1700,6 +1718,26 @@
     wrap.innerHTML = '<span class="pole"></span>';
     return wrap;
   }
+  var RUG_COLS = {
+    lilac: ["#c9aee6", "#b394d8", "#9c79c4"],
+    rust:  ["#b8704a", "#9c5d3c", "#8f5536"],
+    sage:  ["#a8c49a", "#8aa97c", "#6f8e62"],
+    rose:  ["#e3a3b8", "#cf8298", "#b66178"]
+  };
+  function buildRug(tint) {
+    var c = RUG_COLS[tint] || RUG_COLS.lilac;
+    var wrap = document.createElement("div");
+    wrap.className = "rug-art";
+    wrap.style.background = "radial-gradient(ellipse, " + c[0] + " 0 38%, " + c[1] + " 39% 58%, " + c[0] + " 59% 78%, " + c[2] + " 79%)";
+    return wrap;
+  }
+  function rugIcon(tint) {
+    var c = RUG_COLS[tint] || RUG_COLS.lilac;
+    return '<svg width="40" height="22" viewBox="0 0 40 22">' +
+      '<ellipse cx="20" cy="11" rx="19" ry="10" fill="' + c[0] + '"/>' +
+      '<ellipse cx="20" cy="11" rx="13" ry="6.5" fill="none" stroke="' + c[2] + '" stroke-width="2"/>' +
+      '<ellipse cx="20" cy="11" rx="7" ry="3.5" fill="' + c[1] + '"/></svg>';
+  }
 
   // Compact wardrobe icon for the shop card.
   var WARDROBE_ICON =
@@ -1771,6 +1809,7 @@
       else if (def.render === "wardrobe") { el.classList.add("wardrobeitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildWardrobe()); }
       else if (def.render === "sofa") { el.classList.add("sofa"); el.style.zIndex = depthZ(p.y); el.appendChild(buildSofa()); }
       else if (def.render === "lamp") { el.classList.add("lamp"); el.style.zIndex = depthZ(p.y); el.appendChild(buildLamp()); }
+      else if (def.render === "rug") { el.classList.add("rug"); el.style.zIndex = 2; el.appendChild(buildRug(def.tint)); }   // rugs lie under everything
       else if (def.render === "vase") { el.classList.add("vase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVase()); }
       else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint, def.size, p.orient)); }
       else { el.style.zIndex = depthZ(p.y); el.textContent = def.ic; }
@@ -2000,6 +2039,7 @@
          : it.render === "wardrobe" ? WARDROBE_ICON
          : it.render === "vase" ? VASE_SVG
          : it.render === "bed" ? bedIcon(it.tint, it.size)
+         : it.render === "rug" ? rugIcon(it.tint)
          : it.ic;
   }
   // catalogue grouped by set, preserving the order sets first appear
@@ -3282,7 +3322,7 @@
   // House overview — a little floor plan of every room (left to right, the way
   // the doors connect: Wardrobe · Bedroom · Kitchen). Tap a room to go there.
   var HOUSE_ROOMS = [
-    { id: "wardrobe", name: "👗 Wardrobe", wall: "linear-gradient(180deg,#4a3a52,#6f5570)", floor: "linear-gradient(180deg,#a98a6a,#876a4a)" },
+    { id: "wardrobe", name: "👗 Wardrobe", wall: "linear-gradient(180deg,#4a3a52,#6f5570)", floor: "linear-gradient(180deg,#dccbef,#c6b2e6)" },
     { id: "main",     name: "🛏️ Bedroom",  wall: "linear-gradient(180deg,#4a3a63,#6b5184)", floor: "linear-gradient(180deg,#8a6a4f,#74573f)" },
     { id: "snug",     name: "🛋️ The Snug", wall: "linear-gradient(180deg,#2e514a,#427563)", floor: "linear-gradient(180deg,#9a7445,#7c5a32)" },
     { id: "two",      name: "🍳 Kitchen", wall: "linear-gradient(180deg,#6a5594,#48366e)", floor: "linear-gradient(180deg,#7a5638,#5f4029)" },

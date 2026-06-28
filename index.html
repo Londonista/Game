@@ -526,6 +526,38 @@
   .item.vanity .vanity-svg { display: block; }
   .item.vanity .del { top: -6px; right: -8px; }
 
+  /* Ornate white wardrobe (opens a clothes chooser when tapped) */
+  .item.wardrobe { font-size: 0; filter: drop-shadow(0 9px 8px rgba(0,0,0,0.4)); cursor: pointer; }
+  .item.wardrobe .wardrobe-svg { display: block; }
+  .item.wardrobe .del { top: -6px; right: -8px; }
+
+  /* Clothes worn by the friend avatars (also reused in the wardrobe preview) */
+  .worn-dress { position: absolute; left: 3px; right: 3px; bottom: 0; height: 30px;
+    border-radius: 7px 7px 13px 13px; pointer-events: none;
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,.14), inset 0 7px 0 rgba(255,255,255,.16); }
+  .worn-hat { position: absolute; top: -7px; left: 0; right: 0; text-align: center;
+    font-size: 19px; line-height: 1; pointer-events: none; z-index: 2; }
+  .worn-acc { position: absolute; top: 30px; left: 0; right: 0; text-align: center;
+    font-size: 14px; line-height: 1; pointer-events: none; z-index: 3; }
+
+  /* Wardrobe chooser modal */
+  .ward-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+  .ward-tab { border: 2px solid var(--c); background: transparent; color: #fff;
+    border-radius: 14px; padding: 6px 16px; font-weight: 700; cursor: pointer; }
+  .ward-tab.on { background: var(--c); color: #2a2238; }
+  .ward-prev { display: flex; justify-content: center; margin: 6px 0 8px; }
+  .ava-prev { position: relative; width: 56px; height: 60px; }
+  .ava-prev .pbody { width: 42px; height: 48px; margin: 0 auto; position: relative;
+    border-radius: 22px 22px 16px 16px; box-shadow: inset 0 -6px 0 rgba(0,0,0,0.12); }
+  .ava-prev .pface { position: absolute; top: 12px; left: 0; right: 0; text-align: center; font-size: 16px; }
+  .ward-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; margin-bottom: 6px; }
+  .ward-card { background: rgba(255,255,255,.06); border: 2px solid transparent; border-radius: 12px;
+    padding: 8px 4px; text-align: center; cursor: pointer; }
+  .ward-card.on { border-color: #ffd86b; background: rgba(255,216,107,.14); }
+  .ward-card .ic { font-size: 24px; height: 40px; display: flex; align-items: center; justify-content: center; }
+  .ward-card .nm { font-size: 11px; margin-top: 2px; }
+  .shop-card.owned { opacity: .65; }
+
   /* Ornate, empty wooden bookcase — a purchasable, removable item */
   .item.bookcase { font-size: 0; filter: drop-shadow(0 8px 7px rgba(0,0,0,0.4)); }
   .item.bookcase .del { top: -8px; right: -10px; }
@@ -923,6 +955,20 @@
 
     // --- Boudoir ---
     { id: "vanity",    name: "Dressing Table", ic: "🪞", price: 34, unlockAt: 0, set: "Boudoir", render: "vanity" },
+    { id: "wardrobe_white", name: "Ornate Wardrobe", ic: "👗", price: 40, unlockAt: 0, set: "Boudoir", render: "wardrobe" },
+
+    // --- Outfits (worn by the friends via the ornate wardrobe) ---
+    { id: "dress_rose",  name: "Rose Dress",   price: 12, unlockAt: 0, set: "Outfits", wear: { slot: "dress", col: "#e98aa8" } },
+    { id: "dress_lilac", name: "Lilac Dress",  price: 12, unlockAt: 0, set: "Outfits", wear: { slot: "dress", col: "#b9a3e0" } },
+    { id: "dress_mint",  name: "Mint Dress",   price: 12, unlockAt: 0, set: "Outfits", wear: { slot: "dress", col: "#8fccb0" } },
+    { id: "dress_gold",  name: "Gold Gown",    price: 14, unlockAt: 0, set: "Outfits", wear: { slot: "dress", col: "#e8c878" } },
+    { id: "hat_tiara",   name: "Tiara",        ic: "👑", price: 10, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👑" } },
+    { id: "hat_bow",     name: "Hair Bow",     ic: "🎀", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🎀" } },
+    { id: "hat_sun",     name: "Sun Hat",      ic: "👒", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👒" } },
+    { id: "hat_flower",  name: "Flower Crown", ic: "🌸", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🌸" } },
+    { id: "acc_scarf",   name: "Cosy Scarf",   ic: "🧣", price: 7,  unlockAt: 0, set: "Outfits", wear: { slot: "acc", emoji: "🧣" } },
+    { id: "acc_shades",  name: "Sunglasses",   ic: "🕶️", price: 7,  unlockAt: 0, set: "Outfits", wear: { slot: "acc", emoji: "🕶️" } },
+    { id: "acc_pearls",  name: "Pearls",       ic: "📿", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "acc", emoji: "📿" } },
 
     // --- Beds (different colours) ---
     { id: "bed_pink",   name: "Pink Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "pink" },
@@ -1012,6 +1058,8 @@
       { id: "adam", x: 79,   y: 88 }
     ],
     currentRoom: "main",   // which room is on screen ("main" bedroom or "two" snug)
+    closet: [],            // clothing item ids you've bought
+    outfits: { jas: {}, aqsa: {}, adam: {} },   // what each friend is wearing
     createdAt: null,
     updatedAt: null
   };
@@ -1020,6 +1068,13 @@
   var CHAR_DEFAULTS = { jas: { x: 17, y: 88 }, aqsa: { x: 47.5, y: 88 }, adam: { x: 79, y: 88 } };
 
   var state = load();
+  normalizeWardrobe(state);
+  // Make sure the wardrobe/outfit fields exist on older saves.
+  function normalizeWardrobe(s) {
+    s.closet = s.closet || [];
+    s.outfits = s.outfits || {};
+    ["jas", "aqsa", "adam"].forEach(function (id) { s.outfits[id] = s.outfits[id] || {}; });
+  }
 
   function load() {
     try {
@@ -1304,6 +1359,65 @@
     return wrap;
   }
 
+  // An ornate white wardrobe — crowned cabinet with a crest + finial, two
+  // arched panelled doors with gold knobs, a scalloped apron and cabriole legs.
+  var WARDROBE_SVG =
+    '<svg class="wardrobe-svg" width="104" height="170" viewBox="0 0 104 170">' +
+    '<circle cx="52" cy="6" r="3" fill="#f2efe8" stroke="#d2ccbe" stroke-width="1"/>' +
+    '<path d="M38 14 C44 6 48 11 52 9 C56 11 60 6 66 14" fill="none" stroke="#d2ccbe" stroke-width="2" stroke-linecap="round"/>' +
+    // crown / cornice
+    '<path d="M12 26 Q52 14 92 26 L92 34 L12 34 Z" fill="#f4f1ea" stroke="#cfc8b9" stroke-width="1.6"/>' +
+    // carcass
+    '<rect x="16" y="33" width="72" height="100" rx="5" fill="#f2efe8" stroke="#cfc8b9" stroke-width="2.2"/>' +
+    // centre stile
+    '<rect x="50" y="36" width="4" height="94" rx="1.5" fill="#e7e0d2"/>' +
+    // left door panel + arched moulding
+    '<rect x="20" y="38" width="28" height="90" rx="3" fill="#efeae0" stroke="#d6cfc0" stroke-width="1.4"/>' +
+    '<path d="M24 70 Q24 46 34 46 Q44 46 44 70 L44 122 L24 122 Z" fill="none" stroke="#d6cfc0" stroke-width="1.4"/>' +
+    // right door panel + arched moulding
+    '<rect x="56" y="38" width="28" height="90" rx="3" fill="#efeae0" stroke="#d6cfc0" stroke-width="1.4"/>' +
+    '<path d="M60 70 Q60 46 70 46 Q80 46 80 70 L80 122 L60 122 Z" fill="none" stroke="#d6cfc0" stroke-width="1.4"/>' +
+    // gold knobs facing the centre
+    '<circle cx="46" cy="84" r="2.2" fill="#e6c887" stroke="#c7a662" stroke-width="0.8"/>' +
+    '<circle cx="58" cy="84" r="2.2" fill="#e6c887" stroke="#c7a662" stroke-width="0.8"/>' +
+    // scalloped apron under the cabinet
+    '<path d="M18 133 Q28 145 38 134 Q45 145 52 134 Q59 145 66 134 Q76 145 86 133 Z" fill="#ece7dd" stroke="#d6cfc0" stroke-width="1"/>' +
+    '<circle cx="52" cy="141" r="2.2" fill="#ece7dd" stroke="#d6cfc0" stroke-width="1"/>' +
+    // cabriole legs with scroll feet + space to the floor
+    '<path d="M24 133 C16 140 16 149 18 156 C19 161 16 165 15 169 C14 170 19 169 20 166 C22 159 27 151 27 146 C28 140 32 137 32 133 Z" fill="#f2efe8" stroke="#cfc8b9" stroke-width="1.4"/>' +
+    '<path d="M80 133 C88 140 88 149 86 156 C85 161 88 165 89 169 C90 170 85 169 84 166 C82 159 77 151 77 146 C76 140 72 137 72 133 Z" fill="#f2efe8" stroke="#cfc8b9" stroke-width="1.4"/>' +
+    '<circle cx="16.5" cy="167" r="2.4" fill="#f2efe8" stroke="#cfc8b9" stroke-width="1.2"/>' +
+    '<circle cx="87.5" cy="167" r="2.4" fill="#f2efe8" stroke="#cfc8b9" stroke-width="1.2"/>' +
+    '</svg>';
+
+  function buildWardrobe() {
+    var wrap = document.createElement("div");
+    wrap.className = "wardrobe-art";
+    wrap.innerHTML = WARDROBE_SVG;
+    return wrap;
+  }
+
+  // Compact wardrobe icon for the shop card.
+  var WARDROBE_ICON =
+    '<svg width="34" height="52" viewBox="0 0 34 52">' +
+    '<path d="M3 7 Q17 2 31 7 L31 11 L3 11 Z" fill="#f4f1ea" stroke="#cfc8b9" stroke-width="1"/>' +
+    '<rect x="4" y="10" width="26" height="34" rx="2" fill="#f2efe8" stroke="#cfc8b9" stroke-width="1.4"/>' +
+    '<rect x="16.5" y="12" width="1.5" height="30" fill="#e0d8c8"/>' +
+    '<rect x="6" y="12" width="9" height="30" rx="1.5" fill="#efeae0" stroke="#d6cfc0" stroke-width="0.8"/>' +
+    '<rect x="19" y="12" width="9" height="30" rx="1.5" fill="#efeae0" stroke="#d6cfc0" stroke-width="0.8"/>' +
+    '<circle cx="14.5" cy="27" r="1.3" fill="#e6c887"/><circle cx="19.5" cy="27" r="1.3" fill="#e6c887"/>' +
+    '<path d="M7 44 C4 48 6 50 6 52 L9 52 C9 49 11 47 11 44 Z" fill="#f2efe8" stroke="#cfc8b9" stroke-width="0.8"/>' +
+    '<path d="M27 44 C30 48 28 50 28 52 L25 52 C25 49 23 47 23 44 Z" fill="#f2efe8" stroke="#cfc8b9" stroke-width="0.8"/>' +
+    '</svg>';
+
+  // A little dress silhouette in a given colour (shop card + wardrobe grid).
+  function dressSwatch(col) {
+    return '<svg width="30" height="40" viewBox="0 0 30 40">' +
+      '<path d="M11 4 L19 4 L17 10 L23 31 Q15 35 7 31 L13 10 Z" fill="' + col + '" stroke="rgba(0,0,0,.22)" stroke-width="1"/>' +
+      '<path d="M11 4 L15 8 L19 4" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/>' +
+      '</svg>';
+  }
+
   // Compact dressing-table icon for the shop card.
   var VANITY_ICON =
     '<svg width="36" height="54" viewBox="0 0 36 54">' +
@@ -1357,6 +1471,7 @@
       else if (def.render === "bookcase") { el.classList.add("bookcase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBookcase()); }
       else if (def.render === "map") { el.classList.add("mapitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildMap()); }
       else if (def.render === "vanity") { el.classList.add("vanity"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVanity()); }
+      else if (def.render === "wardrobe") { el.classList.add("wardrobe"); el.style.zIndex = depthZ(p.y); el.appendChild(buildWardrobe()); }
       else if (def.render === "vase") { el.classList.add("vase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVase()); }
       else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint, def.size, p.orient)); }
       else { el.style.zIndex = depthZ(p.y); el.textContent = def.ic; }
@@ -1389,6 +1504,7 @@
     });
     positionFurniture();
     positionCharacters();
+    applyOutfits();
     updateBatState();
     updateAmbient();
     updateHud();
@@ -1460,6 +1576,7 @@
       window.removeEventListener("mouseup", up);
       window.removeEventListener("touchend", up);
       if (moved) save();
+      else { var d = itemDef(p.itemId); if (d && d.render === "wardrobe") openWardrobe(); }  // tap to open
     }
     el.addEventListener("mousedown", down);
     el.addEventListener("touchstart", down, { passive: false });
@@ -1582,21 +1699,26 @@
       html += '<div class="section-title">' + setName + '</div><div class="shop-grid">';
       sets[setName].forEach(function (it) {
         var unlocked = state.sessions >= it.unlockAt;
+        var owned = it.wear && (state.closet || []).indexOf(it.id) >= 0;
         var canAfford = state.coins >= it.price;
-        var cls = "shop-card" + (!unlocked ? " locked" : (!canAfford ? " cant" : ""));
-        html += '<div class="' + cls + '" data-buy="' + it.id + '" data-ok="' + (unlocked && canAfford) + '">';
+        var cls = "shop-card" + (owned ? " owned" : (!unlocked ? " locked" : (!canAfford ? " cant" : "")));
+        html += '<div class="' + cls + '" data-buy="' + it.id + '" data-ok="' + (!owned && unlocked && canAfford) + '">';
         if (it.joke) html += '<span class="tag">in-joke</span>';
+        if (owned) html += '<span class="tag">owned</span>';
         if (!unlocked) html += '<span class="lock">🔒</span>';
         var icHtml = it.render === "garland" ? GARLAND_ICON
                    : it.render === "bookcase" ? BOOKCASE_ICON
                    : it.render === "map" ? MAP_SVG
                    : it.render === "vanity" ? VANITY_ICON
+                   : it.render === "wardrobe" ? WARDROBE_ICON
+                   : (it.wear && it.wear.slot === "dress") ? dressSwatch(it.wear.col)
                    : it.render === "vase" ? VASE_SVG
                    : it.render === "bed" ? bedIcon(it.tint, it.size)
                    : it.ic;
         html += '<div class="ic">' + icHtml + '</div><div class="nm">' + it.name + '</div>';
-        html += unlocked ? '<div class="pr">🪙 ' + it.price + '</div>'
-                         : '<div class="pr">Wk ' + (it.unlockAt + 1) + '</div>';
+        html += owned ? '<div class="pr">✓ owned</div>'
+                      : unlocked ? '<div class="pr">🪙 ' + it.price + '</div>'
+                                 : '<div class="pr">Wk ' + (it.unlockAt + 1) + '</div>';
         html += '</div>';
       });
       html += '</div>';
@@ -1607,7 +1729,8 @@
       card.addEventListener("click", function () {
         if (card.dataset.ok !== "true") {
           var it = itemDef(card.dataset.buy);
-          if (state.sessions < it.unlockAt) toast("Unlocks on Week " + (it.unlockAt + 1) + " 🔒");
+          if (it.wear && (state.closet || []).indexOf(it.id) >= 0) toast("Already in your wardrobe 👗");
+          else if (state.sessions < it.unlockAt) toast("Unlocks on Week " + (it.unlockAt + 1) + " 🔒");
           else toast("Not enough coins yet 🪙");
           return;
         }
@@ -1619,6 +1742,16 @@
   function buyItem(id) {
     var it = itemDef(id);
     if (!it || state.coins < it.price) return;
+    // clothes go into your wardrobe, not the room
+    if (it.wear) {
+      state.closet = state.closet || [];
+      if (state.closet.indexOf(id) >= 0) { toast("Already in your wardrobe 👗"); return; }
+      setCoins(state.coins - it.price);
+      state.closet.push(id); state.lastItem = it.name; save();
+      toast("Added " + it.name + " to your wardrobe! Tap the 👗 wardrobe to wear it.");
+      openShop();   // refresh so it shows as owned
+      return;
+    }
     setCoins(state.coins - it.price);
     var uid = "i" + Date.now() + Math.floor(Math.random() * 999);
     // a garland hangs high across the room; everything else lands on the floor.
@@ -1641,6 +1774,95 @@
     var h = $("placeHint"); h.style.display = "block";
     clearTimeout(placeHintTimer);
     placeHintTimer = setTimeout(function () { h.style.display = "none"; }, 3500);
+  }
+
+  // =====================================================================
+  //  WARDROBE — tap the ornate wardrobe to dress the friends in clothes
+  //  you've bought from the shop's Outfits set.
+  // =====================================================================
+  var FRIEND_NAMES = { jas: "Jas", aqsa: "Aqsa", adam: "Adam" };
+  var FRIEND_FACES = { jas: "^‿^", aqsa: "◕‿◕", adam: "•ᴗ•" };
+  var wardrobeFriend = "jas";
+
+  function ownedClothes() {
+    return (state.closet || []).map(itemDef).filter(function (d) { return d && d.wear; });
+  }
+  // paint one worn layer onto a parent, creating/removing the node as needed
+  function setWorn(parent, cls, clothingId) {
+    var node = parent.querySelector("." + cls);
+    var def = clothingId ? itemDef(clothingId) : null;
+    if (!def || !def.wear) { if (node) node.remove(); return; }
+    if (!node) { node = document.createElement("div"); node.className = cls; parent.appendChild(node); }
+    if (def.wear.slot === "dress") { node.textContent = ""; node.style.background = def.wear.col; }
+    else node.textContent = def.wear.emoji;
+  }
+  // refresh the clothes shown on every friend avatar from saved outfits
+  function applyOutfits() {
+    ["jas", "aqsa", "adam"].forEach(function (id) {
+      var el = room.querySelector('[data-char="' + id + '"]');
+      if (!el) return;
+      var body = el.querySelector(".body");
+      var o = (state.outfits && state.outfits[id]) || {};
+      if (body) setWorn(body, "worn-dress", o.dress);
+      setWorn(el, "worn-hat", o.hat);
+      setWorn(el, "worn-acc", o.acc);
+    });
+  }
+  // a small preview blob wearing the friend's current outfit (for the modal)
+  function outfitPreview(id) {
+    var o = (state.outfits && state.outfits[id]) || {};
+    var wrap = document.createElement("div"); wrap.className = "ava-prev";
+    var body = document.createElement("div"); body.className = "pbody"; body.style.background = "var(--" + id + ")";
+    var face = document.createElement("div"); face.className = "pface"; face.textContent = FRIEND_FACES[id];
+    body.appendChild(face); wrap.appendChild(body);
+    setWorn(body, "worn-dress", o.dress);
+    setWorn(wrap, "worn-hat", o.hat);
+    setWorn(wrap, "worn-acc", o.acc);
+    return wrap;
+  }
+
+  var WARD_SLOTS = [{ key: "dress", label: "Dresses" }, { key: "hat", label: "Hats" }, { key: "acc", label: "Accessories" }];
+  function openWardrobe() {
+    var friend = wardrobeFriend;
+    state.outfits[friend] = state.outfits[friend] || {};
+    var owned = ownedClothes();
+    var html = '<p class="muted">Dress your friends in clothes from your wardrobe. Buy more in the 🛍️ Shop’s Outfits set.</p>';
+    html += '<div class="ward-tabs">';
+    ["jas", "aqsa", "adam"].forEach(function (id) {
+      html += '<button class="ward-tab' + (id === friend ? " on" : "") + '" data-friend="' + id + '" style="--c:var(--' + id + ')">' + FRIEND_NAMES[id] + '</button>';
+    });
+    html += '</div><div id="wardPrev" class="ward-prev"></div>';
+    if (!owned.length) {
+      html += '<p class="muted" style="text-align:center">Your wardrobe is empty — pop to the 🛍️ Shop and buy some outfits first!</p>';
+    } else {
+      WARD_SLOTS.forEach(function (s) {
+        var opts = owned.filter(function (d) { return d.wear.slot === s.key; });
+        if (!opts.length) return;
+        var worn = state.outfits[friend][s.key] || null;
+        html += '<div class="section-title">' + s.label + '</div><div class="ward-grid">';
+        html += '<div class="ward-card' + (!worn ? " on" : "") + '" data-slot="' + s.key + '" data-cloth=""><div class="ic">🚫</div><div class="nm">None</div></div>';
+        opts.forEach(function (d) {
+          var ic = d.wear.slot === "dress" ? dressSwatch(d.wear.col) : d.wear.emoji;
+          html += '<div class="ward-card' + (worn === d.id ? " on" : "") + '" data-slot="' + s.key + '" data-cloth="' + d.id + '"><div class="ic">' + ic + '</div><div class="nm">' + d.name + '</div></div>';
+        });
+        html += '</div>';
+      });
+    }
+    openPanel("👗 Wardrobe — " + FRIEND_NAMES[friend] + "’s outfit", html, [
+      { label: "Shop for clothes", cls: "", onClick: function () { closePanel(); openShop(); } },
+      { label: "Done", cls: "primary", onClick: closePanel }
+    ]);
+    $("wardPrev").appendChild(outfitPreview(friend));
+    Array.prototype.slice.call($("gBody").querySelectorAll("[data-friend]")).forEach(function (t) {
+      t.addEventListener("click", function () { wardrobeFriend = t.dataset.friend; openWardrobe(); });
+    });
+    Array.prototype.slice.call($("gBody").querySelectorAll("[data-slot]")).forEach(function (c) {
+      c.addEventListener("click", function () {
+        state.outfits[friend][c.dataset.slot] = c.dataset.cloth || null;
+        save(); applyOutfits(); openWardrobe();
+        Ambient.blip(620, 0.05);
+      });
+    });
   }
 
   // =====================================================================
@@ -2010,6 +2232,7 @@
         }
         if (!confirm("Load this save? It will replace the current room (week " + (state.sessions || 0) + ").")) return;
         state = Object.assign({}, clone(DEFAULT_STATE), incoming);
+        normalizeWardrobe(state);
         selectedUid = null;
         save(); renderRoom(); updateHud();
         closePanel();

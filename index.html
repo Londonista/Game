@@ -649,8 +649,9 @@
     background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.12) 0 1px, transparent 1px 26px);
     box-shadow: 0 3px 5px rgba(0,0,0,.35); }
   .kitchen .k-counter .k-cab { position: absolute; top: 16px; left: 0; right: 0; height: 92px;
-    background: linear-gradient(180deg,#523620,#382212); border: 2px solid #2c1b0d; border-top: none; border-radius: 0 0 4px 4px;
-    background-image: repeating-linear-gradient(90deg, transparent 0 70px, rgba(0,0,0,.32) 70px 73px); }
+    border: 2px solid #241608; border-top: none; border-radius: 0 0 4px 4px; background-color: #3a2512;
+    background-image: repeating-linear-gradient(90deg, transparent 0 70px, rgba(0,0,0,.34) 70px 73px),
+                      linear-gradient(180deg,#462f19,#2b1b0b); }
   .kitchen .k-counter .k-cab::after { content:""; position: absolute; top: 14px; left: 18px; width: 6px; height: 6px; border-radius: 50%;
     background: #d8b06a; box-shadow: 70px 0 #d8b06a, 140px 0 #d8b06a, 210px 0 #d8b06a, 280px 0 #d8b06a, 350px 0 #d8b06a; }
   /* muted terracotta tiled backsplash, directly above the counter */
@@ -686,12 +687,19 @@
   /* rustic wooden dining table in the foreground */
   .kitchen .k-table { position: absolute; left: 50%; top: 372px; transform: translateX(-50%); width: 224px; height: 76px; }
   .kitchen .k-table .tt { position: absolute; top: 0; left: 0; right: 0; height: 21px; border-radius: 8px;
-    background: linear-gradient(180deg,#6a4626,#523619); box-shadow: 0 5px 7px rgba(0,0,0,.3);
-    background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.12) 0 1px, transparent 1px 36px); }
+    box-shadow: 0 5px 7px rgba(0,0,0,.3); background-color: #4a3017;
+    background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.14) 0 1px, transparent 1px 36px),
+                      linear-gradient(180deg,#553819,#3a2611); }
   .kitchen .k-table .leg { position: absolute; top: 18px; width: 12px; height: 54px; border-radius: 0 0 3px 3px;
     background: linear-gradient(180deg,#523619,#39260f); }
   .kitchen .k-table .leg.l { left: 14px; } .kitchen .k-table .leg.r { right: 14px; }
   .kitchen .k-table .leg.ml { left: 58px; } .kitchen .k-table .leg.mr { right: 58px; }
+  /* a little vase with a sunflower as a table centrepiece */
+  .kitchen .k-table .k-vase { position: absolute; left: 50%; top: -30px; transform: translateX(-50%); width: 22px; height: 38px; z-index: 2; }
+  .kitchen .k-table .k-vase .pot { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 16px; height: 16px;
+    border-radius: 4px 4px 7px 7px; background: linear-gradient(180deg,#cfe0ec,#9fbdd2); box-shadow: inset 1px 2px 2px rgba(255,255,255,.5); }
+  .kitchen .k-table .k-vase .stem { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); width: 3px; height: 15px; background: #4f8a3a; border-radius: 2px; }
+  .kitchen .k-table .k-vase .bloom { position: absolute; top: -3px; left: 50%; transform: translateX(-50%); font-size: 20px; line-height: 1; }
   .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(90,55,30,.85);
     text-shadow: 0 1px 2px rgba(255,255,255,.4); pointer-events: none; }
 
@@ -935,6 +943,7 @@
         <div class="k-table">
           <div class="leg l"></div><div class="leg r"></div><div class="leg ml"></div><div class="leg mr"></div>
           <div class="tt"></div>
+          <div class="k-vase"><span class="bloom">🌻</span><span class="stem"></span><span class="pot"></span></div>
         </div>
       </div>
       <div class="label2 two-only" style="left:50%; transform:translateX(-50%)">🍳 Kitchen</div>

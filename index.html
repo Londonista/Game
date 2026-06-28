@@ -532,13 +532,10 @@
   .item.wardrobe .del { top: -6px; right: -8px; }
 
   /* Clothes worn by the friend avatars (also reused in the wardrobe preview) */
-  .worn-dress { position: absolute; left: 3px; right: 3px; bottom: 0; height: 30px;
-    border-radius: 7px 7px 13px 13px; pointer-events: none;
-    box-shadow: inset 0 -4px 0 rgba(0,0,0,.14), inset 0 7px 0 rgba(255,255,255,.16); }
-  .worn-hat { position: absolute; top: -7px; left: 0; right: 0; text-align: center;
-    font-size: 19px; line-height: 1; pointer-events: none; z-index: 2; }
-  .worn-acc { position: absolute; top: 30px; left: 0; right: 0; text-align: center;
-    font-size: 14px; line-height: 1; pointer-events: none; z-index: 3; }
+  .worn-hat { position: absolute; top: -5px; left: 0; right: 0; text-align: center;
+    font-size: 15px; line-height: 1; pointer-events: none; z-index: 2; }
+  .worn-glasses { position: absolute; top: 11px; left: 0; right: 0; text-align: center;
+    font-size: 12px; line-height: 1; pointer-events: none; z-index: 3; }
 
   /* Wardrobe chooser modal */
   .ward-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
@@ -557,6 +554,16 @@
   .ward-card .ic { font-size: 24px; height: 40px; display: flex; align-items: center; justify-content: center; }
   .ward-card .nm { font-size: 11px; margin-top: 2px; }
   .shop-card.owned { opacity: .65; }
+
+  /* Shop categories (first screen of the shop) */
+  .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+  .cat-card { background: rgba(255,255,255,.06); border: 2px solid transparent; border-radius: 14px;
+    padding: 12px 8px; text-align: center; cursor: pointer; transition: border-color .12s, background .12s; }
+  .cat-card:hover { border-color: rgba(255,255,255,.28); background: rgba(255,255,255,.1); }
+  .cat-card .ic { font-size: 30px; height: 46px; display: flex; align-items: center; justify-content: center; }
+  .cat-card .ic svg { width: auto; height: 40px; }
+  .cat-card .nm { font-weight: 700; margin-top: 4px; }
+  .cat-card .ct { font-size: 11px; opacity: .7; margin-top: 1px; }
 
   /* Ornate, empty wooden bookcase — a purchasable, removable item */
   .item.bookcase { font-size: 0; filter: drop-shadow(0 8px 7px rgba(0,0,0,0.4)); }
@@ -958,17 +965,13 @@
     { id: "wardrobe_white", name: "Ornate Wardrobe", ic: "👗", price: 40, unlockAt: 0, set: "Boudoir", render: "wardrobe" },
 
     // --- Outfits (worn by the friends via the ornate wardrobe) ---
-    { id: "dress_rose",  name: "Rose Dress",   price: 12, unlockAt: 0, set: "Outfits", wear: { slot: "dress", col: "#e98aa8" } },
-    { id: "dress_lilac", name: "Lilac Dress",  price: 12, unlockAt: 0, set: "Outfits", wear: { slot: "dress", col: "#b9a3e0" } },
-    { id: "dress_mint",  name: "Mint Dress",   price: 12, unlockAt: 0, set: "Outfits", wear: { slot: "dress", col: "#8fccb0" } },
-    { id: "dress_gold",  name: "Gold Gown",    price: 14, unlockAt: 0, set: "Outfits", wear: { slot: "dress", col: "#e8c878" } },
     { id: "hat_tiara",   name: "Tiara",        ic: "👑", price: 10, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👑" } },
     { id: "hat_bow",     name: "Hair Bow",     ic: "🎀", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🎀" } },
     { id: "hat_sun",     name: "Sun Hat",      ic: "👒", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👒" } },
     { id: "hat_flower",  name: "Flower Crown", ic: "🌸", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🌸" } },
-    { id: "acc_scarf",   name: "Cosy Scarf",   ic: "🧣", price: 7,  unlockAt: 0, set: "Outfits", wear: { slot: "acc", emoji: "🧣" } },
-    { id: "acc_shades",  name: "Sunglasses",   ic: "🕶️", price: 7,  unlockAt: 0, set: "Outfits", wear: { slot: "acc", emoji: "🕶️" } },
-    { id: "acc_pearls",  name: "Pearls",       ic: "📿", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "acc", emoji: "📿" } },
+    { id: "hat_cap",     name: "Beanie",       ic: "🧢", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🧢" } },
+    { id: "gl_shades",   name: "Sunglasses",   ic: "🕶️", price: 7,  unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "🕶️" } },
+    { id: "gl_reading",  name: "Reading Glasses", ic: "👓", price: 7, unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "👓" } },
 
     // --- Beds (different colours) ---
     { id: "bed_pink",   name: "Pink Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "pink" },
@@ -1410,13 +1413,6 @@
     '<path d="M27 44 C30 48 28 50 28 52 L25 52 C25 49 23 47 23 44 Z" fill="#f2efe8" stroke="#cfc8b9" stroke-width="0.8"/>' +
     '</svg>';
 
-  // A little dress silhouette in a given colour (shop card + wardrobe grid).
-  function dressSwatch(col) {
-    return '<svg width="30" height="40" viewBox="0 0 30 40">' +
-      '<path d="M11 4 L19 4 L17 10 L23 31 Q15 35 7 31 L13 10 Z" fill="' + col + '" stroke="rgba(0,0,0,.22)" stroke-width="1"/>' +
-      '<path d="M11 4 L15 8 L19 4" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/>' +
-      '</svg>';
-  }
 
   // Compact dressing-table icon for the shop card.
   var VANITY_ICON =
@@ -1689,42 +1685,78 @@
   });
 
   // =====================================================================
-  //  SHOP
+  //  SHOP — categories first, then tap a category to browse its items.
   // =====================================================================
-  function openShop() {
-    var sets = {};
-    CATALOGUE.forEach(function (it) { (sets[it.set] = sets[it.set] || []).push(it); });
-    var html = '<p class="muted">Tap an item to buy it, then drag it anywhere in the room. New sets unlock as your Mondays add up.</p>';
-    Object.keys(sets).forEach(function (setName) {
-      html += '<div class="section-title">' + setName + '</div><div class="shop-grid">';
-      sets[setName].forEach(function (it) {
-        var unlocked = state.sessions >= it.unlockAt;
-        var owned = it.wear && (state.closet || []).indexOf(it.id) >= 0;
-        var canAfford = state.coins >= it.price;
-        var cls = "shop-card" + (owned ? " owned" : (!unlocked ? " locked" : (!canAfford ? " cant" : "")));
-        html += '<div class="' + cls + '" data-buy="' + it.id + '" data-ok="' + (!owned && unlocked && canAfford) + '">';
-        if (it.joke) html += '<span class="tag">in-joke</span>';
-        if (owned) html += '<span class="tag">owned</span>';
-        if (!unlocked) html += '<span class="lock">🔒</span>';
-        var icHtml = it.render === "garland" ? GARLAND_ICON
-                   : it.render === "bookcase" ? BOOKCASE_ICON
-                   : it.render === "map" ? MAP_SVG
-                   : it.render === "vanity" ? VANITY_ICON
-                   : it.render === "wardrobe" ? WARDROBE_ICON
-                   : (it.wear && it.wear.slot === "dress") ? dressSwatch(it.wear.col)
-                   : it.render === "vase" ? VASE_SVG
-                   : it.render === "bed" ? bedIcon(it.tint, it.size)
-                   : it.ic;
-        html += '<div class="ic">' + icHtml + '</div><div class="nm">' + it.name + '</div>';
-        html += owned ? '<div class="pr">✓ owned</div>'
-                      : unlocked ? '<div class="pr">🪙 ' + it.price + '</div>'
-                                 : '<div class="pr">Wk ' + (it.unlockAt + 1) + '</div>';
-        html += '</div>';
-      });
+  var shopCat = null;   // which category is open (null = the category list)
+
+  function shopIcon(it) {
+    return it.render === "garland" ? GARLAND_ICON
+         : it.render === "bookcase" ? BOOKCASE_ICON
+         : it.render === "map" ? MAP_SVG
+         : it.render === "vanity" ? VANITY_ICON
+         : it.render === "wardrobe" ? WARDROBE_ICON
+         : it.render === "vase" ? VASE_SVG
+         : it.render === "bed" ? bedIcon(it.tint, it.size)
+         : it.ic;
+  }
+  // catalogue grouped by set, preserving the order sets first appear
+  function shopSets() {
+    var sets = {}, order = [];
+    CATALOGUE.forEach(function (it) {
+      if (!sets[it.set]) { sets[it.set] = []; order.push(it.set); }
+      sets[it.set].push(it);
+    });
+    return { sets: sets, order: order };
+  }
+
+  function openShop() { shopCat = null; renderShopCategories(); }
+
+  function renderShopCategories() {
+    shopCat = null;
+    var g = shopSets();
+    var html = '<p class="muted">Pick a category to browse. New sets unlock as your Mondays add up.</p>';
+    html += '<div class="cat-grid">';
+    g.order.forEach(function (setName) {
+      var items = g.sets[setName];
+      var allLocked = items.every(function (it) { return state.sessions < it.unlockAt; });
+      html += '<div class="cat-card" data-cat="' + setName + '">' +
+              '<div class="ic">' + shopIcon(items[0]) + '</div>' +
+              '<div class="nm">' + setName + (allLocked ? " 🔒" : "") + '</div>' +
+              '<div class="ct">' + items.length + (items.length === 1 ? " item" : " items") + '</div>' +
+              '</div>';
+    });
+    html += '</div>';
+    openPanel("🛍️ Cozy Shop", html, [{ label: "Done", cls: "primary", onClick: closePanel }]);
+    Array.prototype.slice.call($("gBody").querySelectorAll("[data-cat]")).forEach(function (c) {
+      c.addEventListener("click", function () { renderShopCategory(c.dataset.cat); });
+    });
+  }
+
+  function renderShopCategory(setName) {
+    shopCat = setName;
+    var items = CATALOGUE.filter(function (it) { return it.set === setName; });
+    var html = '<p class="muted">Tap an item to buy it. Décor drops into the room to drag about; clothes go to your 👗 wardrobe.</p>';
+    html += '<div class="shop-grid">';
+    items.forEach(function (it) {
+      var unlocked = state.sessions >= it.unlockAt;
+      var owned = it.wear && (state.closet || []).indexOf(it.id) >= 0;
+      var canAfford = state.coins >= it.price;
+      var cls = "shop-card" + (owned ? " owned" : (!unlocked ? " locked" : (!canAfford ? " cant" : "")));
+      html += '<div class="' + cls + '" data-buy="' + it.id + '" data-ok="' + (!owned && unlocked && canAfford) + '">';
+      if (it.joke) html += '<span class="tag">in-joke</span>';
+      if (owned) html += '<span class="tag">owned</span>';
+      if (!unlocked) html += '<span class="lock">🔒</span>';
+      html += '<div class="ic">' + shopIcon(it) + '</div><div class="nm">' + it.name + '</div>';
+      html += owned ? '<div class="pr">✓ owned</div>'
+                    : unlocked ? '<div class="pr">🪙 ' + it.price + '</div>'
+                               : '<div class="pr">Wk ' + (it.unlockAt + 1) + '</div>';
       html += '</div>';
     });
-    openPanel("🛍️ Cozy Shop", html, [{ label: "Done", cls: "primary", onClick: closePanel }]);
-
+    html += '</div>';
+    openPanel("🛍️ " + setName, html, [
+      { label: "← Categories", onClick: renderShopCategories },
+      { label: "Done", cls: "primary", onClick: closePanel }
+    ]);
     Array.prototype.slice.call($("gBody").querySelectorAll("[data-buy]")).forEach(function (card) {
       card.addEventListener("click", function () {
         if (card.dataset.ok !== "true") {
@@ -1749,7 +1781,7 @@
       setCoins(state.coins - it.price);
       state.closet.push(id); state.lastItem = it.name; save();
       toast("Added " + it.name + " to your wardrobe! Tap the 👗 wardrobe to wear it.");
-      openShop();   // refresh so it shows as owned
+      if (shopCat) renderShopCategory(shopCat); else openShop();   // refresh so it shows as owned
       return;
     }
     setCoins(state.coins - it.price);
@@ -1793,19 +1825,16 @@
     var def = clothingId ? itemDef(clothingId) : null;
     if (!def || !def.wear) { if (node) node.remove(); return; }
     if (!node) { node = document.createElement("div"); node.className = cls; parent.appendChild(node); }
-    if (def.wear.slot === "dress") { node.textContent = ""; node.style.background = def.wear.col; }
-    else node.textContent = def.wear.emoji;
+    node.textContent = def.wear.emoji;
   }
   // refresh the clothes shown on every friend avatar from saved outfits
   function applyOutfits() {
     ["jas", "aqsa", "adam"].forEach(function (id) {
       var el = room.querySelector('[data-char="' + id + '"]');
       if (!el) return;
-      var body = el.querySelector(".body");
       var o = (state.outfits && state.outfits[id]) || {};
-      if (body) setWorn(body, "worn-dress", o.dress);
       setWorn(el, "worn-hat", o.hat);
-      setWorn(el, "worn-acc", o.acc);
+      setWorn(el, "worn-glasses", o.glasses);
     });
   }
   // a small preview blob wearing the friend's current outfit (for the modal)
@@ -1815,13 +1844,12 @@
     var body = document.createElement("div"); body.className = "pbody"; body.style.background = "var(--" + id + ")";
     var face = document.createElement("div"); face.className = "pface"; face.textContent = FRIEND_FACES[id];
     body.appendChild(face); wrap.appendChild(body);
-    setWorn(body, "worn-dress", o.dress);
     setWorn(wrap, "worn-hat", o.hat);
-    setWorn(wrap, "worn-acc", o.acc);
+    setWorn(wrap, "worn-glasses", o.glasses);
     return wrap;
   }
 
-  var WARD_SLOTS = [{ key: "dress", label: "Dresses" }, { key: "hat", label: "Hats" }, { key: "acc", label: "Accessories" }];
+  var WARD_SLOTS = [{ key: "hat", label: "Hats" }, { key: "glasses", label: "Glasses" }];
   function openWardrobe() {
     var friend = wardrobeFriend;
     state.outfits[friend] = state.outfits[friend] || {};
@@ -1842,8 +1870,7 @@
         html += '<div class="section-title">' + s.label + '</div><div class="ward-grid">';
         html += '<div class="ward-card' + (!worn ? " on" : "") + '" data-slot="' + s.key + '" data-cloth=""><div class="ic">🚫</div><div class="nm">None</div></div>';
         opts.forEach(function (d) {
-          var ic = d.wear.slot === "dress" ? dressSwatch(d.wear.col) : d.wear.emoji;
-          html += '<div class="ward-card' + (worn === d.id ? " on" : "") + '" data-slot="' + s.key + '" data-cloth="' + d.id + '"><div class="ic">' + ic + '</div><div class="nm">' + d.name + '</div></div>';
+          html += '<div class="ward-card' + (worn === d.id ? " on" : "") + '" data-slot="' + s.key + '" data-cloth="' + d.id + '"><div class="ic">' + d.wear.emoji + '</div><div class="nm">' + d.name + '</div></div>';
         });
         html += '</div>';
       });

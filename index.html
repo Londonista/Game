@@ -477,7 +477,7 @@
     pointer-events: none; animation: squeakfloat .9s ease-out forwards; }
   @keyframes squeakfloat { 0%{ opacity:0; transform: translate(-50%,0) scale(.6);} 20%{ opacity:1;} 100%{ opacity:0; transform: translate(-50%,-28px) scale(1.05);} }
 
-  /* ---- Two rooms: a door on the right wall leads to "the snug" ---------- */
+  /* ---- Two rooms: a door on the right wall leads to "the kitchen" ------- */
   #room { transition: opacity .16s ease; }              /* gentle fade on room change */
 
   .door-next, .door-back, .door-ward, .door-wardback { position: absolute; bottom: 0; width: 78px; height: 214px; z-index: 3;
@@ -501,9 +501,11 @@
   .door-next:hover .leaf, .door-back:hover .leaf, .door-ward:hover .leaf, .door-wardback:hover .leaf,
   .door-next:active .leaf, .door-back:active .leaf, .door-ward:active .leaf, .door-wardback:active .leaf { filter: brightness(1.12); }
 
-  /* Other rooms: theme by data-room. "two" = the snug, "wardrobe" = Wardrobe */
-  #room[data-room="two"] { background: linear-gradient(180deg,#2e514a,#427563 64%); }
-  #room[data-room="two"] .floor { background: linear-gradient(180deg,#9a7445,#7c5a32); }
+  /* Other rooms: theme by data-room. "two" = the Kitchen, "wardrobe" = Wardrobe */
+  #room[data-room="two"] { background: linear-gradient(180deg,#6a5594,#48366e 64%); }
+  #room[data-room="two"] .floor { background:
+    repeating-linear-gradient(90deg, #7a5638 0 40px, #6c4a2e 40px 42px),
+    linear-gradient(180deg,#7a5638,#5f4029); }
   #room[data-room="wardrobe"] { background: linear-gradient(180deg,#4a3a52,#6f5570 64%); }
   #room[data-room="wardrobe"] .floor { background: linear-gradient(180deg,#a98a6a,#876a4a); }
   /* hide the bedroom's fixtures + furniture whenever you're not in the bedroom
@@ -617,16 +619,89 @@
   .two-only, .ward-only { display: none; }
   #room[data-room="two"] .two-only { display: block; }
   #room[data-room="wardrobe"] .ward-only { display: block; }
-  .window2 { position: absolute; top: 44px; left: 50%; transform: translateX(-50%);
-    width: 148px; height: 148px; border-radius: 50%; border: 8px solid #eaddc4; overflow: hidden;
-    background: #1f2740; box-shadow: inset 0 0 0 2px #cdbb9c, 0 10px 22px rgba(0,0,0,.35); }
-  .window2 .sky2 { position: absolute; inset: 0; background: linear-gradient(180deg,#22304c,#3a3358); }
-  .window2 .cross::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #eaddc4; transform: translateX(-50%); }
-  .window2 .cross::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #eaddc4; transform: translateY(-50%); }
-  .window2 .moon2 { position: absolute; width: 30px; height: 30px; border-radius: 50%; top: 24px; left: 28px;
-    background: radial-gradient(circle at 40% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 16px rgba(255,240,200,.6); }
-  .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(255,255,255,.78);
-    text-shadow: 0 1px 2px rgba(0,0,0,.4); pointer-events: none; }
+  /* ---- Rustic kitchen fixtures (room "two") — pure CSS, behind everything */
+  .kitchen { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  /* night window over the sink, in a rustic wood frame */
+  .kitchen .k-window { position: absolute; top: 34px; left: 132px;
+    width: 122px; height: 92px; border: 8px solid #6b4a2e; border-radius: 4px; overflow: hidden;
+    background: #1a1838; box-shadow: 0 8px 18px rgba(0,0,0,.35), inset 0 0 0 2px #4f361f; }
+  .kitchen .k-window .k-sky { position: absolute; inset: 0; background:
+    radial-gradient(1.5px 1.5px at 22% 28%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 68% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 44% 58%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 82% 52%, #fff, transparent),
+    radial-gradient(1px 1px at 30% 74%, #fff, transparent),
+    linear-gradient(180deg,#241f4a,#3a2f5e); background-color: #241f4a; }
+  .kitchen .k-window .k-sky::after { content:""; position: absolute; top: 12px; right: 14px; width: 22px; height: 22px;
+    border-radius: 50%; background: radial-gradient(circle at 38% 38%,#fffdf0,#ffe9a8); box-shadow: 0 0 14px rgba(255,240,200,.5); }
+  .kitchen .k-window .k-pane::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #6b4a2e; transform: translateX(-50%); }
+  .kitchen .k-window .k-pane::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #6b4a2e; transform: translateY(-50%); }
+  /* a rustic wood wall shelf with a couple of jars */
+  .kitchen .k-shelf { position: absolute; top: 96px; left: 300px; width: 96px; height: 8px; border-radius: 2px;
+    background: linear-gradient(180deg,#8a5a30,#6b4423); box-shadow: 0 3px 4px rgba(0,0,0,.3); }
+  .kitchen .k-shelf::before, .kitchen .k-shelf::after { content:""; position: absolute; bottom: 8px; width: 14px; height: 20px; border-radius: 3px 3px 1px 1px; }
+  .kitchen .k-shelf::before { left: 18px; background: linear-gradient(180deg,#cf9b6a,#a9733f); }
+  .kitchen .k-shelf::after { left: 52px; width: 16px; height: 16px; background: linear-gradient(180deg,#8fb0a0,#5f8a78); }
+  /* low rustic counter: butcher-block worktop over plank cabinet doors */
+  .kitchen .k-counter { position: absolute; left: 24px; width: 430px; top: 248px; bottom: 0; }
+  .kitchen .k-counter .k-top { position: absolute; top: 0; left: 0; right: 0; height: 16px; border-radius: 4px;
+    background: linear-gradient(180deg,#b98046,#8f5e30);
+    background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.12) 0 1px, transparent 1px 26px);
+    box-shadow: 0 3px 5px rgba(0,0,0,.35); }
+  .kitchen .k-counter .k-cab { position: absolute; top: 16px; left: 0; right: 0; height: 92px;
+    border: 2px solid #241608; border-top: none; border-radius: 0 0 4px 4px; background-color: #3a2512;
+    background-image: repeating-linear-gradient(90deg, transparent 0 70px, rgba(0,0,0,.34) 70px 73px),
+                      linear-gradient(180deg,#462f19,#2b1b0b); }
+  .kitchen .k-counter .k-cab::after { content:""; position: absolute; top: 14px; left: 18px; width: 6px; height: 6px; border-radius: 50%;
+    background: #d8b06a; box-shadow: 70px 0 #d8b06a, 140px 0 #d8b06a, 210px 0 #d8b06a, 280px 0 #d8b06a, 350px 0 #d8b06a; }
+  /* muted terracotta tiled backsplash, directly above the counter */
+  .kitchen .k-backsplash { position: absolute; left: 24px; width: 430px; top: 210px; height: 38px; border-radius: 3px 3px 0 0;
+    background: repeating-linear-gradient(0deg, transparent 0 9px, rgba(0,0,0,.1) 9px 10px),
+                repeating-linear-gradient(90deg, #b07250 0 19px, #a1663e 19px 20px); }
+  /* sink + faucet sunk into the worktop (left, under the window) */
+  .kitchen .k-sink { position: absolute; top: 3px; left: 90px; width: 60px; height: 11px; border-radius: 4px;
+    background: linear-gradient(180deg,#aeb2b8,#8e949c); box-shadow: inset 0 2px 3px rgba(0,0,0,.4); }
+  .kitchen .k-sink::before { content:""; position: absolute; top: -15px; right: 10px; width: 5px; height: 17px; border-radius: 3px 3px 0 0; background: #b9bdc2; }
+  .kitchen .k-sink::after { content:""; position: absolute; top: -15px; right: 10px; width: 15px; height: 5px; border-radius: 3px; background: #b9bdc2; }
+  /* stove with four burners (right side of the counter) */
+  .kitchen .k-stove { position: absolute; top: 2px; right: 28px; width: 54px; height: 13px; border-radius: 4px;
+    background: linear-gradient(180deg,#3a3a40,#26262b); display: flex; flex-wrap: wrap; gap: 3px; padding: 3px; box-sizing: border-box; }
+  .kitchen .k-stove i { width: 10px; height: 3px; border-radius: 50%; background: #6a6a72; }
+  /* white fridge with ABC magnets + a New York postcard */
+  .kitchen .k-fridge { position: absolute; left: 628px; top: 150px; width: 88px; height: 204px; }
+  .kitchen .k-fridge::before { content:""; position: absolute; inset: 0; border-radius: 9px 9px 5px 5px;
+    background: linear-gradient(180deg,#fdfdfb,#e7e7ea); border: 2px solid #ccccd0; box-shadow: 0 7px 16px rgba(0,0,0,.32); }
+  .kitchen .k-fridge .k-fdoor { position: absolute; left: 6px; right: 6px; border: 1px solid #d8d8db; border-radius: 5px; }
+  .kitchen .k-fridge .k-fdoor.top { top: 8px; height: 56px; }
+  .kitchen .k-fridge .k-fdoor.bot { top: 72px; bottom: 8px; }
+  .kitchen .k-fridge .k-handle { position: absolute; left: 12px; width: 5px; border-radius: 3px; background: #bcbcc1; }
+  .kitchen .k-fridge .k-handle.t { top: 16px; height: 36px; }
+  .kitchen .k-fridge .k-handle.b { top: 82px; height: 46px; }
+  .kitchen .k-fridge .k-magnets { position: absolute; top: 92px; left: 26px; display: flex; gap: 4px; z-index: 2; }
+  .kitchen .k-fridge .k-magnets b { width: 15px; height: 17px; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: #fff; border-radius: 3px; background: var(--c);
+    box-shadow: 0 1px 1px rgba(0,0,0,.3); transform: rotate(var(--r,0deg)); }
+  .kitchen .k-fridge .k-postcard { position: absolute; top: 128px; left: 20px; width: 52px; height: 40px;
+    background: #fff7e6; border: 1px solid #e2d2ac; border-radius: 2px; transform: rotate(-5deg); z-index: 2;
+    box-shadow: 0 2px 3px rgba(0,0,0,.28); font-size: 7px; line-height: 1.3; font-weight: 800; color: #9a5536; text-align: center; padding-top: 4px; }
+  /* rustic wooden dining table in the foreground */
+  .kitchen .k-table { position: absolute; left: 50%; top: 372px; transform: translateX(-50%); width: 224px; height: 76px; }
+  .kitchen .k-table .tt { position: absolute; top: 0; left: 0; right: 0; height: 21px; border-radius: 8px;
+    box-shadow: 0 5px 7px rgba(0,0,0,.3); background-color: #4a3017;
+    background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.14) 0 1px, transparent 1px 36px),
+                      linear-gradient(180deg,#553819,#3a2611); }
+  .kitchen .k-table .leg { position: absolute; top: 18px; width: 12px; height: 54px; border-radius: 0 0 3px 3px;
+    background: linear-gradient(180deg,#523619,#39260f); }
+  .kitchen .k-table .leg.l { left: 14px; } .kitchen .k-table .leg.r { right: 14px; }
+  .kitchen .k-table .leg.ml { left: 58px; } .kitchen .k-table .leg.mr { right: 58px; }
+  /* a little vase with a sunflower as a table centrepiece */
+  .kitchen .k-table .k-vase { position: absolute; left: 50%; top: -30px; transform: translateX(-50%); width: 22px; height: 38px; z-index: 2; }
+  .kitchen .k-table .k-vase .pot { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 16px; height: 16px;
+    border-radius: 4px 4px 7px 7px; background: linear-gradient(180deg,#cfe0ec,#9fbdd2); box-shadow: inset 1px 2px 2px rgba(255,255,255,.5); }
+  .kitchen .k-table .k-vase .stem { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); width: 3px; height: 15px; background: #4f8a3a; border-radius: 2px; }
+  .kitchen .k-table .k-vase .bloom { position: absolute; top: -3px; left: 50%; transform: translateX(-50%); font-size: 20px; line-height: 1; }
+  .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(90,55,30,.85);
+    text-shadow: 0 1px 2px rgba(255,255,255,.4); pointer-events: none; }
 
   /* ---- House overview (floor plan of all rooms) ------------------------ */
   .house-plan { display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
@@ -835,10 +910,10 @@
         </div>
       </div>
 
-      <!-- Door on the right wall → leads to the snug -->
-      <div class="door-next" id="doorNext" title="Go to the snug">
+      <!-- Door on the right wall → leads to the kitchen -->
+      <div class="door-next" id="doorNext" title="Go to the kitchen">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">the snug →</div>
+        <div class="sign">kitchen →</div>
       </div>
       <!-- Door on the left wall → leads to the Wardrobe -->
       <div class="door-ward" id="doorWard" title="Go to the Wardrobe">
@@ -846,13 +921,32 @@
         <div class="sign">← wardrobe</div>
       </div>
 
-      <!-- ===== SECOND ROOM ("the snug") — shown only when you're in it ===== -->
-      <div class="window2 two-only">
-        <div class="sky2"></div>
-        <div class="moon2"></div>
-        <div class="cross"></div>
+      <!-- ===== SECOND ROOM (the Kitchen) — shown only when you're in it ===== -->
+      <div class="kitchen two-only">
+        <div class="k-window"><div class="k-sky"></div><div class="k-pane"></div></div>
+        <div class="k-shelf"></div>
+        <div class="k-backsplash"></div>
+        <div class="k-counter">
+          <div class="k-top"></div>
+          <div class="k-cab"></div>
+          <div class="k-sink"></div>
+          <div class="k-stove"><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="k-fridge">
+          <div class="k-fdoor top"></div>
+          <div class="k-fdoor bot"></div>
+          <div class="k-handle t"></div>
+          <div class="k-handle b"></div>
+          <div class="k-magnets"><b style="--c:#e9608a;--r:-8deg">A</b><b style="--c:#4f9fe0;--r:5deg">B</b><b style="--c:#5fbf6a;--r:-4deg">C</b></div>
+          <div class="k-postcard">🗽<br>love from<br>New York</div>
+        </div>
+        <div class="k-table">
+          <div class="leg l"></div><div class="leg r"></div><div class="leg ml"></div><div class="leg mr"></div>
+          <div class="tt"></div>
+          <div class="k-vase"><span class="bloom">🌻</span><span class="stem"></span><span class="pot"></span></div>
+        </div>
       </div>
-      <div class="label2 two-only" style="left:50%; transform:translateX(-50%)">🛋️ The Snug</div>
+      <div class="label2 two-only" style="left:50%; transform:translateX(-50%)">🍳 Kitchen</div>
       <div class="door-back two-only" id="doorBack" title="Back to the bedroom">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
         <div class="sign">← bedroom</div>
@@ -1078,7 +1172,7 @@
       { id: "aqsa", x: 47.5, y: 88 },
       { id: "adam", x: 79,   y: 88 }
     ],
-    currentRoom: "main",   // which room is on screen ("main" bedroom or "two" snug)
+    currentRoom: "main",   // which room is on screen ("main" bedroom or "two" kitchen)
     closet: [],            // clothing item ids you've bought
     outfits: { jas: {}, aqsa: {}, adam: {} },   // what each friend is wearing
     scores: { starcatcher: [], laundromat: [] },   // mini-game leaderboards
@@ -2580,7 +2674,7 @@
       try { localStorage.setItem("mns.muted", muted ? "1" : "0"); } catch (e) {}
       if (!muted) {
         if (!started) start();
-        else { ensureRunning(); master.gain.setTargetAtTime(LEVEL, ctx.currentTime, 0.5); }
+        else { ensureRunning(); master.gain.setTargetAtTime(padSuppressed ? 0 : LEVEL, ctx.currentTime, 0.5); }
       } else if (started) {
         master.gain.setTargetAtTime(0, ctx.currentTime, 0.4);
       }
@@ -2659,19 +2753,23 @@
       bell(0, 1318.51); bell(0.08, 1760.0);
     }
 
-    // Looping 8-bit tunes for the mini-games (original melodies). Each game
-    // gets its own, layered over the calming ambient pad.
-    var tuneTimer = null, tuneStep = 0, curTune = null;
+    // Looping tunes for the mini-games (original melodies). The laundromat tune
+    // layers over the ambient pad; the Star Catcher tune is a slow, whimsical,
+    // music-box-style pentatonic piece and plays ON ITS OWN (the pad is ducked).
+    var tuneTimer = null, tuneStep = 0, curTune = null, tuneOut = null, padSuppressed = false;
     var TUNES = {
       laundro: {
         mel: [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880.0, 698.46,
               523.25, 659.25, 783.99, 1046.5, 587.33, 493.88, 587.33, 392.0],
         bass: [130.81, 174.61, 146.83, 196.0], step: 150, melType: "square", melVol: 0.045, bassType: "triangle", bassVol: 0.06
       },
-      star: {   // brighter, twinklier arpeggio for Star Catcher
-        mel: [659.25, 987.77, 1318.51, 987.77, 1174.66, 880.0, 1046.5, 1318.51,
-              784.0, 1046.5, 1318.51, 1567.98, 1174.66, 880.0, 987.77, 1318.51],
-        bass: [164.81, 220.0, 196.0, 146.83], step: 132, melType: "triangle", melVol: 0.05, bassType: "sine", bassVol: 0.05
+      star: {   // gentle C-major-pentatonic music box — relaxing & magical
+        mel: [523.25, 659.25, 783.99, 1046.5, 880.0, 783.99, 659.25, 587.33,
+              659.25, 783.99, 1046.5, 1318.51, 1046.5, 880.0, 783.99, 659.25],
+        bass: [130.81, 174.61, 196.0, 174.61], step: 330,
+        melType: "triangle", melVol: 0.05, melDur: 0.95,
+        bassType: "sine", bassVol: 0.038, bassDur: 2.4, solo: true,
+        sparkle: [1567.98, 1760.0, 2093.0, 1318.51]   // occasional high twinkles
       }
     };
     function note(f, dur, type, vol) {
@@ -2679,9 +2777,9 @@
       var t = c.currentTime, o = c.createOscillator(), g = c.createGain();
       o.type = type; o.frequency.value = f;
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      o.connect(g); g.connect(master || c.destination);
+      o.connect(g); g.connect(tuneOut || master || c.destination);
       o.start(t); o.stop(t + dur + 0.02);
     }
     function startTune(which) {
@@ -2691,15 +2789,34 @@
       curTune = which;
       if (!started) start();
       ensureRunning();
+      if (!tuneOut && ctx) { tuneOut = ctx.createGain(); tuneOut.gain.value = 1; tuneOut.connect(ctx.destination); }
+      padSuppressed = !!tn.solo;   // a "solo" tune silences the background pad entirely
+      if (padSuppressed) {
+        if (chordTimer) { clearInterval(chordTimer); chordTimer = null; }
+        if (twinkleTimer) { clearTimeout(twinkleTimer); twinkleTimer = null; }
+        if (master && ctx) master.gain.setTargetAtTime(0, ctx.currentTime, 0.3);
+      }
       tuneStep = 0;
       tuneTimer = setInterval(function () {
         if (muted || !ctx) return;
-        note(tn.mel[tuneStep % tn.mel.length], 0.12, tn.melType, tn.melVol);
-        if (tuneStep % 4 === 0) note(tn.bass[(tuneStep / 4) % tn.bass.length], 0.22, tn.bassType, tn.bassVol);
+        note(tn.mel[tuneStep % tn.mel.length], tn.melDur || 0.12, tn.melType, tn.melVol);
+        if (tuneStep % 4 === 0) note(tn.bass[(tuneStep / 4) % tn.bass.length], tn.bassDur || 0.22, tn.bassType, tn.bassVol);
+        if (tn.sparkle && Math.random() < 0.22) note(tn.sparkle[(Math.random() * tn.sparkle.length) | 0], 0.7, "sine", 0.03);
         tuneStep++;
       }, tn.step);
     }
-    function stopTune() { if (tuneTimer) { clearInterval(tuneTimer); tuneTimer = null; } curTune = null; }
+    function stopTune() {
+      if (tuneTimer) { clearInterval(tuneTimer); tuneTimer = null; }
+      curTune = null;
+      if (padSuppressed) {   // bring the ambient pad back
+        if (master && ctx) master.gain.setTargetAtTime(muted ? 0 : LEVEL, ctx.currentTime, 0.6);
+        if (started) {
+          if (!chordTimer) { playChord(); chordTimer = setInterval(playChord, 9000); }
+          if (!twinkleTimer) scheduleTwinkle();
+        }
+      }
+      padSuppressed = false;
+    }
 
     return { start: start, toggle: toggle, squeak: squeak, charSqueak: charSqueak, blip: blip,
              chaching: chaching, startTune: startTune, stopTune: stopTune,
@@ -2857,10 +2974,10 @@
   }
 
   // =====================================================================
-  //  ROOMS — doors on the walls switch between the bedroom, snug & wardrobe.
+  //  ROOMS — doors on the walls switch between the bedroom, kitchen & wardrobe.
   // =====================================================================
   var ROOM_TOASTS = {
-    two: "🚪 The snug — decorate it too! Tap ← to head back.",
+    two: "🍳 The kitchen — decorate it too! Tap ← to head back.",
     wardrobe: "👗 The Wardrobe — make it yours! Tap → to head back.",
     main: "🏠 Back in the bedroom."
   };
@@ -2878,11 +2995,11 @@
   }
 
   // House overview — a little floor plan of every room (left to right, the way
-  // the doors connect: Wardrobe · Bedroom · Snug). Tap a room to go there.
+  // the doors connect: Wardrobe · Bedroom · Kitchen). Tap a room to go there.
   var HOUSE_ROOMS = [
     { id: "wardrobe", name: "👗 Wardrobe", wall: "linear-gradient(180deg,#4a3a52,#6f5570)", floor: "linear-gradient(180deg,#a98a6a,#876a4a)" },
     { id: "main",     name: "🛏️ Bedroom",  wall: "linear-gradient(180deg,#4a3a63,#6b5184)", floor: "linear-gradient(180deg,#8a6a4f,#74573f)" },
-    { id: "two",      name: "🛋️ The Snug", wall: "linear-gradient(180deg,#2e514a,#427563)", floor: "linear-gradient(180deg,#9a7445,#7c5a32)" }
+    { id: "two",      name: "🍳 Kitchen", wall: "linear-gradient(180deg,#6a5594,#48366e)", floor: "linear-gradient(180deg,#7a5638,#5f4029)" }
   ];
   var FURN_EMOJI = { wardrobe: "🗄️", bed: "🛏️", desk: "🖥️" };
 

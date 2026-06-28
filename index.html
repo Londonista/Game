@@ -776,43 +776,45 @@
     background: radial-gradient(circle at 40% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 16px rgba(255,240,200,.6); }
   .snug .s-window .s-cross::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #eaddc4; transform: translateX(-50%); z-index: 2; }
   .snug .s-window .s-cross::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #eaddc4; transform: translateY(-50%); z-index: 2; }
-  /* warm floor lamp */
-  .snug .s-lamp { position: absolute; left: 78px; bottom: 78px; width: 6px; height: 128px; border-radius: 3px;
-    background: linear-gradient(90deg,#5a4632,#7a5e42,#5a4632); }
-  .snug .s-lamp::before { content:""; position: absolute; top: -26px; left: 50%; transform: translateX(-50%); width: 34px; height: 28px;
-    border-radius: 6px 6px 14px 14px; background: linear-gradient(180deg,#ffe6a8,#f4c46a); box-shadow: 0 0 28px 7px rgba(255,224,150,.45); }
-  .snug .s-lamp::after { content:""; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); width: 26px; height: 6px; border-radius: 50%; background: #4a3a28; }
   /* round patterned rug */
   .snug .s-rug { position: absolute; left: 50%; transform: translateX(-50%); bottom: 22px; width: 300px; height: 48px; border-radius: 50%;
     background: radial-gradient(circle, #b8704a 0 38%, #9c5d3c 39% 58%, #b8704a 59% 78%, #8f5536 79%); opacity: .92; }
-  /* cosy sofa */
-  .snug .s-sofa { position: absolute; left: 50%; transform: translateX(-50%); bottom: 50px; width: 250px; height: 90px; }
-  .snug .s-sofa .back { position: absolute; top: 0; left: 8px; right: 8px; height: 52px; border-radius: 14px 14px 6px 6px; background: linear-gradient(180deg,#b5683f,#8f4f2c); }
-  .snug .s-sofa .arm { position: absolute; bottom: 0; width: 28px; height: 64px; border-radius: 10px; background: linear-gradient(180deg,#a85e38,#854829); }
-  .snug .s-sofa .arm.l { left: 0; } .snug .s-sofa .arm.r { right: 0; }
-  .snug .s-sofa .seat { position: absolute; bottom: 0; left: 24px; right: 24px; height: 44px; border-radius: 9px; background: linear-gradient(180deg,#c47a4e,#a5613a); }
-  .snug .s-sofa .cush { position: absolute; bottom: 22px; width: 64px; height: 40px; border-radius: 9px; background: #cf8a5e; box-shadow: inset 0 -4px 0 rgba(0,0,0,.12); }
-  .snug .s-sofa .cush.c1 { left: 40px; } .snug .s-sofa .cush.c2 { right: 40px; }
+
+  /* Cosy sofa — a purchasable, draggable item */
+  .item.sofa { font-size: 0; filter: drop-shadow(0 7px 6px rgba(0,0,0,0.4)); }
+  .sofa-art { position: relative; width: 230px; height: 96px; }
+  .sofa-art .back { position: absolute; top: 0; left: 8px; right: 8px; height: 54px; border-radius: 14px 14px 6px 6px; background: linear-gradient(180deg,#b5683f,#8f4f2c); }
+  .sofa-art .arm { position: absolute; bottom: 0; width: 30px; height: 66px; border-radius: 10px; background: linear-gradient(180deg,#a85e38,#854829); }
+  .sofa-art .arm.l { left: 0; } .sofa-art .arm.r { right: 0; }
+  .sofa-art .seat { position: absolute; bottom: 0; left: 26px; right: 26px; height: 46px; border-radius: 9px; background: linear-gradient(180deg,#c47a4e,#a5613a); }
+  .sofa-art .cush { position: absolute; bottom: 24px; width: 60px; height: 40px; border-radius: 9px; background: #cf8a5e; box-shadow: inset 0 -4px 0 rgba(0,0,0,.12); }
+  .sofa-art .cush.c1 { left: 40px; } .sofa-art .cush.c2 { right: 40px; }
+
+  /* Warm floor lamp — a purchasable, draggable item */
+  .item.lamp { font-size: 0; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.35)); }
+  .lamp-art { position: relative; width: 40px; height: 152px; }
+  .lamp-art .pole { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 6px; height: 124px; border-radius: 3px;
+    background: linear-gradient(90deg,#5a4632,#7a5e42,#5a4632); }
+  .lamp-art::before { content:""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 36px; height: 30px;
+    border-radius: 6px 6px 16px 16px; background: linear-gradient(180deg,#ffe6a8,#f4c46a); box-shadow: 0 0 30px 8px rgba(255,224,150,.45); }
+  .lamp-art::after { content:""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 28px; height: 7px; border-radius: 50%; background: #4a3a28; }
 
   .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(90,55,30,.85);
     text-shadow: 0 1px 2px rgba(255,255,255,.4); pointer-events: none; }
   #room[data-room="garden"] .label2 { color: rgba(255,255,255,.85); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
 
-  /* jewel flowers & vines that bloom in the corners when you enter the garden */
-  .gardenfx { position: absolute; width: 46%; max-width: 190px; height: 46%; max-height: 190px; z-index: 70; pointer-events: none; }
-  .gardenfx.tl { top: 0; left: 0; }
-  .gardenfx.tr { top: 0; right: 0; transform: scaleX(-1); }
-  .gardenfx.bl { bottom: 0; left: 0; transform: scaleY(-1); }
-  .gardenfx.br { bottom: 0; right: 0; transform: scale(-1,-1); }
-  .gardenfx .gfx-in { width: 100%; height: 100%; transform-origin: 0 0; opacity: 0;
-    filter: drop-shadow(0 0 6px rgba(255,255,255,.25)); animation: gfxbloom 4.4s ease forwards; }
-  .gardenfx .gfx-in svg { width: 100%; height: 100%; display: block; }
-  @keyframes gfxbloom {
-    0%   { opacity: 0; transform: scale(.4) rotate(-7deg); }
-    22%  { opacity: 1; }
-    55%  { opacity: 1; transform: scale(1) rotate(0deg); }
-    100% { opacity: 0; transform: scale(1.08) rotate(3deg); }
-  }
+  /* Entering the garden: a black screen framed with jewel flowers & vines in
+     the corners, which fades out as one to reveal the garden. */
+  .garden-reveal { position: absolute; inset: 0; z-index: 75; background: #04060c; pointer-events: none;
+    animation: gardenreveal 2.8s ease forwards; }
+  @keyframes gardenreveal { 0% { opacity: 1; } 30% { opacity: 1; } 100% { opacity: 0; } }
+  .garden-reveal .gv { position: absolute; width: 64%; max-width: 300px; height: 64%; max-height: 300px;
+    filter: drop-shadow(0 0 6px rgba(255,255,255,.3)); }
+  .garden-reveal .gv.tl { top: 0; left: 0; }
+  .garden-reveal .gv.tr { top: 0; right: 0; transform: scaleX(-1); }
+  .garden-reveal .gv.bl { bottom: 0; left: 0; transform: scaleY(-1); }
+  .garden-reveal .gv.br { bottom: 0; right: 0; transform: scale(-1,-1); }
+  .garden-reveal .gv svg { width: 100%; height: 100%; display: block; }
   #room[data-room="snug"] .label2 { color: rgba(255,255,255,.82); text-shadow: 0 1px 2px rgba(0,0,0,.45); }
 
   /* ---- House overview (floor plan of all rooms) ------------------------ */
@@ -1036,12 +1038,7 @@
       <!-- ===== THE SNUG — between the bedroom and the kitchen ===== -->
       <div class="snug snug-only">
         <div class="s-window"><div class="s-moon"></div><div class="s-cross"></div></div>
-        <div class="s-lamp"></div>
         <div class="s-rug"></div>
-        <div class="s-sofa">
-          <span class="back"></span><span class="arm l"></span><span class="arm r"></span>
-          <span class="seat"></span><span class="cush c1"></span><span class="cush c2"></span>
-        </div>
       </div>
       <div class="label2 snug-only" style="left:50%; transform:translateX(-50%)">🛋️ The Snug</div>
       <div class="door-back snug-only" id="doorSnugBack" title="Back to the bedroom">
@@ -1236,6 +1233,10 @@
     { id: "vanity",    name: "Dressing Table", ic: "🪞", price: 34, unlockAt: 0, set: "Boudoir", render: "vanity" },
     { id: "wardrobe_white", name: "Ornate Wardrobe", ic: "👗", price: 40, unlockAt: 0, set: "Boudoir", render: "wardrobe" },
 
+    // --- Snug (cosy seating) ---
+    { id: "sofa_rust", name: "Cosy Sofa", ic: "🛋️", price: 36, unlockAt: 0, set: "Snug", render: "sofa" },
+    { id: "lamp_floor", name: "Floor Lamp", ic: "🪔", price: 18, unlockAt: 0, set: "Snug", render: "lamp" },
+
     // --- Outfits (worn by the friends via the ornate wardrobe) ---
     { id: "hat_tiara",   name: "Tiara",        ic: "👑", price: 10, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👑", art: "tiara" } },
     { id: "hat_bow",     name: "Hair Bow",     ic: "🎀", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🎀", art: "bow" } },
@@ -1346,6 +1347,7 @@
 
   var state = load();
   normalizeWardrobe(state);
+  save();   // persist any first-run normalisation (e.g. the snug furnishing)
   // Make sure the wardrobe/outfit fields exist on older saves.
   function normalizeWardrobe(s) {
     s.closet = s.closet || [];
@@ -1354,6 +1356,14 @@
     s.scores = s.scores || {};
     ["starcatcher", "laundromat"].forEach(function (id) { s.scores[id] = s.scores[id] || []; });
     if (typeof s.gardenDoorX !== "number") s.gardenDoorX = 68;
+    // furnish the snug once with a (now removable/movable) sofa + floor lamp
+    if (!s.snugFurnished) {
+      s.placed = s.placed || [];
+      var hasU = function (u) { return s.placed.some(function (p) { return p.uid === u; }); };
+      if (!hasU("snug_sofa")) s.placed.push({ uid: "snug_sofa", itemId: "sofa_rust", x: 50, y: 84, room: "snug", scale: 1 });
+      if (!hasU("snug_lamp")) s.placed.push({ uid: "snug_lamp", itemId: "lamp_floor", x: 14, y: 78, room: "snug", scale: 1 });
+      s.snugFurnished = true;
+    }
   }
 
   function load() {
@@ -1677,6 +1687,20 @@
     return wrap;
   }
 
+  function buildSofa() {
+    var wrap = document.createElement("div");
+    wrap.className = "sofa-art";
+    wrap.innerHTML = '<span class="back"></span><span class="arm l"></span><span class="arm r"></span>' +
+      '<span class="seat"></span><span class="cush c1"></span><span class="cush c2"></span>';
+    return wrap;
+  }
+  function buildLamp() {
+    var wrap = document.createElement("div");
+    wrap.className = "lamp-art";
+    wrap.innerHTML = '<span class="pole"></span>';
+    return wrap;
+  }
+
   // Compact wardrobe icon for the shop card.
   var WARDROBE_ICON =
     '<svg width="34" height="52" viewBox="0 0 34 52">' +
@@ -1745,6 +1769,8 @@
       else if (def.render === "map") { el.classList.add("mapitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildMap()); }
       else if (def.render === "vanity") { el.classList.add("vanity"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVanity()); }
       else if (def.render === "wardrobe") { el.classList.add("wardrobeitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildWardrobe()); }
+      else if (def.render === "sofa") { el.classList.add("sofa"); el.style.zIndex = depthZ(p.y); el.appendChild(buildSofa()); }
+      else if (def.render === "lamp") { el.classList.add("lamp"); el.style.zIndex = depthZ(p.y); el.appendChild(buildLamp()); }
       else if (def.render === "vase") { el.classList.add("vase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVase()); }
       else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint, def.size, p.orient)); }
       else { el.style.zIndex = depthZ(p.y); el.textContent = def.ic; }
@@ -3187,8 +3213,8 @@
     }, 160);
   }
 
-  // One ornate corner of jewel-coloured flowers on a leafy vine (SVG). The
-  // gradient ids are suffixed per corner so the four copies don't collide.
+  // A lush corner of jewel-coloured flowers on leafy vines (SVG). The gradient
+  // ids are suffixed per corner so the four copies don't collide.
   function cornerVine(idx) {
     var p = "jw" + idx + "-";
     function grad(id, a, b, c) {
@@ -3198,7 +3224,7 @@
     var defs = '<defs>' +
       grad('am', '#e6c2ff', '#9b59b6', '#5e2a86') + grad('sa', '#c3dbff', '#2e6fd6', '#163b80') +
       grad('em', '#bff6db', '#1ea672', '#0c5a3e') + grad('ru', '#ffc7d8', '#d6336c', '#841842') +
-      grad('to', '#ffe9ad', '#e0a83a', '#9a6b14') + '</defs>';
+      grad('to', '#ffe9ad', '#e0a83a', '#9a6b14') + grad('ro', '#ffd0e6', '#e85aa0', '#8f2a5e') + '</defs>';
     function flower(cx, cy, r, g) {
       var s = "";
       for (var i = 0; i < 6; i++) {
@@ -3207,28 +3233,58 @@
       }
       return s + '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.42).toFixed(1) + '" fill="#fff6d2"/>';
     }
-    var stems = '<g stroke="#2f7a46" stroke-width="3.2" fill="none" stroke-linecap="round">' +
-      '<path d="M2 16 C 38 22, 66 42, 96 82"/><path d="M16 2 C 22 36, 42 64, 80 94"/><path d="M2 4 C 28 12, 46 28, 58 52"/></g>';
+    function leaf(cx, cy, rot, sz) {
+      return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + sz + '" ry="' + (sz * 0.5).toFixed(1) + '" transform="rotate(' + rot + ' ' + cx + ' ' + cy + ')"/>';
+    }
+    function bud(cx, cy, r, g) {
+      return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#' + p + g + ')"/>' +
+        '<circle cx="' + (cx - r * 0.3).toFixed(1) + '" cy="' + (cy - r * 0.3).toFixed(1) + '" r="' + (r * 0.3).toFixed(1) + '" fill="rgba(255,255,255,.6)"/>';
+    }
+    // two layers of stems that cross/weave, for a webby, intertwined corner
+    var stemsBack = '<g stroke="#2a6e3f" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".92">' +
+      '<path d="M2 34 C 64 26, 118 62, 196 118"/><path d="M34 2 C 26 64, 62 118, 118 196"/>' +
+      '<path d="M2 96 C 70 86, 104 118, 150 196"/><path d="M96 2 C 86 70, 118 104, 196 150"/>' +
+      '<path d="M2 160 C 50 150, 84 172, 104 198"/><path d="M160 2 C 150 50, 172 84, 198 104"/></g>';
+    var stemsFront = '<g stroke="#3a915a" stroke-width="3.2" fill="none" stroke-linecap="round">' +
+      '<path d="M2 10 C 56 44, 96 30, 162 78"/><path d="M10 2 C 44 56, 30 96, 78 162"/>' +
+      '<path d="M2 60 C 60 50, 92 92, 120 150"/><path d="M60 2 C 50 60, 92 92, 150 120"/>' +
+      '<path d="M2 120 C 44 116, 70 140, 80 184"/><path d="M120 2 C 116 44, 140 70, 184 80"/></g>';
+    var curls = '<g stroke="#4aa56a" stroke-width="2" fill="none" stroke-linecap="round">' +
+      '<path d="M150 80 c 10 -6 16 4 8 12 c -5 5 -12 1 -9 -6"/>' +
+      '<path d="M80 150 c -6 10 4 16 12 8 c 5 -5 1 -12 -6 -9"/>' +
+      '<path d="M110 110 c 8 6 2 16 -7 12 c -6 -3 -4 -11 3 -10"/>' +
+      '<path d="M52 96 c -8 4 -6 14 3 13 c 6 -1 6 -9 0 -11"/>' +
+      '<path d="M96 52 c 4 -8 14 -6 13 3 c -1 6 -9 6 -11 0"/></g>';
     var leaves = '<g fill="#3a915a">' +
-      '<ellipse cx="44" cy="30" rx="9" ry="4.6" transform="rotate(30 44 30)"/>' +
-      '<ellipse cx="30" cy="46" rx="9" ry="4.6" transform="rotate(64 30 46)"/>' +
-      '<ellipse cx="72" cy="60" rx="8" ry="4.2" transform="rotate(36 72 60)"/>' +
-      '<ellipse cx="60" cy="84" rx="8" ry="4.2" transform="rotate(60 60 84)"/></g>';
-    var flowers = flower(96, 82, 12, 'am') + flower(80, 96, 11, 'sa') + flower(58, 52, 10, 'em') +
-      flower(15, 16, 9, 'ru') + flower(40, 70, 8, 'to');
-    return '<svg viewBox="0 0 170 170" preserveAspectRatio="xMidYMid meet">' + defs + stems + leaves + flowers + '</svg>';
+      leaf(40, 18, 20, 9) + leaf(70, 40, 14, 9) + leaf(110, 34, -10, 8) + leaf(150, 66, 26, 9) + leaf(176, 104, 40, 9) +
+      leaf(18, 40, 70, 9) + leaf(40, 70, 76, 9) + leaf(34, 110, 100, 8) + leaf(66, 150, 64, 9) + leaf(104, 176, 50, 9) +
+      leaf(60, 60, 40, 9) + leaf(96, 96, 30, 9) + leaf(124, 120, 55, 9) + leaf(150, 150, 45, 9) +
+      leaf(84, 124, 80, 8) + leaf(124, 84, 10, 8) + '</g>';
+    var leavesDk = '<g fill="#2f7a46">' +
+      leaf(54, 32, 50, 7) + leaf(32, 54, 28, 7) + leaf(120, 60, 70, 7) + leaf(60, 120, 16, 7) +
+      leaf(160, 130, 35, 7) + leaf(130, 160, 60, 7) + '</g>';
+    var flowers =
+      flower(162, 78, 14, 'am') + flower(78, 162, 14, 'sa') + flower(196, 118, 12, 'em') +
+      flower(118, 196, 12, 'ru') + flower(184, 80, 11, 'to') + flower(80, 184, 11, 'ro') +
+      flower(110, 110, 15, 'am') + flower(60, 60, 11, 'em') + flower(150, 120, 12, 'ru') +
+      flower(120, 150, 12, 'to') + flower(52, 96, 9, 'sa') + flower(96, 52, 9, 'ro') + flower(16, 18, 11, 'to');
+    var buds = bud(132, 58, 4, 'ro') + bud(58, 132, 4, 'am') + bud(172, 142, 4, 'sa') +
+      bud(142, 172, 4, 'em') + bud(34, 74, 3.5, 'ru') + bud(74, 34, 3.5, 'to') + bud(100, 30, 3.5, 'am');
+    return '<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">' + defs +
+      stemsBack + leavesDk + stemsFront + curls + leaves + flowers + buds + '</svg>';
   }
-  // play the entry flourish + bloom jewel vines in all four corners, then fade
+  // Enter the garden: play the flourish and drop a black screen framed with
+  // jewel vines in the corners, which fades out as one to reveal the garden.
   function gardenFlourish() {
     Ambient.flourish();
-    Array.prototype.slice.call(room.querySelectorAll(".gardenfx")).forEach(function (n) { n.remove(); });
-    ["tl", "tr", "bl", "br"].forEach(function (cn, i) {
-      var d = document.createElement("div");
-      d.className = "gardenfx " + cn;
-      d.innerHTML = '<div class="gfx-in">' + cornerVine(i) + '</div>';
-      room.appendChild(d);
-      setTimeout(function () { if (d.parentNode) d.remove(); }, 4500);
-    });
+    Array.prototype.slice.call(room.querySelectorAll(".garden-reveal")).forEach(function (n) { n.remove(); });
+    var ov = document.createElement("div");
+    ov.className = "garden-reveal";
+    ov.innerHTML = ["tl", "tr", "bl", "br"].map(function (cn, i) {
+      return '<div class="gv ' + cn + '">' + cornerVine(i) + '</div>';
+    }).join("");
+    room.appendChild(ov);
+    setTimeout(function () { if (ov.parentNode) ov.remove(); }, 3000);
   }
 
   // House overview — a little floor plan of every room (left to right, the way

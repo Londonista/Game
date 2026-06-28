@@ -526,6 +526,46 @@
   .item.vanity .vanity-svg { display: block; }
   .item.vanity .del { top: -6px; right: -8px; }
 
+  /* Ornate white wardrobe (opens a clothes chooser when tapped) */
+  .item.wardrobe { font-size: 0; filter: drop-shadow(0 9px 8px rgba(0,0,0,0.4)); cursor: pointer; }
+  .item.wardrobe .wardrobe-svg { display: block; }
+  .item.wardrobe .del { top: -6px; right: -8px; }
+
+  /* Clothes worn by the friend avatars (also reused in the wardrobe preview) */
+  .worn-hat { position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+    line-height: 0; pointer-events: none; z-index: 2; }
+  .worn-glasses { position: absolute; top: 13px; left: 50%; transform: translateX(-50%);
+    line-height: 0; pointer-events: none; z-index: 3; }
+  .worn-hat svg, .worn-glasses svg { display: block; }
+
+  /* Wardrobe chooser modal */
+  .ward-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+  .ward-tab { border: 2px solid var(--c); background: transparent; color: #fff;
+    border-radius: 14px; padding: 6px 16px; font-weight: 700; cursor: pointer; }
+  .ward-tab.on { background: var(--c); color: #2a2238; }
+  .ward-prev { display: flex; justify-content: center; margin: 6px 0 8px; }
+  .ava-prev { position: relative; width: 56px; height: 60px; }
+  .ava-prev .pbody { width: 42px; height: 48px; margin: 0 auto; position: relative;
+    border-radius: 22px 22px 16px 16px; box-shadow: inset 0 -6px 0 rgba(0,0,0,0.12); }
+  .ava-prev .pface { position: absolute; top: 12px; left: 0; right: 0; text-align: center; font-size: 16px; }
+  .ward-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; margin-bottom: 6px; }
+  .ward-card { background: rgba(255,255,255,.06); border: 2px solid transparent; border-radius: 12px;
+    padding: 8px 4px; text-align: center; cursor: pointer; }
+  .ward-card.on { border-color: #ffd86b; background: rgba(255,216,107,.14); }
+  .ward-card .ic { font-size: 24px; height: 40px; display: flex; align-items: center; justify-content: center; }
+  .ward-card .nm { font-size: 11px; margin-top: 2px; }
+  .shop-card.owned { opacity: .65; }
+
+  /* Shop categories (first screen of the shop) */
+  .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+  .cat-card { background: rgba(255,255,255,.06); border: 2px solid transparent; border-radius: 14px;
+    padding: 12px 8px; text-align: center; cursor: pointer; transition: border-color .12s, background .12s; }
+  .cat-card:hover { border-color: rgba(255,255,255,.28); background: rgba(255,255,255,.1); }
+  .cat-card .ic { font-size: 30px; height: 46px; display: flex; align-items: center; justify-content: center; }
+  .cat-card .ic svg { width: auto; height: 40px; }
+  .cat-card .nm { font-weight: 700; margin-top: 4px; }
+  .cat-card .ct { font-size: 11px; opacity: .7; margin-top: 1px; }
+
   /* Ornate, empty wooden bookcase — a purchasable, removable item */
   .item.bookcase { font-size: 0; filter: drop-shadow(0 8px 7px rgba(0,0,0,0.4)); }
   .item.bookcase .del { top: -8px; right: -10px; }
@@ -923,6 +963,16 @@
 
     // --- Boudoir ---
     { id: "vanity",    name: "Dressing Table", ic: "🪞", price: 34, unlockAt: 0, set: "Boudoir", render: "vanity" },
+    { id: "wardrobe_white", name: "Ornate Wardrobe", ic: "👗", price: 40, unlockAt: 0, set: "Boudoir", render: "wardrobe" },
+
+    // --- Outfits (worn by the friends via the ornate wardrobe) ---
+    { id: "hat_tiara",   name: "Tiara",        ic: "👑", price: 10, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👑", art: "tiara" } },
+    { id: "hat_bow",     name: "Hair Bow",     ic: "🎀", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🎀", art: "bow" } },
+    { id: "hat_sun",     name: "Sun Hat",      ic: "👒", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👒", art: "sunhat" } },
+    { id: "hat_flower",  name: "Flower Crown", ic: "🌸", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🌸", art: "flower" } },
+    { id: "hat_cap",     name: "Beanie",       ic: "🧢", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🧢", art: "beanie" } },
+    { id: "gl_shades",   name: "Sunglasses",   ic: "🕶️", price: 7,  unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "🕶️", art: "shades" } },
+    { id: "gl_reading",  name: "Reading Glasses", ic: "👓", price: 7, unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "👓", art: "reading" } },
 
     // --- Beds (different colours) ---
     { id: "bed_pink",   name: "Pink Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "pink" },
@@ -1012,6 +1062,8 @@
       { id: "adam", x: 79,   y: 88 }
     ],
     currentRoom: "main",   // which room is on screen ("main" bedroom or "two" snug)
+    closet: [],            // clothing item ids you've bought
+    outfits: { jas: {}, aqsa: {}, adam: {} },   // what each friend is wearing
     createdAt: null,
     updatedAt: null
   };
@@ -1020,6 +1072,13 @@
   var CHAR_DEFAULTS = { jas: { x: 17, y: 88 }, aqsa: { x: 47.5, y: 88 }, adam: { x: 79, y: 88 } };
 
   var state = load();
+  normalizeWardrobe(state);
+  // Make sure the wardrobe/outfit fields exist on older saves.
+  function normalizeWardrobe(s) {
+    s.closet = s.closet || [];
+    s.outfits = s.outfits || {};
+    ["jas", "aqsa", "adam"].forEach(function (id) { s.outfits[id] = s.outfits[id] || {}; });
+  }
 
   function load() {
     try {
@@ -1304,6 +1363,58 @@
     return wrap;
   }
 
+  // An ornate white wardrobe — crowned cabinet with a crest + finial, two
+  // arched panelled doors with gold knobs, a scalloped apron and cabriole legs.
+  var WARDROBE_SVG =
+    '<svg class="wardrobe-svg" width="104" height="170" viewBox="0 0 104 170">' +
+    '<circle cx="52" cy="6" r="3" fill="#f2efe8" stroke="#d2ccbe" stroke-width="1"/>' +
+    '<path d="M38 14 C44 6 48 11 52 9 C56 11 60 6 66 14" fill="none" stroke="#d2ccbe" stroke-width="2" stroke-linecap="round"/>' +
+    // crown / cornice
+    '<path d="M12 26 Q52 14 92 26 L92 34 L12 34 Z" fill="#f4f1ea" stroke="#cfc8b9" stroke-width="1.6"/>' +
+    // carcass
+    '<rect x="16" y="33" width="72" height="100" rx="5" fill="#f2efe8" stroke="#cfc8b9" stroke-width="2.2"/>' +
+    // centre stile
+    '<rect x="50" y="36" width="4" height="94" rx="1.5" fill="#e7e0d2"/>' +
+    // left door panel + arched moulding
+    '<rect x="20" y="38" width="28" height="90" rx="3" fill="#efeae0" stroke="#d6cfc0" stroke-width="1.4"/>' +
+    '<path d="M24 70 Q24 46 34 46 Q44 46 44 70 L44 122 L24 122 Z" fill="none" stroke="#d6cfc0" stroke-width="1.4"/>' +
+    // right door panel + arched moulding
+    '<rect x="56" y="38" width="28" height="90" rx="3" fill="#efeae0" stroke="#d6cfc0" stroke-width="1.4"/>' +
+    '<path d="M60 70 Q60 46 70 46 Q80 46 80 70 L80 122 L60 122 Z" fill="none" stroke="#d6cfc0" stroke-width="1.4"/>' +
+    // gold knobs facing the centre
+    '<circle cx="46" cy="84" r="2.2" fill="#e6c887" stroke="#c7a662" stroke-width="0.8"/>' +
+    '<circle cx="58" cy="84" r="2.2" fill="#e6c887" stroke="#c7a662" stroke-width="0.8"/>' +
+    // scalloped apron under the cabinet
+    '<path d="M18 133 Q28 145 38 134 Q45 145 52 134 Q59 145 66 134 Q76 145 86 133 Z" fill="#ece7dd" stroke="#d6cfc0" stroke-width="1"/>' +
+    '<circle cx="52" cy="141" r="2.2" fill="#ece7dd" stroke="#d6cfc0" stroke-width="1"/>' +
+    // cabriole legs with scroll feet + space to the floor
+    '<path d="M24 133 C16 140 16 149 18 156 C19 161 16 165 15 169 C14 170 19 169 20 166 C22 159 27 151 27 146 C28 140 32 137 32 133 Z" fill="#f2efe8" stroke="#cfc8b9" stroke-width="1.4"/>' +
+    '<path d="M80 133 C88 140 88 149 86 156 C85 161 88 165 89 169 C90 170 85 169 84 166 C82 159 77 151 77 146 C76 140 72 137 72 133 Z" fill="#f2efe8" stroke="#cfc8b9" stroke-width="1.4"/>' +
+    '<circle cx="16.5" cy="167" r="2.4" fill="#f2efe8" stroke="#cfc8b9" stroke-width="1.2"/>' +
+    '<circle cx="87.5" cy="167" r="2.4" fill="#f2efe8" stroke="#cfc8b9" stroke-width="1.2"/>' +
+    '</svg>';
+
+  function buildWardrobe() {
+    var wrap = document.createElement("div");
+    wrap.className = "wardrobe-art";
+    wrap.innerHTML = WARDROBE_SVG;
+    return wrap;
+  }
+
+  // Compact wardrobe icon for the shop card.
+  var WARDROBE_ICON =
+    '<svg width="34" height="52" viewBox="0 0 34 52">' +
+    '<path d="M3 7 Q17 2 31 7 L31 11 L3 11 Z" fill="#f4f1ea" stroke="#cfc8b9" stroke-width="1"/>' +
+    '<rect x="4" y="10" width="26" height="34" rx="2" fill="#f2efe8" stroke="#cfc8b9" stroke-width="1.4"/>' +
+    '<rect x="16.5" y="12" width="1.5" height="30" fill="#e0d8c8"/>' +
+    '<rect x="6" y="12" width="9" height="30" rx="1.5" fill="#efeae0" stroke="#d6cfc0" stroke-width="0.8"/>' +
+    '<rect x="19" y="12" width="9" height="30" rx="1.5" fill="#efeae0" stroke="#d6cfc0" stroke-width="0.8"/>' +
+    '<circle cx="14.5" cy="27" r="1.3" fill="#e6c887"/><circle cx="19.5" cy="27" r="1.3" fill="#e6c887"/>' +
+    '<path d="M7 44 C4 48 6 50 6 52 L9 52 C9 49 11 47 11 44 Z" fill="#f2efe8" stroke="#cfc8b9" stroke-width="0.8"/>' +
+    '<path d="M27 44 C30 48 28 50 28 52 L25 52 C25 49 23 47 23 44 Z" fill="#f2efe8" stroke="#cfc8b9" stroke-width="0.8"/>' +
+    '</svg>';
+
+
   // Compact dressing-table icon for the shop card.
   var VANITY_ICON =
     '<svg width="36" height="54" viewBox="0 0 36 54">' +
@@ -1357,6 +1468,7 @@
       else if (def.render === "bookcase") { el.classList.add("bookcase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBookcase()); }
       else if (def.render === "map") { el.classList.add("mapitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildMap()); }
       else if (def.render === "vanity") { el.classList.add("vanity"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVanity()); }
+      else if (def.render === "wardrobe") { el.classList.add("wardrobe"); el.style.zIndex = depthZ(p.y); el.appendChild(buildWardrobe()); }
       else if (def.render === "vase") { el.classList.add("vase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVase()); }
       else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint, def.size, p.orient)); }
       else { el.style.zIndex = depthZ(p.y); el.textContent = def.ic; }
@@ -1389,6 +1501,7 @@
     });
     positionFurniture();
     positionCharacters();
+    applyOutfits();
     updateBatState();
     updateAmbient();
     updateHud();
@@ -1460,6 +1573,7 @@
       window.removeEventListener("mouseup", up);
       window.removeEventListener("touchend", up);
       if (moved) save();
+      else { var d = itemDef(p.itemId); if (d && d.render === "wardrobe") openWardrobe(); }  // tap to open
     }
     el.addEventListener("mousedown", down);
     el.addEventListener("touchstart", down, { passive: false });
@@ -1572,42 +1686,84 @@
   });
 
   // =====================================================================
-  //  SHOP
+  //  SHOP — categories first, then tap a category to browse its items.
   // =====================================================================
-  function openShop() {
-    var sets = {};
-    CATALOGUE.forEach(function (it) { (sets[it.set] = sets[it.set] || []).push(it); });
-    var html = '<p class="muted">Tap an item to buy it, then drag it anywhere in the room. New sets unlock as your Mondays add up.</p>';
-    Object.keys(sets).forEach(function (setName) {
-      html += '<div class="section-title">' + setName + '</div><div class="shop-grid">';
-      sets[setName].forEach(function (it) {
-        var unlocked = state.sessions >= it.unlockAt;
-        var canAfford = state.coins >= it.price;
-        var cls = "shop-card" + (!unlocked ? " locked" : (!canAfford ? " cant" : ""));
-        html += '<div class="' + cls + '" data-buy="' + it.id + '" data-ok="' + (unlocked && canAfford) + '">';
-        if (it.joke) html += '<span class="tag">in-joke</span>';
-        if (!unlocked) html += '<span class="lock">🔒</span>';
-        var icHtml = it.render === "garland" ? GARLAND_ICON
-                   : it.render === "bookcase" ? BOOKCASE_ICON
-                   : it.render === "map" ? MAP_SVG
-                   : it.render === "vanity" ? VANITY_ICON
-                   : it.render === "vase" ? VASE_SVG
-                   : it.render === "bed" ? bedIcon(it.tint, it.size)
-                   : it.ic;
-        html += '<div class="ic">' + icHtml + '</div><div class="nm">' + it.name + '</div>';
-        html += unlocked ? '<div class="pr">🪙 ' + it.price + '</div>'
-                         : '<div class="pr">Wk ' + (it.unlockAt + 1) + '</div>';
-        html += '</div>';
-      });
+  var shopCat = null;   // which category is open (null = the category list)
+
+  function shopIcon(it) {
+    return it.render === "garland" ? GARLAND_ICON
+         : it.render === "bookcase" ? BOOKCASE_ICON
+         : it.render === "map" ? MAP_SVG
+         : it.render === "vanity" ? VANITY_ICON
+         : it.render === "wardrobe" ? WARDROBE_ICON
+         : it.render === "vase" ? VASE_SVG
+         : it.render === "bed" ? bedIcon(it.tint, it.size)
+         : it.ic;
+  }
+  // catalogue grouped by set, preserving the order sets first appear
+  function shopSets() {
+    var sets = {}, order = [];
+    CATALOGUE.forEach(function (it) {
+      if (!sets[it.set]) { sets[it.set] = []; order.push(it.set); }
+      sets[it.set].push(it);
+    });
+    return { sets: sets, order: order };
+  }
+
+  function openShop() { shopCat = null; renderShopCategories(); }
+
+  function renderShopCategories() {
+    shopCat = null;
+    var g = shopSets();
+    var html = '<p class="muted">Pick a category to browse. New sets unlock as your Mondays add up.</p>';
+    html += '<div class="cat-grid">';
+    g.order.forEach(function (setName) {
+      var items = g.sets[setName];
+      var allLocked = items.every(function (it) { return state.sessions < it.unlockAt; });
+      html += '<div class="cat-card" data-cat="' + setName + '">' +
+              '<div class="ic">' + shopIcon(items[0]) + '</div>' +
+              '<div class="nm">' + setName + (allLocked ? " 🔒" : "") + '</div>' +
+              '<div class="ct">' + items.length + (items.length === 1 ? " item" : " items") + '</div>' +
+              '</div>';
+    });
+    html += '</div>';
+    openPanel("🛍️ Cozy Shop", html, [{ label: "Done", cls: "primary", onClick: closePanel }]);
+    Array.prototype.slice.call($("gBody").querySelectorAll("[data-cat]")).forEach(function (c) {
+      c.addEventListener("click", function () { renderShopCategory(c.dataset.cat); });
+    });
+  }
+
+  function renderShopCategory(setName) {
+    shopCat = setName;
+    var items = CATALOGUE.filter(function (it) { return it.set === setName; });
+    var html = '<p class="muted">Tap an item to buy it. Décor drops into the room to drag about; clothes go to your 👗 wardrobe.</p>';
+    html += '<div class="shop-grid">';
+    items.forEach(function (it) {
+      var unlocked = state.sessions >= it.unlockAt;
+      var owned = it.wear && (state.closet || []).indexOf(it.id) >= 0;
+      var canAfford = state.coins >= it.price;
+      var cls = "shop-card" + (owned ? " owned" : (!unlocked ? " locked" : (!canAfford ? " cant" : "")));
+      html += '<div class="' + cls + '" data-buy="' + it.id + '" data-ok="' + (!owned && unlocked && canAfford) + '">';
+      if (it.joke) html += '<span class="tag">in-joke</span>';
+      if (owned) html += '<span class="tag">owned</span>';
+      if (!unlocked) html += '<span class="lock">🔒</span>';
+      html += '<div class="ic">' + shopIcon(it) + '</div><div class="nm">' + it.name + '</div>';
+      html += owned ? '<div class="pr">✓ owned</div>'
+                    : unlocked ? '<div class="pr">🪙 ' + it.price + '</div>'
+                               : '<div class="pr">Wk ' + (it.unlockAt + 1) + '</div>';
       html += '</div>';
     });
-    openPanel("🛍️ Cozy Shop", html, [{ label: "Done", cls: "primary", onClick: closePanel }]);
-
+    html += '</div>';
+    openPanel("🛍️ " + setName, html, [
+      { label: "← Categories", onClick: renderShopCategories },
+      { label: "Done", cls: "primary", onClick: closePanel }
+    ]);
     Array.prototype.slice.call($("gBody").querySelectorAll("[data-buy]")).forEach(function (card) {
       card.addEventListener("click", function () {
         if (card.dataset.ok !== "true") {
           var it = itemDef(card.dataset.buy);
-          if (state.sessions < it.unlockAt) toast("Unlocks on Week " + (it.unlockAt + 1) + " 🔒");
+          if (it.wear && (state.closet || []).indexOf(it.id) >= 0) toast("Already in your wardrobe 👗");
+          else if (state.sessions < it.unlockAt) toast("Unlocks on Week " + (it.unlockAt + 1) + " 🔒");
           else toast("Not enough coins yet 🪙");
           return;
         }
@@ -1619,6 +1775,16 @@
   function buyItem(id) {
     var it = itemDef(id);
     if (!it || state.coins < it.price) return;
+    // clothes go into your wardrobe, not the room
+    if (it.wear) {
+      state.closet = state.closet || [];
+      if (state.closet.indexOf(id) >= 0) { toast("Already in your wardrobe 👗"); return; }
+      setCoins(state.coins - it.price);
+      state.closet.push(id); state.lastItem = it.name; save();
+      toast("Added " + it.name + " to your wardrobe! Tap the 👗 wardrobe to wear it.");
+      if (shopCat) renderShopCategory(shopCat); else openShop();   // refresh so it shows as owned
+      return;
+    }
     setCoins(state.coins - it.price);
     var uid = "i" + Date.now() + Math.floor(Math.random() * 999);
     // a garland hangs high across the room; everything else lands on the floor.
@@ -1641,6 +1807,130 @@
     var h = $("placeHint"); h.style.display = "block";
     clearTimeout(placeHintTimer);
     placeHintTimer = setTimeout(function () { h.style.display = "none"; }, 3500);
+  }
+
+  // =====================================================================
+  //  WARDROBE — tap the ornate wardrobe to dress the friends in clothes
+  //  you've bought from the shop's Outfits set.
+  // =====================================================================
+  var FRIEND_NAMES = { jas: "Jas", aqsa: "Aqsa", adam: "Adam" };
+  var FRIEND_FACES = { jas: "^‿^", aqsa: "◕‿◕", adam: "•ᴗ•" };
+  var wardrobeFriend = "jas";
+
+  function ownedClothes() {
+    return (state.closet || []).map(itemDef).filter(function (d) { return d && d.wear; });
+  }
+  // Hand-drawn hats & glasses so they sit straight, are wider than the head,
+  // and the glasses are just lens fronts (no temple arms).
+  function wearSVG(art) {
+    switch (art) {
+      case "sunhat": return '<svg width="54" height="24" viewBox="0 0 54 24">' +
+        '<ellipse cx="27" cy="18" rx="25" ry="5.5" fill="#ecc987" stroke="#cda765" stroke-width="1.4"/>' +
+        '<path d="M13 18 Q27 -1 41 18 Z" fill="#f2d59a" stroke="#cda765" stroke-width="1.4"/>' +
+        '<ellipse cx="27" cy="16.5" rx="13" ry="3" fill="#d9a86a"/></svg>';
+      case "tiara": return '<svg width="50" height="20" viewBox="0 0 50 20">' +
+        '<path d="M5 17 Q25 9 45 17" fill="none" stroke="#e6b94a" stroke-width="3" stroke-linecap="round"/>' +
+        '<path d="M9 16 L14 7 L19 15 L25 4 L31 15 L36 7 L41 16 Z" fill="#ffe08a" stroke="#d8b24a" stroke-width="1.2" stroke-linejoin="round"/>' +
+        '<circle cx="25" cy="7" r="2.4" fill="#ff8fb0" stroke="#d8b24a" stroke-width="0.8"/>' +
+        '<circle cx="14" cy="10" r="1.5" fill="#8fc7ff"/><circle cx="36" cy="10" r="1.5" fill="#8fc7ff"/></svg>';
+      case "bow": return '<svg width="46" height="22" viewBox="0 0 46 22">' +
+        '<path d="M23 11 L5 3 Q0 11 5 19 Z" fill="#ec6fa0" stroke="#c64f80" stroke-width="1.3"/>' +
+        '<path d="M23 11 L41 3 Q46 11 41 19 Z" fill="#ec6fa0" stroke="#c64f80" stroke-width="1.3"/>' +
+        '<circle cx="23" cy="11" r="4.5" fill="#d85a8f" stroke="#c64f80" stroke-width="1.3"/></svg>';
+      case "flower": return '<svg width="52" height="18" viewBox="0 0 52 18">' +
+        '<path d="M4 14 Q26 7 48 14" fill="none" stroke="#6fae6f" stroke-width="3" stroke-linecap="round"/>' +
+        [9, 20, 31, 42].map(function (cx, i) {
+          var col = ["#ff9ec2", "#ffd86b", "#c6a0ff", "#ff9ec2"][i];
+          return '<g>' + [0, 1, 2, 3, 4].map(function (k) {
+            var a = k * 1.2566; return '<circle cx="' + (cx + Math.cos(a) * 3.2).toFixed(1) + '" cy="' + (10 + Math.sin(a) * 3.2).toFixed(1) + '" r="2.1" fill="' + col + '"/>';
+          }).join("") + '<circle cx="' + cx + '" cy="10" r="1.6" fill="#fff2b0"/></g>';
+        }).join("") + '</svg>';
+      case "beanie": return '<svg width="50" height="24" viewBox="0 0 50 24">' +
+        '<path d="M4 20 Q4 3 25 3 Q46 3 46 20 Z" fill="#7f9bd8" stroke="#5f7bc0" stroke-width="1.4"/>' +
+        '<rect x="4" y="17.5" width="42" height="5.5" rx="2.7" fill="#6f8bc8" stroke="#5f7bc0" stroke-width="1"/>' +
+        '<circle cx="25" cy="3" r="3" fill="#aabdf0"/></svg>';
+      case "shades": return '<svg width="34" height="15" viewBox="0 0 34 15">' +
+        '<rect x="2" y="2" width="12" height="10" rx="4.5" fill="#2b2b34" stroke="#15151a" stroke-width="1"/>' +
+        '<rect x="20" y="2" width="12" height="10" rx="4.5" fill="#2b2b34" stroke="#15151a" stroke-width="1"/>' +
+        '<path d="M14 5 L20 5" stroke="#2b2b34" stroke-width="2.6"/></svg>';
+      case "reading": return '<svg width="34" height="15" viewBox="0 0 34 15">' +
+        '<circle cx="8.5" cy="7.5" r="6" fill="rgba(255,255,255,.16)" stroke="#3a2e22" stroke-width="1.7"/>' +
+        '<circle cx="25.5" cy="7.5" r="6" fill="rgba(255,255,255,.16)" stroke="#3a2e22" stroke-width="1.7"/>' +
+        '<path d="M14.5 7.5 L19.5 7.5" stroke="#3a2e22" stroke-width="1.7"/></svg>';
+    }
+    return "";
+  }
+  // paint one worn layer onto a parent, creating/removing the node as needed
+  function setWorn(parent, cls, clothingId) {
+    var node = parent.querySelector("." + cls);
+    var def = clothingId ? itemDef(clothingId) : null;
+    if (!def || !def.wear) { if (node) node.remove(); return; }
+    if (!node) { node = document.createElement("div"); node.className = cls; parent.appendChild(node); }
+    node.innerHTML = wearSVG(def.wear.art);
+  }
+  // refresh the clothes shown on every friend avatar from saved outfits
+  function applyOutfits() {
+    ["jas", "aqsa", "adam"].forEach(function (id) {
+      var el = room.querySelector('[data-char="' + id + '"]');
+      if (!el) return;
+      var o = (state.outfits && state.outfits[id]) || {};
+      setWorn(el, "worn-hat", o.hat);
+      setWorn(el, "worn-glasses", o.glasses);
+    });
+  }
+  // a small preview blob wearing the friend's current outfit (for the modal)
+  function outfitPreview(id) {
+    var o = (state.outfits && state.outfits[id]) || {};
+    var wrap = document.createElement("div"); wrap.className = "ava-prev";
+    var body = document.createElement("div"); body.className = "pbody"; body.style.background = "var(--" + id + ")";
+    var face = document.createElement("div"); face.className = "pface"; face.textContent = FRIEND_FACES[id];
+    body.appendChild(face); wrap.appendChild(body);
+    setWorn(wrap, "worn-hat", o.hat);
+    setWorn(wrap, "worn-glasses", o.glasses);
+    return wrap;
+  }
+
+  var WARD_SLOTS = [{ key: "hat", label: "Hats" }, { key: "glasses", label: "Glasses" }];
+  function openWardrobe() {
+    var friend = wardrobeFriend;
+    state.outfits[friend] = state.outfits[friend] || {};
+    var owned = ownedClothes();
+    var html = '<p class="muted">Dress your friends in clothes from your wardrobe. Buy more in the 🛍️ Shop’s Outfits set.</p>';
+    html += '<div class="ward-tabs">';
+    ["jas", "aqsa", "adam"].forEach(function (id) {
+      html += '<button class="ward-tab' + (id === friend ? " on" : "") + '" data-friend="' + id + '" style="--c:var(--' + id + ')">' + FRIEND_NAMES[id] + '</button>';
+    });
+    html += '</div><div id="wardPrev" class="ward-prev"></div>';
+    if (!owned.length) {
+      html += '<p class="muted" style="text-align:center">Your wardrobe is empty — pop to the 🛍️ Shop and buy some outfits first!</p>';
+    } else {
+      WARD_SLOTS.forEach(function (s) {
+        var opts = owned.filter(function (d) { return d.wear.slot === s.key; });
+        if (!opts.length) return;
+        var worn = state.outfits[friend][s.key] || null;
+        html += '<div class="section-title">' + s.label + '</div><div class="ward-grid">';
+        html += '<div class="ward-card' + (!worn ? " on" : "") + '" data-slot="' + s.key + '" data-cloth=""><div class="ic">🚫</div><div class="nm">None</div></div>';
+        opts.forEach(function (d) {
+          html += '<div class="ward-card' + (worn === d.id ? " on" : "") + '" data-slot="' + s.key + '" data-cloth="' + d.id + '"><div class="ic">' + d.wear.emoji + '</div><div class="nm">' + d.name + '</div></div>';
+        });
+        html += '</div>';
+      });
+    }
+    openPanel("👗 Wardrobe — " + FRIEND_NAMES[friend] + "’s outfit", html, [
+      { label: "Shop for clothes", cls: "", onClick: function () { closePanel(); openShop(); } },
+      { label: "Done", cls: "primary", onClick: closePanel }
+    ]);
+    $("wardPrev").appendChild(outfitPreview(friend));
+    Array.prototype.slice.call($("gBody").querySelectorAll("[data-friend]")).forEach(function (t) {
+      t.addEventListener("click", function () { wardrobeFriend = t.dataset.friend; openWardrobe(); });
+    });
+    Array.prototype.slice.call($("gBody").querySelectorAll("[data-slot]")).forEach(function (c) {
+      c.addEventListener("click", function () {
+        state.outfits[friend][c.dataset.slot] = c.dataset.cloth || null;
+        save(); applyOutfits(); openWardrobe();
+        Ambient.blip(620, 0.05);
+      });
+    });
   }
 
   // =====================================================================
@@ -2010,6 +2300,7 @@
         }
         if (!confirm("Load this save? It will replace the current room (week " + (state.sessions || 0) + ").")) return;
         state = Object.assign({}, clone(DEFAULT_STATE), incoming);
+        normalizeWardrobe(state);
         selectedUid = null;
         save(); renderRoom(); updateHud();
         closePanel();

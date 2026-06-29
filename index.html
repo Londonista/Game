@@ -797,6 +797,23 @@
   .sofa-art .cush { position: absolute; bottom: 24px; width: 60px; height: 40px; border-radius: 9px; background: #cf8a5e; box-shadow: inset 0 -4px 0 rgba(0,0,0,.12); }
   .sofa-art .cush.c1 { left: 40px; } .sofa-art .cush.c2 { right: 40px; }
 
+  /* Dark green sideboard — a purchasable, resizable, draggable item */
+  .item.sideboard { font-size: 0; filter: drop-shadow(0 7px 6px rgba(0,0,0,0.42)); }
+  .sideboard-art { position: relative; width: 150px; height: 72px; }
+  .sideboard-art .top { position: absolute; top: 0; left: -3px; right: -3px; height: 10px; border-radius: 4px;
+    background: linear-gradient(180deg,#356a4c,#244a35); box-shadow: 0 2px 3px rgba(0,0,0,.3); }
+  .sideboard-art .body { position: absolute; top: 9px; left: 2px; right: 2px; bottom: 10px; border-radius: 3px;
+    background: linear-gradient(180deg,#356a4c,#274f39); border: 2px solid #1c3a29; }
+  .sideboard-art .door { position: absolute; top: 16px; bottom: 16px; width: 28%; border: 1.5px solid rgba(0,0,0,.28);
+    border-radius: 3px; background: linear-gradient(180deg,#3f7a5a,#2c5740); }
+  .sideboard-art .door::after { content: ""; position: absolute; top: 46%; width: 5px; height: 5px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%,#ffe39a,#c79436); right: 4px; }
+  .sideboard-art .door.d1 { left: 5%; } .sideboard-art .door.d2 { left: 36%; } .sideboard-art .door.d3 { left: 67%; }
+  .sideboard-art .door.d3::after { left: 4px; right: auto; }
+  .sideboard-art .leg { position: absolute; bottom: 0; width: 8px; height: 12px; border-radius: 0 0 2px 2px;
+    background: linear-gradient(180deg,#3a2a18,#241a0e); }
+  .sideboard-art .leg.l { left: 8px; } .sideboard-art .leg.r { right: 8px; }
+
   /* Warm floor lamp — a purchasable, draggable item */
   .item.lamp { font-size: 0; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.35)); }
   .lamp-art { position: relative; width: 40px; height: 152px; }
@@ -1242,6 +1259,7 @@
     // --- Snug (cosy seating) ---
     { id: "sofa_rust", name: "Cosy Sofa", ic: "🛋️", price: 36, unlockAt: 0, set: "Snug", render: "sofa" },
     { id: "lamp_floor", name: "Floor Lamp", ic: "🪔", price: 18, unlockAt: 0, set: "Snug", render: "lamp" },
+    { id: "sideboard_green", name: "Sideboard", ic: "🟩", price: 32, unlockAt: 0, set: "Snug", render: "sideboard" },
 
     // --- Rugs (drag them under your furniture) ---
     { id: "rug_lilac", name: "Lilac Rug", ic: "🟪", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "lilac" },
@@ -1346,7 +1364,8 @@
       { id: "adam", x: 79,   y: 88 }
     ],
     currentRoom: "main",   // which room is on screen ("main" bedroom or "two" kitchen)
-    gardenDoorX: 68,       // horizontal % position of the kitchen's garden door (draggable)
+    gardenDoorX: 68,       // x/y % position of the kitchen's garden door (draggable in 2D)
+    gardenDoorY: 59,
     closet: [],            // clothing item ids you've bought
     outfits: { jas: {}, aqsa: {}, adam: {} },   // what each friend is wearing
     scores: { starcatcher: [], laundromat: [] },   // mini-game leaderboards
@@ -1368,6 +1387,7 @@
     s.scores = s.scores || {};
     ["starcatcher", "laundromat"].forEach(function (id) { s.scores[id] = s.scores[id] || []; });
     if (typeof s.gardenDoorX !== "number") s.gardenDoorX = 68;
+    if (typeof s.gardenDoorY !== "number") s.gardenDoorY = 59;
     s.placed = s.placed || [];
     var hasU = function (u) { return s.placed.some(function (p) { return p.uid === u; }); };
     // furnish the snug once with a (now removable/movable) sofa + floor lamp
@@ -1738,6 +1758,23 @@
       '<ellipse cx="20" cy="11" rx="13" ry="6.5" fill="none" stroke="' + c[2] + '" stroke-width="2"/>' +
       '<ellipse cx="20" cy="11" rx="7" ry="3.5" fill="' + c[1] + '"/></svg>';
   }
+  function buildSideboard() {
+    var w = document.createElement("div");
+    w.className = "sideboard-art";
+    w.innerHTML = '<span class="top"></span><span class="body"></span>' +
+      '<span class="door d1"></span><span class="door d2"></span><span class="door d3"></span>' +
+      '<span class="leg l"></span><span class="leg r"></span>';
+    return w;
+  }
+  var SIDEBOARD_ICON =
+    '<svg width="42" height="26" viewBox="0 0 42 26">' +
+    '<rect x="1" y="3" width="40" height="5" rx="2" fill="#2f5d43"/>' +
+    '<rect x="3" y="7" width="36" height="13" rx="2" fill="#356a4c" stroke="#1c3a29" stroke-width="1.5"/>' +
+    '<rect x="6" y="9.5" width="9" height="8.5" rx="1" fill="#3c7355" stroke="#1c3a29" stroke-width="0.8"/>' +
+    '<rect x="16.5" y="9.5" width="9" height="8.5" rx="1" fill="#3c7355" stroke="#1c3a29" stroke-width="0.8"/>' +
+    '<rect x="27" y="9.5" width="9" height="8.5" rx="1" fill="#3c7355" stroke="#1c3a29" stroke-width="0.8"/>' +
+    '<circle cx="13" cy="14" r="1" fill="#e6c887"/><circle cx="23.5" cy="14" r="1" fill="#e6c887"/><circle cx="34" cy="14" r="1" fill="#e6c887"/>' +
+    '<rect x="6" y="20" width="3" height="4" fill="#241a0e"/><rect x="33" y="20" width="3" height="4" fill="#241a0e"/></svg>';
 
   // Compact wardrobe icon for the shop card.
   var WARDROBE_ICON =
@@ -1810,6 +1847,7 @@
       else if (def.render === "sofa") { el.classList.add("sofa"); el.style.zIndex = depthZ(p.y); el.appendChild(buildSofa()); }
       else if (def.render === "lamp") { el.classList.add("lamp"); el.style.zIndex = depthZ(p.y); el.appendChild(buildLamp()); }
       else if (def.render === "rug") { el.classList.add("rug"); el.style.zIndex = 2; el.appendChild(buildRug(def.tint)); }   // rugs lie under everything
+      else if (def.render === "sideboard") { el.classList.add("sideboard"); el.style.zIndex = depthZ(p.y); el.appendChild(buildSideboard()); }
       else if (def.render === "vase") { el.classList.add("vase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVase()); }
       else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint, def.size, p.orient)); }
       else { el.style.zIndex = depthZ(p.y); el.textContent = def.ic; }
@@ -2040,6 +2078,7 @@
          : it.render === "vase" ? VASE_SVG
          : it.render === "bed" ? bedIcon(it.tint, it.size)
          : it.render === "rug" ? rugIcon(it.tint)
+         : it.render === "sideboard" ? SIDEBOARD_ICON
          : it.ic;
   }
   // catalogue grouped by set, preserving the order sets first appear
@@ -3773,25 +3812,29 @@
   // The garden door can be dragged along the kitchen wall; a tap (no drag) opens the garden.
   function initGardenDoorDrag() {
     var el = $("doorGarden"); if (!el) return;
-    var DOOR_PCT = 78 / 800 * 100;                 // door width as % of the room
-    function setX(pct) {
-      pct = Math.max(0, Math.min(100 - DOOR_PCT, pct));
-      state.gardenDoorX = pct; el.style.left = pct + "%";
+    var DOOR_W = 78 / 800 * 100, DOOR_H = 214 / 520 * 100;   // door size as % of the room
+    function place() {
+      var x = Math.max(0, Math.min(100 - DOOR_W, state.gardenDoorX));
+      var y = Math.max(2, Math.min(100 - DOOR_H, state.gardenDoorY));
+      state.gardenDoorX = x; state.gardenDoorY = y;
+      el.style.left = x + "%"; el.style.top = y + "%"; el.style.bottom = "auto";
     }
-    setX(state.gardenDoorX);                        // place it from the saved position
-    var dragging = false, moved = false, startX = 0;
+    place();                                         // place it from the saved position
+    var dragging = false, moved = false, startX = 0, startY = 0;
     function down(e) {
       e.preventDefault(); dragging = true; moved = false;
-      startX = (e.touches ? e.touches[0] : e).clientX;
+      var pt = e.touches ? e.touches[0] : e; startX = pt.clientX; startY = pt.clientY;
       window.addEventListener("mousemove", move); window.addEventListener("touchmove", move, { passive: false });
       window.addEventListener("mouseup", up); window.addEventListener("touchend", up);
     }
     function move(e) {
       if (!dragging) return; e.preventDefault();
       var pt = e.touches ? e.touches[0] : e;
-      if (Math.abs(pt.clientX - startX) > 4) moved = true;
+      if (Math.abs(pt.clientX - startX) > 4 || Math.abs(pt.clientY - startY) > 4) moved = true;
       var rect = room.getBoundingClientRect();
-      setX(((pt.clientX - rect.left) / rect.width) * 100 - DOOR_PCT / 2);   // centre under the pointer
+      state.gardenDoorX = ((pt.clientX - rect.left) / rect.width) * 100 - DOOR_W / 2;   // centre under the pointer
+      state.gardenDoorY = ((pt.clientY - rect.top) / rect.height) * 100 - DOOR_H / 2;
+      place();
     }
     function up() {
       if (!dragging) return; dragging = false;

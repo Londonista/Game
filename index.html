@@ -730,44 +730,143 @@
     background: rgba(0,0,0,.4); padding: 2px 9px; border-radius: 999px; animation: doorhint 2.2s ease-in-out infinite; }
   .gdoor:hover .leaf, .gdoor:active .leaf { filter: brightness(1.12); }
 
-  /* ---- Garden room (data-room="garden") -------------------------------- */
-  #room[data-room="garden"] { background: linear-gradient(180deg,#202a4c,#36406a 62%); }
-  #room[data-room="garden"] .floor { background: linear-gradient(180deg,#3f6f3c,#2c5230); }
+  /* ---- Garden room (data-room="garden") — a wide, explorable enchanted garden */
+  #room[data-room="garden"] { background: linear-gradient(180deg,#222d54,#3a4670 62%); }
+  #room[data-room="garden"] .floor { display: none; }
   .garden-only { display: none; }
   #room[data-room="garden"] .garden-only { display: block; }
-  .garden { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-  .garden::before { content:""; position: absolute; inset: 0; opacity: .9; background:
-    radial-gradient(1.5px 1.5px at 12% 16%, #fff, transparent),
-    radial-gradient(1.5px 1.5px at 30% 26%, #fff, transparent),
-    radial-gradient(1px 1px at 46% 12%, #fff, transparent),
-    radial-gradient(1.5px 1.5px at 62% 22%, #fff, transparent),
-    radial-gradient(1px 1px at 80% 14%, #fff, transparent),
-    radial-gradient(1.5px 1.5px at 90% 30%, #fff, transparent); }
-  .garden .g-moon { position: absolute; top: 38px; right: 96px; width: 46px; height: 46px; border-radius: 50%;
-    background: radial-gradient(circle at 38% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 26px rgba(255,240,200,.5); }
-  /* a string of warm fairy lights */
-  .garden .g-lights { position: absolute; top: 30px; left: 22px; right: 22px; height: 14px; border-top: 2px solid rgba(30,22,14,.55);
-    background: radial-gradient(circle at 13px 8px, #ffd87a 0 3px, transparent 4px) repeat-x; background-size: 50px 14px;
-    filter: drop-shadow(0 0 3px rgba(255,210,120,.7)); }
-  /* tree */
-  .garden .g-tree { position: absolute; left: 70px; top: 150px; width: 130px; height: 212px; }
-  .garden .g-tree .g-trunk { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 22px; height: 112px;
-    background: linear-gradient(90deg,#4f3318,#6e4a2c,#4f3318); border-radius: 4px; }
-  .garden .g-tree .g-leaves { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 130px; height: 130px; border-radius: 50%;
-    background: radial-gradient(circle at 40% 35%, #3f7a44, #275030); box-shadow: -30px 20px 0 -10px #356a3a, 32px 16px 0 -8px #356a3a, 0 -12px 0 -6px #428048; }
-  /* picket fence along the back */
-  .garden .g-fence { position: absolute; left: 0; right: 0; top: 300px; height: 56px; }
-  .garden .g-fence::before { content:""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #8a5e36 0 18px, transparent 18px 30px); }
-  .garden .g-fence::after { content:""; position: absolute; left: 0; right: 0; top: 12px; height: 7px; background: #7a5230; box-shadow: 0 22px 0 #7a5230; }
-  /* flower bushes */
-  .garden .g-bush { position: absolute; top: 332px; height: 48px; border-radius: 42% 42% 30% 30%;
-    background: radial-gradient(circle at 40% 30%, #43804a, #2c5a32); box-shadow: inset 0 -6px 0 rgba(0,0,0,.15); }
-  .garden .g-bush.b1 { left: 36px; width: 78px; }
-  .garden .g-bush.b2 { right: 150px; width: 96px; }
-  .garden .g-bush::after { content:""; position: absolute; inset: 0; border-radius: inherit; background:
-    radial-gradient(4px 4px at 22% 42%, #ff8fb0 0 50%, transparent 51%),
-    radial-gradient(4px 4px at 52% 28%, #ffd86b 0 50%, transparent 51%),
-    radial-gradient(4px 4px at 78% 48%, #c6a0ff 0 50%, transparent 51%); }
+  /* the wide scrolling world (panned by translateX) */
+  .garden { position: absolute; top: 0; left: 0; height: 100%; width: 2000px; z-index: 1;
+    pointer-events: auto; cursor: grab; will-change: transform; touch-action: none; }
+  .garden:active { cursor: grabbing; }
+  .garden > * { pointer-events: none; }
+  .g-sky { position: absolute; top: 0; left: 0; width: 100%; height: 330px; background:
+    radial-gradient(1.5px 1.5px at 6% 16%, #fff, transparent), radial-gradient(1.5px 1.5px at 16% 30%, #fff, transparent),
+    radial-gradient(1px 1px at 24% 12%, #fff, transparent), radial-gradient(1.5px 1.5px at 34% 24%, #fff, transparent),
+    radial-gradient(1px 1px at 45% 14%, #fff, transparent), radial-gradient(1.5px 1.5px at 56% 26%, #fff, transparent),
+    radial-gradient(1px 1px at 66% 12%, #fff, transparent), radial-gradient(1.5px 1.5px at 76% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 86% 16%, #fff, transparent), radial-gradient(1.5px 1.5px at 95% 28%, #fff, transparent),
+    linear-gradient(180deg,#222d54,#3a4670); }
+  .g-ground { position: absolute; left: 0; top: 300px; width: 100%; bottom: 0; background:
+    linear-gradient(180deg,#4a7e44,#2f5a32);
+    box-shadow: inset 0 6px 14px rgba(0,0,0,.18); }
+  .g-ground::before { content:""; position: absolute; inset: 0; opacity: .5; background:
+    radial-gradient(2px 2px at 10% 30%, rgba(255,255,255,.12), transparent),
+    radial-gradient(2px 2px at 40% 60%, rgba(0,0,0,.12), transparent),
+    radial-gradient(2px 2px at 70% 40%, rgba(255,255,255,.1), transparent),
+    radial-gradient(2px 2px at 90% 70%, rgba(0,0,0,.12), transparent); background-size: 80px 80px; }
+  .g-moon { position: absolute; top: 40px; left: 90px; width: 50px; height: 50px; border-radius: 50%;
+    background: radial-gradient(circle at 38% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 30px rgba(255,240,200,.5); }
+  .g-lights { position: absolute; top: 26px; left: 10px; width: 1980px; height: 16px; border-top: 2px solid rgba(30,22,14,.5);
+    background: radial-gradient(circle at 14px 9px, #ffd87a 0 3px, transparent 4px) repeat-x; background-size: 54px 16px;
+    filter: drop-shadow(0 0 3px rgba(255,210,120,.75)); }
+  /* winding path */
+  .g-path { position: absolute; left: 0; top: 372px; width: 100%; height: 70px;
+    background: repeating-linear-gradient(90deg, #b79a6a 0 26px, #a98c5c 26px 30px);
+    -webkit-mask: radial-gradient(60px 26px at 50% 0, #000 60%, transparent 62%) repeat-x; mask: radial-gradient(60px 26px at 50% 0, #000 60%, transparent 62%) repeat-x;
+    -webkit-mask-size: 220px 70px; mask-size: 220px 70px; opacity: .9; }
+  /* soil plot with rows */
+  .g-plot { position: absolute; border-radius: 7px; background: linear-gradient(180deg,#6e4a2c,#523418);
+    box-shadow: inset 0 0 0 3px #43290f, inset 0 6px 8px rgba(0,0,0,.25);
+    background-image: repeating-linear-gradient(90deg, transparent 0 14px, rgba(0,0,0,.18) 14px 16px); }
+  /* a little crop / plant (colour set inline on ::before via currentColor) */
+  .g-crop { position: absolute; width: 16px; height: 22px; }
+  .g-crop .lf { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 14px; height: 12px;
+    border-radius: 60% 60% 40% 40%; background: #3f9a52; }
+  .g-crop .top { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 9px; height: 11px; border-radius: 50%; }
+  /* flower (petal ring + centre), colour via --c */
+  .g-fl { position: absolute; width: 14px; height: 14px; }
+  .g-fl::before { content:""; position: absolute; inset: 0; border-radius: 50%; background:
+    radial-gradient(circle at 50% 0, var(--c) 0 30%, transparent 32%), radial-gradient(circle at 0 50%, var(--c) 0 30%, transparent 32%),
+    radial-gradient(circle at 100% 50%, var(--c) 0 30%, transparent 32%), radial-gradient(circle at 50% 100%, var(--c) 0 30%, transparent 32%),
+    radial-gradient(circle at 18% 18%, var(--c) 0 26%, transparent 28%), radial-gradient(circle at 82% 82%, var(--c) 0 26%, transparent 28%); }
+  .g-fl::after { content:""; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 5px; height: 5px; border-radius: 50%; background: #fff2b0; }
+  .g-fl.glow { filter: drop-shadow(0 0 5px var(--c)); animation: gglow 3s ease-in-out infinite; }
+  @keyframes gglow { 0%,100% { filter: drop-shadow(0 0 3px var(--c)); } 50% { filter: drop-shadow(0 0 8px var(--c)); } }
+  /* fruit tree */
+  .g-tree2 { position: absolute; width: 140px; height: 170px; }
+  .g-tree2 .tk { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 20px; height: 78px; border-radius: 5px; background: linear-gradient(90deg,#4f3318,#6e4a2c,#4f3318); }
+  .g-tree2 .cn { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 130px; height: 110px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 34%, #3f7a44, #275030); box-shadow: -28px 18px 0 -10px #356a3a, 30px 14px 0 -8px #356a3a; }
+  .g-tree2 .cn::after { content:""; position: absolute; inset: 0; border-radius: 50%; background:
+    radial-gradient(5px 5px at 30% 40%, var(--fruit,#e0507f) 0 50%, transparent 52%),
+    radial-gradient(5px 5px at 58% 30%, var(--fruit,#e0507f) 0 50%, transparent 52%),
+    radial-gradient(5px 5px at 72% 58%, var(--fruit,#e0507f) 0 50%, transparent 52%),
+    radial-gradient(5px 5px at 44% 64%, var(--fruit,#e0507f) 0 50%, transparent 52%); }
+  /* berry bush / shrub / hedge */
+  .g-bush2 { position: absolute; border-radius: 46% 46% 32% 32%; background: radial-gradient(circle at 40% 28%, #43804a, #285230); box-shadow: inset 0 -6px 0 rgba(0,0,0,.15); }
+  .g-bush2.berry::after, .g-bush2.bloom::after { content:""; position: absolute; inset: 0; border-radius: inherit; }
+  .g-bush2.berry::after { background: radial-gradient(3px 3px at 26% 44%, #6a3aa0 0 50%, transparent 52%), radial-gradient(3px 3px at 54% 30%, #6a3aa0 0 50%, transparent 52%), radial-gradient(3px 3px at 76% 52%, #8a4ad0 0 50%, transparent 52%), radial-gradient(3px 3px at 40% 64%, #6a3aa0 0 50%, transparent 52%); }
+  .g-bush2.bloom::after { background: radial-gradient(4px 4px at 24% 40%, #ff8fb0 0 50%, transparent 52%), radial-gradient(4px 4px at 56% 28%, #ffd86b 0 50%, transparent 52%), radial-gradient(4px 4px at 80% 50%, #c6a0ff 0 50%, transparent 52%), radial-gradient(4px 4px at 44% 62%, #ff8fb0 0 50%, transparent 52%); }
+  .g-hedge { position: absolute; border-radius: 14px; background: linear-gradient(180deg,#3f8048,#2c5a34); box-shadow: inset 0 -8px 0 rgba(0,0,0,.14), inset 0 6px 0 rgba(255,255,255,.08); }
+  /* stone fountain */
+  .g-fountain { position: absolute; width: 120px; height: 120px; }
+  .g-fountain .basin { position: absolute; bottom: 0; left: 0; width: 120px; height: 40px; border-radius: 50%; background: radial-gradient(circle at 50% 30%, #c8cdd2, #9aa0a8); box-shadow: inset 0 4px 6px rgba(0,0,0,.25); }
+  .g-fountain .water { position: absolute; bottom: 8px; left: 18px; width: 84px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 50% 30%, #bfe6f3, #6fb6d8); }
+  .g-fountain .tier { position: absolute; left: 50%; transform: translateX(-50%); background: radial-gradient(circle at 50% 30%, #c8cdd2, #9aa0a8); border-radius: 50%; }
+  .g-fountain .t2 { bottom: 26px; width: 64px; height: 22px; }
+  .g-fountain .t3 { bottom: 44px; width: 30px; height: 44px; border-radius: 6px; }
+  .g-fountain .spout { position: absolute; bottom: 78px; left: 50%; transform: translateX(-50%); width: 8px; height: 16px; border-radius: 4px;
+    background: linear-gradient(180deg,#cfe9f5,#8fc6e0); box-shadow: 0 0 8px rgba(150,210,235,.6); }
+  /* pond */
+  .g-pond { position: absolute; border-radius: 50%; background: radial-gradient(circle at 42% 32%, #6fb6d8, #2f6f96);
+    box-shadow: inset 0 4px 10px rgba(0,0,0,.25), inset 0 0 0 4px #3f6f3c; }
+  .g-pond::after { content:""; position: absolute; left: 20%; top: 26%; width: 36%; height: 14%; border-radius: 50%; background: rgba(255,255,255,.22); }
+  .g-lily { position: absolute; width: 16px; height: 10px; border-radius: 50%; background: #4a9a52; box-shadow: inset -2px -2px 0 rgba(0,0,0,.12); }
+  .g-lily::after { content:""; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 5px; height: 5px; border-radius: 50%; background: #ff9ec2; }
+  .g-reed { position: absolute; width: 3px; height: 26px; background: linear-gradient(180deg,#5aa05a,#3a7a3f); border-radius: 2px; transform-origin: bottom; }
+  /* wooden bench */
+  .g-bench { position: absolute; width: 90px; height: 46px; }
+  .g-bench .seat { position: absolute; bottom: 14px; left: 0; width: 90px; height: 9px; border-radius: 3px; background: linear-gradient(180deg,#a9733f,#8a5a30); }
+  .g-bench .bk { position: absolute; top: 0; left: 0; width: 90px; height: 16px; border-radius: 3px; background: linear-gradient(180deg,#b67e46,#8a5a30); }
+  .g-bench .lg { position: absolute; bottom: 0; width: 7px; height: 18px; background: #6b4423; }
+  .g-bench .lg.l { left: 8px; } .g-bench .lg.r { right: 8px; }
+  /* lantern on a post with warm glow */
+  .g-lantern { position: absolute; width: 18px; height: 70px; }
+  .g-lantern .post { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 5px; height: 58px; background: linear-gradient(90deg,#3a2a18,#5a4632,#3a2a18); border-radius: 2px; }
+  .g-lantern .lamp { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 16px; height: 20px; border-radius: 4px 4px 3px 3px;
+    background: radial-gradient(circle at 50% 40%, #fff0b8, #f0b84a); box-shadow: 0 0 16px 4px rgba(255,210,120,.5); animation: glamp 4s ease-in-out infinite; }
+  @keyframes glamp { 0%,100% { box-shadow: 0 0 12px 3px rgba(255,210,120,.4); } 50% { box-shadow: 0 0 18px 6px rgba(255,210,120,.6); } }
+  /* flower box planter */
+  .g-box { position: absolute; width: 64px; height: 26px; }
+  .g-box .crate { position: absolute; bottom: 0; left: 0; width: 64px; height: 16px; border-radius: 3px; background: linear-gradient(180deg,#8a5a30,#6b4423); box-shadow: inset 0 0 0 2px rgba(0,0,0,.2); }
+  .g-box .blooms { position: absolute; top: 0; left: 0; right: 0; height: 14px; border-radius: 8px; background:
+    radial-gradient(4px 4px at 16% 60%, #ff8fb0 0 50%, transparent 52%), radial-gradient(4px 4px at 38% 40%, #ffd86b 0 50%, transparent 52%),
+    radial-gradient(4px 4px at 60% 56%, #c6a0ff 0 50%, transparent 52%), radial-gradient(4px 4px at 84% 44%, #8fd0ff 0 50%, transparent 52%), #3f9a52; }
+  /* log, mossy rock, mushroom */
+  .g-log { position: absolute; width: 54px; height: 18px; border-radius: 9px; background: linear-gradient(180deg,#7a5230,#5a3a20); box-shadow: inset 0 -4px 0 rgba(0,0,0,.2); }
+  .g-log::after { content:""; position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle,#8a6038,#5a3a20); }
+  .g-log .moss { position: absolute; top: -3px; left: 10px; right: 8px; height: 6px; border-radius: 6px; background: #4a9a52; }
+  .g-rock { position: absolute; border-radius: 46% 46% 40% 40%; background: radial-gradient(circle at 40% 30%, #9aa0a8, #6a7078); }
+  .g-rock .moss { position: absolute; top: -2px; left: 14%; right: 14%; height: 40%; border-radius: 50%; background: #4a9a52; opacity: .9; }
+  .g-mush { position: absolute; width: 16px; height: 18px; }
+  .g-mush .stalk { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 6px; height: 10px; border-radius: 3px; background: #efe6d2; }
+  .g-mush .cap { position: absolute; top: 0; left: 0; width: 16px; height: 10px; border-radius: 50% 50% 40% 40%; background: radial-gradient(circle at 40% 30%, #e0654a, #b23a2a); }
+  .g-mush .cap::after { content:""; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(2px 2px at 30% 50%, #fff 0 50%, transparent 52%), radial-gradient(2px 2px at 64% 38%, #fff 0 50%, transparent 52%); }
+  /* trellis with climbing vine */
+  .g-trellis { position: absolute; width: 60px; height: 96px; }
+  .g-trellis .frame { position: absolute; inset: 0; background:
+    repeating-linear-gradient(90deg, #8a5e36 0 3px, transparent 3px 16px), repeating-linear-gradient(0deg, #8a5e36 0 3px, transparent 3px 16px); border-radius: 4px; opacity: .85; }
+  .g-trellis .vine { position: absolute; inset: 0; background:
+    radial-gradient(5px 5px at 20% 80%, #3f9a52 0 50%, transparent 52%), radial-gradient(5px 5px at 50% 60%, #3f9a52 0 50%, transparent 52%),
+    radial-gradient(5px 5px at 76% 40%, #3f9a52 0 50%, transparent 52%), radial-gradient(4px 4px at 36% 30%, #ff8fb0 0 50%, transparent 52%),
+    radial-gradient(4px 4px at 64% 70%, #c6a0ff 0 50%, transparent 52%); }
+  /* fence section */
+  .g-fence2 { position: absolute; height: 44px; }
+  .g-fence2::before { content:""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #8a5e36 0 14px, transparent 14px 26px); }
+  .g-fence2::after { content:""; position: absolute; left: 0; right: 0; top: 10px; height: 6px; background: #7a5230; box-shadow: 0 16px 0 #7a5230; }
+  /* fireflies + floating petals (ambient magic) */
+  .g-fly { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: #eaff9a;
+    box-shadow: 0 0 8px 2px rgba(210,255,140,.7); animation: gfly 7s ease-in-out infinite; }
+  @keyframes gfly { 0% { transform: translate(0,0); opacity: .2; } 25% { opacity: 1; } 50% { transform: translate(20px,-16px); opacity: .6; } 75% { opacity: 1; } 100% { transform: translate(-6px,6px); opacity: .2; } }
+  .g-petal { position: absolute; width: 7px; height: 7px; border-radius: 60% 0 60% 0; opacity: .8; animation: gpetal 9s linear infinite; }
+  @keyframes gpetal { 0% { transform: translate(0,0) rotate(0); opacity: 0; } 12% { opacity: .85; } 100% { transform: translate(-46px,150px) rotate(220deg); opacity: 0; } }
+  /* on-screen pan arrows + back door stay fixed to the frame */
+  .g-arrow { position: absolute; top: 46%; z-index: 6; width: 34px; height: 46px; border-radius: 10px; cursor: pointer;
+    background: rgba(20,28,20,.5); color: #eaf6df; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,.18); }
+  .g-arrow.l { left: 92px; } .g-arrow.r { right: 6px; }
+  .g-arrow:active { background: rgba(20,28,20,.7); }
 
   /* ---- The Snug (data-room="snug") — a cosy sitting room ---------------- */
   #room[data-room="snug"] { background: linear-gradient(180deg,#2e514a,#427563 64%); }
@@ -1113,15 +1212,10 @@
         <div class="sign">garden →</div>
       </div>
 
-      <!-- ===== GARDEN ROOM — shown only when you're in it ===== -->
-      <div class="garden garden-only">
-        <div class="g-moon"></div>
-        <div class="g-lights"></div>
-        <div class="g-tree"><div class="g-trunk"></div><div class="g-leaves"></div></div>
-        <div class="g-fence"></div>
-        <div class="g-bush b1"></div>
-        <div class="g-bush b2"></div>
-      </div>
+      <!-- ===== GARDEN ROOM — a wide explorable world, built in JS ===== -->
+      <div class="garden garden-only" id="gardenWorld"></div>
+      <div class="g-arrow l garden-only" id="gArrowL" title="Explore left">‹</div>
+      <div class="g-arrow r garden-only" id="gArrowR" title="Explore right">›</div>
       <div class="label2 garden-only" style="left:50%; transform:translateX(-50%)">🌷 Garden</div>
       <div class="door-gardenback garden-only gdoor" id="doorGardenBack" title="Back into the kitchen">
         <div class="leaf">
@@ -3274,7 +3368,7 @@
   var ROOM_TOASTS = {
     snug: "🛋️ The snug — get cosy & decorate it! ← bedroom · kitchen →",
     two: "🍳 The kitchen — decorate it too! Tap ← to head back.",
-    garden: "🌷 The garden — a breath of night air. Tap ← to head back.",
+    garden: "🌷 The garden — drag to explore · ‹ › or ← for the kitchen.",
     wardrobe: "👗 The Wardrobe — make it yours! Tap → to head back.",
     main: "🏠 Back in the bedroom."
   };
@@ -3288,7 +3382,7 @@
       room.style.opacity = "1";
       save();
       toast(ROOM_TOASTS[name] || "🚪 A new room to decorate!");
-      if (name === "garden") gardenFlourish();
+      if (name === "garden") { panGarden(0); gardenFlourish(); }
     }, 160);
   }
 
@@ -3356,6 +3450,99 @@
     }).join("");
     room.appendChild(ov);
     setTimeout(function () { if (ov.parentNode) ov.remove(); }, 3000);
+  }
+
+  // ----- The enchanted garden world (wide, scrollable, hand-built) -----------
+  var GARDEN_W = 2000, gardenScroll = 0;
+  var FCOL = ["#ff8fb0", "#ffd86b", "#c6a0ff", "#8fd0ff", "#ff7a7a", "#ffffff", "#ffb3d9", "#b6f0a0"];
+  function buildGardenScene() {
+    var w = $("gardenWorld"); if (!w) return;
+    var s = '<div class="g-sky"></div><div class="g-ground"></div><div class="g-moon"></div><div class="g-lights"></div><div class="g-path"></div>';
+    function rnd(a, b) { return a + Math.random() * (b - a); }
+    function fl(x, y, c, glow) { s += '<div class="g-fl' + (glow ? ' glow' : '') + '" style="left:' + (x | 0) + 'px;top:' + (y | 0) + 'px;--c:' + c + '"></div>'; }
+    function flowers(x0, x1, y0, y1, n, glowCh) { for (var i = 0; i < n; i++) fl(rnd(x0, x1), rnd(y0, y1), FCOL[(Math.random() * FCOL.length) | 0], Math.random() < (glowCh || 0)); }
+    function plot(x, y, ww, hh, cols) {
+      s += '<div class="g-plot" style="left:' + x + 'px;top:' + y + 'px;width:' + ww + 'px;height:' + hh + 'px"></div>';
+      for (var cy = y + 6; cy < y + hh - 6; cy += 18) for (var cx = x + 12; cx < x + ww - 6; cx += 20)
+        s += '<div class="g-crop" style="left:' + (cx - 8) + 'px;top:' + (cy - 14) + 'px"><span class="lf"></span><span class="top" style="background:' + cols[((cx + cy) / 7 | 0) % cols.length] + '"></span></div>';
+    }
+    function bush(x, y, ww, hh, kind) { s += '<div class="g-bush2 ' + (kind || '') + '" style="left:' + x + 'px;top:' + y + 'px;width:' + ww + 'px;height:' + hh + 'px"></div>'; }
+    function lantern(x, y) { s += '<div class="g-lantern" style="left:' + x + 'px;top:' + y + 'px"><span class="post"></span><span class="lamp"></span></div>'; }
+    function tree(x, y, fruit) { s += '<div class="g-tree2" style="left:' + x + 'px;top:' + y + 'px;--fruit:' + fruit + '"><span class="tk"></span><span class="cn"></span></div>'; }
+
+    // ===== Area A — the veg patch & cottage flowers =====
+    s += '<div class="g-fence2" style="left:0;top:300px;width:54px"></div>';
+    plot(46, 330, 150, 38, ["#e0654a", "#ffb347", "#8fd86b"]);
+    plot(60, 392, 176, 40, ["#9a6ad0", "#8fd86b", "#e0654a"]);
+    s += '<div class="g-box" style="left:250px;top:392px"><span class="blooms"></span><span class="crate"></span></div>';
+    lantern(232, 300);
+    s += '<div class="g-mush" style="left:300px;top:436px"><span class="stalk"></span><span class="cap"></span></div>';
+    s += '<div class="g-mush" style="left:318px;top:444px"><span class="stalk"></span><span class="cap"></span></div>';
+    s += '<div class="g-log" style="left:360px;top:448px"><span class="moss"></span></div>';
+    s += '<div class="g-rock" style="left:430px;top:430px;width:46px;height:32px"><span class="moss"></span></div>';
+    bush(470, 330, 90, 40, "bloom");
+    flowers(40, 600, 420, 500, 28, 0.18);
+
+    // ===== Area B — the pond, fountain & resting spot =====
+    s += '<div class="g-pond" style="left:660px;top:392px;width:210px;height:96px"></div>';
+    s += '<div class="g-lily" style="left:700px;top:420px"></div><div class="g-lily" style="left:760px;top:448px"></div><div class="g-lily" style="left:812px;top:418px"></div>';
+    s += '<div class="g-reed" style="left:666px;top:372px;transform:rotate(-8deg)"></div><div class="g-reed" style="left:672px;top:376px;transform:rotate(6deg)"></div>';
+    s += '<div class="g-reed" style="left:862px;top:374px;transform:rotate(7deg)"></div><div class="g-reed" style="left:856px;top:378px;transform:rotate(-6deg)"></div>';
+    s += '<div class="g-rock" style="left:632px;top:436px;width:40px;height:28px"><span class="moss"></span></div>';
+    s += '<div class="g-fountain" style="left:930px;top:250px"><span class="basin"></span><span class="water"></span><span class="tier t2"></span><span class="tier t3"></span><span class="spout"></span></div>';
+    s += '<div class="g-bench" style="left:1120px;top:402px"><span class="bk"></span><span class="seat"></span><span class="lg l"></span><span class="lg r"></span></div>';
+    lantern(1086, 300); lantern(1228, 300);
+    flowers(620, 1300, 300, 360, 18, 0.5);   // glowing magical flowers by the water
+    flowers(900, 1300, 430, 500, 16, 0.12);
+
+    // ===== Area C — the orchard & berry bushes =====
+    tree(1360, 178, "#e0507f"); tree(1520, 196, "#ffcf4a"); tree(1690, 182, "#c84a4a");
+    bush(1420, 432, 80, 42, "berry"); bush(1600, 430, 84, 44, "berry"); bush(1760, 436, 78, 40, "bloom");
+    s += '<div class="g-hedge" style="left:1330px;top:430px;width:120px;height:34px"></div>';
+    s += '<div class="g-trellis" style="left:1860px;top:300px"><span class="frame"></span><span class="vine"></span></div>';
+    lantern(1820, 300);
+    s += '<div class="g-fence2" style="left:1940px;top:300px;width:60px"></div>';
+    flowers(1330, 1960, 440, 500, 26, 0.15);
+    bush(1300, 470, 70, 34, "bloom");
+
+    // scattered hedges + extra bushes to soften the layout
+    s += '<div class="g-hedge" style="left:540px;top:466px;width:120px;height:30px"></div>';
+    bush(880, 472, 80, 34, "bloom"); bush(1180, 474, 76, 32, "berry");
+
+    // ambient magic — fireflies + drifting petals
+    for (var i = 0; i < 16; i++) s += '<div class="g-fly" style="left:' + (rnd(40, 1960) | 0) + 'px;top:' + (rnd(320, 470) | 0) + 'px;animation-delay:' + (-rnd(0, 7)).toFixed(1) + 's;animation-duration:' + rnd(6, 10).toFixed(1) + 's"></div>';
+    for (var j = 0; j < 12; j++) s += '<div class="g-petal" style="left:' + (rnd(60, 1960) | 0) + 'px;top:' + (rnd(120, 300) | 0) + 'px;background:' + FCOL[(Math.random() * FCOL.length) | 0] + ';animation-delay:' + (-rnd(0, 9)).toFixed(1) + 's"></div>';
+    w.innerHTML = s;
+  }
+  function panGarden(to) {
+    var max = GARDEN_W - 800;
+    gardenScroll = Math.max(0, Math.min(max, to));
+    var w = $("gardenWorld"); if (w) w.style.transform = "translateX(" + (-gardenScroll) + "px)";
+  }
+  function initGardenPan() {
+    var w = $("gardenWorld"); if (!w) return;
+    buildGardenScene();
+    var dragging = false, startX = 0, startScroll = 0;
+    function down(e) {
+      dragging = true; var pt = e.touches ? e.touches[0] : e; startX = pt.clientX; startScroll = gardenScroll;
+      if (e.cancelable) e.preventDefault();
+      window.addEventListener("mousemove", mv); window.addEventListener("touchmove", mv, { passive: false });
+      window.addEventListener("mouseup", up); window.addEventListener("touchend", up);
+    }
+    function mv(e) {
+      if (!dragging) return;
+      var pt = e.touches ? e.touches[0] : e, rect = room.getBoundingClientRect(), scale = rect.width / 800;
+      panGarden(startScroll - (pt.clientX - startX) / scale);
+      if (e.cancelable) e.preventDefault();
+    }
+    function up() {
+      dragging = false;
+      window.removeEventListener("mousemove", mv); window.removeEventListener("touchmove", mv);
+      window.removeEventListener("mouseup", up); window.removeEventListener("touchend", up);
+    }
+    w.addEventListener("mousedown", down); w.addEventListener("touchstart", down, { passive: false });
+    $("gArrowL").addEventListener("click", function () { panGarden(gardenScroll - 320); });
+    $("gArrowR").addEventListener("click", function () { panGarden(gardenScroll + 320); });
   }
 
   // House overview — a little floor plan of every room (left to right, the way
@@ -3870,6 +4057,7 @@
     initFurnitureDrag();
     initCharacters();
     initGardenDoorDrag();
+    initGardenPan();
     updateHud();
     Pet.init();
     Ambient.updateBtn();

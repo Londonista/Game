@@ -863,8 +863,9 @@
   @keyframes gpetal { 0% { transform: translate(0,0) rotate(0); opacity: 0; } 12% { opacity: .85; } 100% { transform: translate(-46px,150px) rotate(220deg); opacity: 0; } }
   /* on-screen pan arrows + back door stay fixed to the frame */
   .g-arrow { position: absolute; top: 46%; z-index: 6; width: 34px; height: 46px; border-radius: 10px; cursor: pointer;
-    background: rgba(20,28,20,.5); color: #eaf6df; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center;
-    border: 1px solid rgba(255,255,255,.18); }
+    background: rgba(20,28,20,.5); color: #eaf6df; font-size: 22px; font-weight: 800; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,.18); display: none; }
+  #room[data-room="garden"] .g-arrow { display: flex; }
   .g-arrow.l { left: 92px; } .g-arrow.r { right: 6px; }
   .g-arrow:active { background: rgba(20,28,20,.7); }
 
@@ -922,9 +923,31 @@
     border-radius: 6px 6px 16px 16px; background: linear-gradient(180deg,#ffe6a8,#f4c46a); box-shadow: 0 0 30px 8px rgba(255,224,150,.45); }
   .lamp-art::after { content:""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 28px; height: 7px; border-radius: 50%; background: #4a3a28; }
 
+  /* ---- Two extra bedrooms flanking the main one ------------------------ */
+  #room[data-room="bed2"] { background: linear-gradient(180deg,#7d5570,#563a54 64%); }
+  #room[data-room="bed2"] .floor { background: linear-gradient(180deg,#8a6a4f,#6f5340); }
+  #room[data-room="bed3"] { background: linear-gradient(180deg,#3f4f7a,#2b3556 64%); }
+  #room[data-room="bed3"] .floor { background: linear-gradient(180deg,#7a6a52,#5f4e3a); }
+  .bed2-only, .bed3-only { display: none; }
+  #room[data-room="bed2"] .bed2-only, #room[data-room="bed3"] .bed3-only { display: block; }
+  /* a round night window reused by the extra bedrooms */
+  .roomwin { position: absolute; top: 44px; left: 50%; transform: translateX(-50%); width: 148px; height: 148px;
+    border-radius: 50%; border: 8px solid #eaddc4; overflow: hidden; background: #1f2740; box-shadow: inset 0 0 0 2px #cdbb9c, 0 10px 22px rgba(0,0,0,.35); }
+  .roomwin::before { content:""; position: absolute; inset: 0; background: linear-gradient(180deg,#22304c,#3a3358); }
+  .roomwin .rw-moon { position: absolute; width: 30px; height: 30px; border-radius: 50%; top: 26px; left: 30px; z-index: 1;
+    background: radial-gradient(circle at 40% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 16px rgba(255,240,200,.6); }
+  .roomwin .rw-cross::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #eaddc4; transform: translateX(-50%); z-index: 2; }
+  .roomwin .rw-cross::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #eaddc4; transform: translateY(-50%); z-index: 2; }
+  /* a soft framed picture on the wall */
+  .roomframe { position: absolute; top: 70px; width: 58px; height: 46px; border-radius: 4px; border: 5px solid #d8c39a;
+    background: linear-gradient(180deg,#b7c5d6,#8fa6c0); box-shadow: 0 4px 8px rgba(0,0,0,.3); }
+  .roomframe::after { content:""; position: absolute; left: 14%; bottom: 12%; width: 40%; height: 40%; border-radius: 50%;
+    background: radial-gradient(circle at 40% 38%,#fff,#ffe9a8); opacity: .8; }
+
   .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(90,55,30,.85);
     text-shadow: 0 1px 2px rgba(255,255,255,.4); pointer-events: none; }
   #room[data-room="garden"] .label2 { color: rgba(255,255,255,.85); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+  #room[data-room="bed2"] .label2, #room[data-room="bed3"] .label2 { color: rgba(255,255,255,.82); text-shadow: 0 1px 2px rgba(0,0,0,.45); }
 
   /* Entering the garden: dainty jewel flowers & vines fill the corners and
      gently fade away (no backdrop — the garden shows through). */
@@ -1147,15 +1170,45 @@
         </div>
       </div>
 
-      <!-- Door on the right wall → leads to the kitchen -->
-      <div class="door-next" id="doorNext" title="Go to the snug">
+      <!-- Door on the right wall → leads to the Blue Room -->
+      <div class="door-next" id="doorNext" title="Go to the Blue Room">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">snug →</div>
+        <div class="sign">blue room →</div>
       </div>
-      <!-- Door on the left wall → leads to the Wardrobe -->
-      <div class="door-ward" id="doorWard" title="Go to the Wardrobe">
+      <!-- Door on the left wall → leads to the Rose Room -->
+      <div class="door-ward" id="doorWard" title="Go to the Rose Room">
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
+        <div class="sign">← rose room</div>
+      </div>
+
+      <!-- ===== ROSE ROOM — an extra bedroom left of the main one ===== -->
+      <div class="bed2-only">
+        <div class="roomwin"><div class="rw-moon"></div><div class="rw-cross"></div></div>
+        <div class="roomframe" style="left:22%"></div>
+      </div>
+      <div class="label2 bed2-only" style="left:50%; transform:translateX(-50%)">🌸 Rose Room</div>
+      <div class="door-back bed2-only" id="doorBed2L" title="Go to the Wardrobe">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
         <div class="sign">← wardrobe</div>
+      </div>
+      <div class="door-wardback bed2-only" id="doorBed2R" title="Go to the bedroom">
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
+        <div class="sign">bedroom →</div>
+      </div>
+
+      <!-- ===== BLUE ROOM — an extra bedroom right of the main one ===== -->
+      <div class="bed3-only">
+        <div class="roomwin"><div class="rw-moon"></div><div class="rw-cross"></div></div>
+        <div class="roomframe" style="right:22%"></div>
+      </div>
+      <div class="label2 bed3-only" style="left:50%; transform:translateX(-50%)">💙 Blue Room</div>
+      <div class="door-back bed3-only" id="doorBed3L" title="Go to the bedroom">
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
+        <div class="sign">← bedroom</div>
+      </div>
+      <div class="door-wardback bed3-only" id="doorBed3R" title="Go to the snug">
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
+        <div class="sign">snug →</div>
       </div>
 
       <!-- ===== THE SNUG — between the bedroom and the kitchen ===== -->
@@ -1163,9 +1216,9 @@
         <div class="s-window"><div class="s-moon"></div><div class="s-cross"></div></div>
       </div>
       <div class="label2 snug-only" style="left:50%; transform:translateX(-50%)">🛋️ The Snug</div>
-      <div class="door-back snug-only" id="doorSnugBack" title="Back to the bedroom">
+      <div class="door-back snug-only" id="doorSnugBack" title="Go to the Blue Room">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">← bedroom</div>
+        <div class="sign">← blue room</div>
       </div>
       <div class="door-wardback snug-only" id="doorSnugNext" title="Go to the kitchen">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
@@ -1228,9 +1281,9 @@
 
       <!-- ===== WARDROBE ROOM — shown only when you're in it ===== -->
       <div class="label2 ward-only" style="left:50%; transform:translateX(-50%)">👗 Wardrobe</div>
-      <div class="door-wardback ward-only" id="doorWardBack" title="Back to the bedroom">
+      <div class="door-wardback ward-only" id="doorWardBack" title="Go to the Rose Room">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">bedroom →</div>
+        <div class="sign">rose room →</div>
       </div>
 
       <!-- Placed items get injected here -->
@@ -1495,6 +1548,14 @@
       if (!hasU("snug_rug")) s.placed.push({ uid: "snug_rug", itemId: "rug_rust", x: 50, y: 88, room: "snug", scale: 1 });
       if (!hasU("bed_rug")) s.placed.push({ uid: "bed_rug", itemId: "rug_lilac", x: 52, y: 86, room: "main", scale: 1 });
       s.rugsAdded = true;
+    }
+    // furnish the two extra bedrooms with a bed + rug once
+    if (!s.extraBedsAdded) {
+      if (!hasU("bed2_bed")) s.placed.push({ uid: "bed2_bed", itemId: "bed_pink", x: 50, y: 82, room: "bed2", scale: 1 });
+      if (!hasU("bed2_rug")) s.placed.push({ uid: "bed2_rug", itemId: "rug_rose", x: 52, y: 88, room: "bed2", scale: 1 });
+      if (!hasU("bed3_bed")) s.placed.push({ uid: "bed3_bed", itemId: "bed_blue", x: 50, y: 82, room: "bed3", scale: 1 });
+      if (!hasU("bed3_rug")) s.placed.push({ uid: "bed3_rug", itemId: "rug_sage", x: 52, y: 88, room: "bed3", scale: 1 });
+      s.extraBedsAdded = true;
     }
   }
 
@@ -3366,7 +3427,9 @@
   //  ROOMS — doors on the walls switch between the bedroom, kitchen & wardrobe.
   // =====================================================================
   var ROOM_TOASTS = {
-    snug: "🛋️ The snug — get cosy & decorate it! ← bedroom · kitchen →",
+    bed2: "🌸 The Rose Room — a cosy spare bedroom. ← wardrobe · bedroom →",
+    bed3: "💙 The Blue Room — a cosy spare bedroom. ← bedroom · snug →",
+    snug: "🛋️ The snug — get cosy & decorate it! ← blue room · kitchen →",
     two: "🍳 The kitchen — decorate it too! Tap ← to head back.",
     garden: "🌷 The garden — drag to explore · ‹ › or ← for the kitchen.",
     wardrobe: "👗 The Wardrobe — make it yours! Tap → to head back.",
@@ -3549,7 +3612,9 @@
   // the doors connect: Wardrobe · Bedroom · Kitchen). Tap a room to go there.
   var HOUSE_ROOMS = [
     { id: "wardrobe", name: "👗 Wardrobe", wall: "linear-gradient(180deg,#4a3a52,#6f5570)", floor: "linear-gradient(180deg,#dccbef,#c6b2e6)" },
+    { id: "bed2",     name: "🌸 Rose Room", wall: "linear-gradient(180deg,#7d5570,#563a54)", floor: "linear-gradient(180deg,#8a6a4f,#6f5340)" },
     { id: "main",     name: "🛏️ Bedroom",  wall: "linear-gradient(180deg,#4a3a63,#6b5184)", floor: "linear-gradient(180deg,#8a6a4f,#74573f)" },
+    { id: "bed3",     name: "💙 Blue Room", wall: "linear-gradient(180deg,#3f4f7a,#2b3556)", floor: "linear-gradient(180deg,#7a6a52,#5f4e3a)" },
     { id: "snug",     name: "🛋️ The Snug", wall: "linear-gradient(180deg,#2e514a,#427563)", floor: "linear-gradient(180deg,#9a7445,#7c5a32)" },
     { id: "two",      name: "🍳 Kitchen", wall: "linear-gradient(180deg,#6a5594,#48366e)", floor: "linear-gradient(180deg,#7a5638,#5f4029)" },
     { id: "garden",   name: "🌷 Garden",  wall: "linear-gradient(180deg,#202a4c,#36406a)", floor: "linear-gradient(180deg,#3f6f3c,#2c5230)" }
@@ -3989,12 +4054,16 @@
   $("btnMemory").addEventListener("click", openMemories);
   $("btnSave").addEventListener("click", openSaveMenu);
   $("btnMute").addEventListener("click", function () { Ambient.toggle(); });
-  $("doorNext").addEventListener("click", function () { goToRoom("snug"); });
+  $("doorNext").addEventListener("click", function () { goToRoom("bed3"); });     // bedroom → Blue Room
   $("doorBack").addEventListener("click", function () { goToRoom("snug"); });
-  $("doorSnugBack").addEventListener("click", function () { goToRoom("main"); });
+  $("doorSnugBack").addEventListener("click", function () { goToRoom("bed3"); }); // snug → Blue Room
   $("doorSnugNext").addEventListener("click", function () { goToRoom("two"); });
-  $("doorWard").addEventListener("click", function () { goToRoom("wardrobe"); });
-  $("doorWardBack").addEventListener("click", function () { goToRoom("main"); });
+  $("doorWard").addEventListener("click", function () { goToRoom("bed2"); });     // bedroom → Rose Room
+  $("doorWardBack").addEventListener("click", function () { goToRoom("bed2"); }); // wardrobe → Rose Room
+  $("doorBed2L").addEventListener("click", function () { goToRoom("wardrobe"); });
+  $("doorBed2R").addEventListener("click", function () { goToRoom("main"); });
+  $("doorBed3L").addEventListener("click", function () { goToRoom("main"); });
+  $("doorBed3R").addEventListener("click", function () { goToRoom("snug"); });
   $("doorGardenBack").addEventListener("click", function () { goToRoom("two"); });
   // The garden door can be dragged along the kitchen wall; a tap (no drag) opens the garden.
   function initGardenDoorDrag() {

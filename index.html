@@ -507,7 +507,14 @@
     repeating-linear-gradient(90deg, #7a5638 0 40px, #6c4a2e 40px 42px),
     linear-gradient(180deg,#7a5638,#5f4029); }
   #room[data-room="wardrobe"] { background: linear-gradient(180deg,#4a3a52,#6f5570 64%); }
-  #room[data-room="wardrobe"] .floor { background: linear-gradient(180deg,#a98a6a,#876a4a); }
+  /* light lilac, textured "fluffy" carpet */
+  #room[data-room="wardrobe"] .floor { background-color: #dccbef;
+    background-image:
+      radial-gradient(rgba(255,255,255,.55) 1px, transparent 1.7px),
+      radial-gradient(rgba(160,140,196,.45) 1px, transparent 1.7px),
+      radial-gradient(rgba(255,255,255,.3) 1px, transparent 1.5px);
+    background-size: 9px 9px, 9px 9px, 13px 13px;
+    background-position: 0 0, 4px 4px, 2px 6px; }
   /* hide the bedroom's fixtures + furniture whenever you're not in the bedroom
      (friends + cat come along, so they're NOT hidden) */
   #room:not([data-room="main"]) .window, #room:not([data-room="main"]) .curtain,
@@ -723,44 +730,144 @@
     background: rgba(0,0,0,.4); padding: 2px 9px; border-radius: 999px; animation: doorhint 2.2s ease-in-out infinite; }
   .gdoor:hover .leaf, .gdoor:active .leaf { filter: brightness(1.12); }
 
-  /* ---- Garden room (data-room="garden") -------------------------------- */
-  #room[data-room="garden"] { background: linear-gradient(180deg,#202a4c,#36406a 62%); }
-  #room[data-room="garden"] .floor { background: linear-gradient(180deg,#3f6f3c,#2c5230); }
+  /* ---- Garden room (data-room="garden") — a wide, explorable enchanted garden */
+  #room[data-room="garden"] { background: linear-gradient(180deg,#222d54,#3a4670 62%); }
+  #room[data-room="garden"] .floor { display: none; }
   .garden-only { display: none; }
   #room[data-room="garden"] .garden-only { display: block; }
-  .garden { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-  .garden::before { content:""; position: absolute; inset: 0; opacity: .9; background:
-    radial-gradient(1.5px 1.5px at 12% 16%, #fff, transparent),
-    radial-gradient(1.5px 1.5px at 30% 26%, #fff, transparent),
-    radial-gradient(1px 1px at 46% 12%, #fff, transparent),
-    radial-gradient(1.5px 1.5px at 62% 22%, #fff, transparent),
-    radial-gradient(1px 1px at 80% 14%, #fff, transparent),
-    radial-gradient(1.5px 1.5px at 90% 30%, #fff, transparent); }
-  .garden .g-moon { position: absolute; top: 38px; right: 96px; width: 46px; height: 46px; border-radius: 50%;
-    background: radial-gradient(circle at 38% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 26px rgba(255,240,200,.5); }
-  /* a string of warm fairy lights */
-  .garden .g-lights { position: absolute; top: 30px; left: 22px; right: 22px; height: 14px; border-top: 2px solid rgba(30,22,14,.55);
-    background: radial-gradient(circle at 13px 8px, #ffd87a 0 3px, transparent 4px) repeat-x; background-size: 50px 14px;
-    filter: drop-shadow(0 0 3px rgba(255,210,120,.7)); }
-  /* tree */
-  .garden .g-tree { position: absolute; left: 70px; top: 150px; width: 130px; height: 212px; }
-  .garden .g-tree .g-trunk { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 22px; height: 112px;
-    background: linear-gradient(90deg,#4f3318,#6e4a2c,#4f3318); border-radius: 4px; }
-  .garden .g-tree .g-leaves { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 130px; height: 130px; border-radius: 50%;
-    background: radial-gradient(circle at 40% 35%, #3f7a44, #275030); box-shadow: -30px 20px 0 -10px #356a3a, 32px 16px 0 -8px #356a3a, 0 -12px 0 -6px #428048; }
-  /* picket fence along the back */
-  .garden .g-fence { position: absolute; left: 0; right: 0; top: 300px; height: 56px; }
-  .garden .g-fence::before { content:""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #8a5e36 0 18px, transparent 18px 30px); }
-  .garden .g-fence::after { content:""; position: absolute; left: 0; right: 0; top: 12px; height: 7px; background: #7a5230; box-shadow: 0 22px 0 #7a5230; }
-  /* flower bushes */
-  .garden .g-bush { position: absolute; top: 332px; height: 48px; border-radius: 42% 42% 30% 30%;
-    background: radial-gradient(circle at 40% 30%, #43804a, #2c5a32); box-shadow: inset 0 -6px 0 rgba(0,0,0,.15); }
-  .garden .g-bush.b1 { left: 36px; width: 78px; }
-  .garden .g-bush.b2 { right: 150px; width: 96px; }
-  .garden .g-bush::after { content:""; position: absolute; inset: 0; border-radius: inherit; background:
-    radial-gradient(4px 4px at 22% 42%, #ff8fb0 0 50%, transparent 51%),
-    radial-gradient(4px 4px at 52% 28%, #ffd86b 0 50%, transparent 51%),
-    radial-gradient(4px 4px at 78% 48%, #c6a0ff 0 50%, transparent 51%); }
+  /* the wide scrolling world (panned by translateX) */
+  .garden { position: absolute; top: 0; left: 0; height: 100%; width: 2000px; z-index: 1;
+    pointer-events: auto; cursor: grab; will-change: transform; touch-action: none; }
+  .garden:active { cursor: grabbing; }
+  .garden > * { pointer-events: none; }
+  .g-sky { position: absolute; top: 0; left: 0; width: 100%; height: 330px; background:
+    radial-gradient(1.5px 1.5px at 6% 16%, #fff, transparent), radial-gradient(1.5px 1.5px at 16% 30%, #fff, transparent),
+    radial-gradient(1px 1px at 24% 12%, #fff, transparent), radial-gradient(1.5px 1.5px at 34% 24%, #fff, transparent),
+    radial-gradient(1px 1px at 45% 14%, #fff, transparent), radial-gradient(1.5px 1.5px at 56% 26%, #fff, transparent),
+    radial-gradient(1px 1px at 66% 12%, #fff, transparent), radial-gradient(1.5px 1.5px at 76% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 86% 16%, #fff, transparent), radial-gradient(1.5px 1.5px at 95% 28%, #fff, transparent),
+    linear-gradient(180deg,#222d54,#3a4670); }
+  .g-ground { position: absolute; left: 0; top: 300px; width: 100%; bottom: 0; background:
+    linear-gradient(180deg,#4a7e44,#2f5a32);
+    box-shadow: inset 0 6px 14px rgba(0,0,0,.18); }
+  .g-ground::before { content:""; position: absolute; inset: 0; opacity: .5; background:
+    radial-gradient(2px 2px at 10% 30%, rgba(255,255,255,.12), transparent),
+    radial-gradient(2px 2px at 40% 60%, rgba(0,0,0,.12), transparent),
+    radial-gradient(2px 2px at 70% 40%, rgba(255,255,255,.1), transparent),
+    radial-gradient(2px 2px at 90% 70%, rgba(0,0,0,.12), transparent); background-size: 80px 80px; }
+  .g-moon { position: absolute; top: 40px; left: 90px; width: 50px; height: 50px; border-radius: 50%;
+    background: radial-gradient(circle at 38% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 30px rgba(255,240,200,.5); }
+  .g-lights { position: absolute; top: 26px; left: 10px; width: 1980px; height: 16px; border-top: 2px solid rgba(30,22,14,.5);
+    background: radial-gradient(circle at 14px 9px, #ffd87a 0 3px, transparent 4px) repeat-x; background-size: 54px 16px;
+    filter: drop-shadow(0 0 3px rgba(255,210,120,.75)); }
+  /* winding path */
+  .g-path { position: absolute; left: 0; top: 372px; width: 100%; height: 70px;
+    background: repeating-linear-gradient(90deg, #b79a6a 0 26px, #a98c5c 26px 30px);
+    -webkit-mask: radial-gradient(60px 26px at 50% 0, #000 60%, transparent 62%) repeat-x; mask: radial-gradient(60px 26px at 50% 0, #000 60%, transparent 62%) repeat-x;
+    -webkit-mask-size: 220px 70px; mask-size: 220px 70px; opacity: .9; }
+  /* soil plot with rows */
+  .g-plot { position: absolute; border-radius: 7px; background: linear-gradient(180deg,#6e4a2c,#523418);
+    box-shadow: inset 0 0 0 3px #43290f, inset 0 6px 8px rgba(0,0,0,.25);
+    background-image: repeating-linear-gradient(90deg, transparent 0 14px, rgba(0,0,0,.18) 14px 16px); }
+  /* a little crop / plant (colour set inline on ::before via currentColor) */
+  .g-crop { position: absolute; width: 16px; height: 22px; }
+  .g-crop .lf { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 14px; height: 12px;
+    border-radius: 60% 60% 40% 40%; background: #3f9a52; }
+  .g-crop .top { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 9px; height: 11px; border-radius: 50%; }
+  /* flower (petal ring + centre), colour via --c */
+  .g-fl { position: absolute; width: 14px; height: 14px; }
+  .g-fl::before { content:""; position: absolute; inset: 0; border-radius: 50%; background:
+    radial-gradient(circle at 50% 0, var(--c) 0 30%, transparent 32%), radial-gradient(circle at 0 50%, var(--c) 0 30%, transparent 32%),
+    radial-gradient(circle at 100% 50%, var(--c) 0 30%, transparent 32%), radial-gradient(circle at 50% 100%, var(--c) 0 30%, transparent 32%),
+    radial-gradient(circle at 18% 18%, var(--c) 0 26%, transparent 28%), radial-gradient(circle at 82% 82%, var(--c) 0 26%, transparent 28%); }
+  .g-fl::after { content:""; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 5px; height: 5px; border-radius: 50%; background: #fff2b0; }
+  .g-fl.glow { filter: drop-shadow(0 0 5px var(--c)); animation: gglow 3s ease-in-out infinite; }
+  @keyframes gglow { 0%,100% { filter: drop-shadow(0 0 3px var(--c)); } 50% { filter: drop-shadow(0 0 8px var(--c)); } }
+  /* fruit tree */
+  .g-tree2 { position: absolute; width: 140px; height: 170px; }
+  .g-tree2 .tk { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 20px; height: 78px; border-radius: 5px; background: linear-gradient(90deg,#4f3318,#6e4a2c,#4f3318); }
+  .g-tree2 .cn { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 130px; height: 110px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 34%, #3f7a44, #275030); box-shadow: -28px 18px 0 -10px #356a3a, 30px 14px 0 -8px #356a3a; }
+  .g-tree2 .cn::after { content:""; position: absolute; inset: 0; border-radius: 50%; background:
+    radial-gradient(5px 5px at 30% 40%, var(--fruit,#e0507f) 0 50%, transparent 52%),
+    radial-gradient(5px 5px at 58% 30%, var(--fruit,#e0507f) 0 50%, transparent 52%),
+    radial-gradient(5px 5px at 72% 58%, var(--fruit,#e0507f) 0 50%, transparent 52%),
+    radial-gradient(5px 5px at 44% 64%, var(--fruit,#e0507f) 0 50%, transparent 52%); }
+  /* berry bush / shrub / hedge */
+  .g-bush2 { position: absolute; border-radius: 46% 46% 32% 32%; background: radial-gradient(circle at 40% 28%, #43804a, #285230); box-shadow: inset 0 -6px 0 rgba(0,0,0,.15); }
+  .g-bush2.berry::after, .g-bush2.bloom::after { content:""; position: absolute; inset: 0; border-radius: inherit; }
+  .g-bush2.berry::after { background: radial-gradient(3px 3px at 26% 44%, #6a3aa0 0 50%, transparent 52%), radial-gradient(3px 3px at 54% 30%, #6a3aa0 0 50%, transparent 52%), radial-gradient(3px 3px at 76% 52%, #8a4ad0 0 50%, transparent 52%), radial-gradient(3px 3px at 40% 64%, #6a3aa0 0 50%, transparent 52%); }
+  .g-bush2.bloom::after { background: radial-gradient(4px 4px at 24% 40%, #ff8fb0 0 50%, transparent 52%), radial-gradient(4px 4px at 56% 28%, #ffd86b 0 50%, transparent 52%), radial-gradient(4px 4px at 80% 50%, #c6a0ff 0 50%, transparent 52%), radial-gradient(4px 4px at 44% 62%, #ff8fb0 0 50%, transparent 52%); }
+  .g-hedge { position: absolute; border-radius: 14px; background: linear-gradient(180deg,#3f8048,#2c5a34); box-shadow: inset 0 -8px 0 rgba(0,0,0,.14), inset 0 6px 0 rgba(255,255,255,.08); }
+  /* stone fountain */
+  .g-fountain { position: absolute; width: 120px; height: 120px; }
+  .g-fountain .basin { position: absolute; bottom: 0; left: 0; width: 120px; height: 40px; border-radius: 50%; background: radial-gradient(circle at 50% 30%, #c8cdd2, #9aa0a8); box-shadow: inset 0 4px 6px rgba(0,0,0,.25); }
+  .g-fountain .water { position: absolute; bottom: 8px; left: 18px; width: 84px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 50% 30%, #bfe6f3, #6fb6d8); }
+  .g-fountain .tier { position: absolute; left: 50%; transform: translateX(-50%); background: radial-gradient(circle at 50% 30%, #c8cdd2, #9aa0a8); border-radius: 50%; }
+  .g-fountain .t2 { bottom: 26px; width: 64px; height: 22px; }
+  .g-fountain .t3 { bottom: 44px; width: 30px; height: 44px; border-radius: 6px; }
+  .g-fountain .spout { position: absolute; bottom: 78px; left: 50%; transform: translateX(-50%); width: 8px; height: 16px; border-radius: 4px;
+    background: linear-gradient(180deg,#cfe9f5,#8fc6e0); box-shadow: 0 0 8px rgba(150,210,235,.6); }
+  /* pond */
+  .g-pond { position: absolute; border-radius: 50%; background: radial-gradient(circle at 42% 32%, #6fb6d8, #2f6f96);
+    box-shadow: inset 0 4px 10px rgba(0,0,0,.25), inset 0 0 0 4px #3f6f3c; }
+  .g-pond::after { content:""; position: absolute; left: 20%; top: 26%; width: 36%; height: 14%; border-radius: 50%; background: rgba(255,255,255,.22); }
+  .g-lily { position: absolute; width: 16px; height: 10px; border-radius: 50%; background: #4a9a52; box-shadow: inset -2px -2px 0 rgba(0,0,0,.12); }
+  .g-lily::after { content:""; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 5px; height: 5px; border-radius: 50%; background: #ff9ec2; }
+  .g-reed { position: absolute; width: 3px; height: 26px; background: linear-gradient(180deg,#5aa05a,#3a7a3f); border-radius: 2px; transform-origin: bottom; }
+  /* wooden bench */
+  .g-bench { position: absolute; width: 90px; height: 46px; }
+  .g-bench .seat { position: absolute; bottom: 14px; left: 0; width: 90px; height: 9px; border-radius: 3px; background: linear-gradient(180deg,#a9733f,#8a5a30); }
+  .g-bench .bk { position: absolute; top: 0; left: 0; width: 90px; height: 16px; border-radius: 3px; background: linear-gradient(180deg,#b67e46,#8a5a30); }
+  .g-bench .lg { position: absolute; bottom: 0; width: 7px; height: 18px; background: #6b4423; }
+  .g-bench .lg.l { left: 8px; } .g-bench .lg.r { right: 8px; }
+  /* lantern on a post with warm glow */
+  .g-lantern { position: absolute; width: 18px; height: 70px; }
+  .g-lantern .post { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 5px; height: 58px; background: linear-gradient(90deg,#3a2a18,#5a4632,#3a2a18); border-radius: 2px; }
+  .g-lantern .lamp { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 16px; height: 20px; border-radius: 4px 4px 3px 3px;
+    background: radial-gradient(circle at 50% 40%, #fff0b8, #f0b84a); box-shadow: 0 0 16px 4px rgba(255,210,120,.5); animation: glamp 4s ease-in-out infinite; }
+  @keyframes glamp { 0%,100% { box-shadow: 0 0 12px 3px rgba(255,210,120,.4); } 50% { box-shadow: 0 0 18px 6px rgba(255,210,120,.6); } }
+  /* flower box planter */
+  .g-box { position: absolute; width: 64px; height: 26px; }
+  .g-box .crate { position: absolute; bottom: 0; left: 0; width: 64px; height: 16px; border-radius: 3px; background: linear-gradient(180deg,#8a5a30,#6b4423); box-shadow: inset 0 0 0 2px rgba(0,0,0,.2); }
+  .g-box .blooms { position: absolute; top: 0; left: 0; right: 0; height: 14px; border-radius: 8px; background:
+    radial-gradient(4px 4px at 16% 60%, #ff8fb0 0 50%, transparent 52%), radial-gradient(4px 4px at 38% 40%, #ffd86b 0 50%, transparent 52%),
+    radial-gradient(4px 4px at 60% 56%, #c6a0ff 0 50%, transparent 52%), radial-gradient(4px 4px at 84% 44%, #8fd0ff 0 50%, transparent 52%), #3f9a52; }
+  /* log, mossy rock, mushroom */
+  .g-log { position: absolute; width: 54px; height: 18px; border-radius: 9px; background: linear-gradient(180deg,#7a5230,#5a3a20); box-shadow: inset 0 -4px 0 rgba(0,0,0,.2); }
+  .g-log::after { content:""; position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle,#8a6038,#5a3a20); }
+  .g-log .moss { position: absolute; top: -3px; left: 10px; right: 8px; height: 6px; border-radius: 6px; background: #4a9a52; }
+  .g-rock { position: absolute; border-radius: 46% 46% 40% 40%; background: radial-gradient(circle at 40% 30%, #9aa0a8, #6a7078); }
+  .g-rock .moss { position: absolute; top: -2px; left: 14%; right: 14%; height: 40%; border-radius: 50%; background: #4a9a52; opacity: .9; }
+  .g-mush { position: absolute; width: 16px; height: 18px; }
+  .g-mush .stalk { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 6px; height: 10px; border-radius: 3px; background: #efe6d2; }
+  .g-mush .cap { position: absolute; top: 0; left: 0; width: 16px; height: 10px; border-radius: 50% 50% 40% 40%; background: radial-gradient(circle at 40% 30%, #e0654a, #b23a2a); }
+  .g-mush .cap::after { content:""; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(2px 2px at 30% 50%, #fff 0 50%, transparent 52%), radial-gradient(2px 2px at 64% 38%, #fff 0 50%, transparent 52%); }
+  /* trellis with climbing vine */
+  .g-trellis { position: absolute; width: 60px; height: 96px; }
+  .g-trellis .frame { position: absolute; inset: 0; background:
+    repeating-linear-gradient(90deg, #8a5e36 0 3px, transparent 3px 16px), repeating-linear-gradient(0deg, #8a5e36 0 3px, transparent 3px 16px); border-radius: 4px; opacity: .85; }
+  .g-trellis .vine { position: absolute; inset: 0; background:
+    radial-gradient(5px 5px at 20% 80%, #3f9a52 0 50%, transparent 52%), radial-gradient(5px 5px at 50% 60%, #3f9a52 0 50%, transparent 52%),
+    radial-gradient(5px 5px at 76% 40%, #3f9a52 0 50%, transparent 52%), radial-gradient(4px 4px at 36% 30%, #ff8fb0 0 50%, transparent 52%),
+    radial-gradient(4px 4px at 64% 70%, #c6a0ff 0 50%, transparent 52%); }
+  /* fence section */
+  .g-fence2 { position: absolute; height: 44px; }
+  .g-fence2::before { content:""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #8a5e36 0 14px, transparent 14px 26px); }
+  .g-fence2::after { content:""; position: absolute; left: 0; right: 0; top: 10px; height: 6px; background: #7a5230; box-shadow: 0 16px 0 #7a5230; }
+  /* fireflies + floating petals (ambient magic) */
+  .g-fly { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: #eaff9a;
+    box-shadow: 0 0 8px 2px rgba(210,255,140,.7); animation: gfly 7s ease-in-out infinite; }
+  @keyframes gfly { 0% { transform: translate(0,0); opacity: .2; } 25% { opacity: 1; } 50% { transform: translate(20px,-16px); opacity: .6; } 75% { opacity: 1; } 100% { transform: translate(-6px,6px); opacity: .2; } }
+  .g-petal { position: absolute; width: 7px; height: 7px; border-radius: 60% 0 60% 0; opacity: .8; animation: gpetal 9s linear infinite; }
+  @keyframes gpetal { 0% { transform: translate(0,0) rotate(0); opacity: 0; } 12% { opacity: .85; } 100% { transform: translate(-46px,150px) rotate(220deg); opacity: 0; } }
+  /* on-screen pan arrows + back door stay fixed to the frame */
+  .g-arrow { position: absolute; top: 46%; z-index: 6; width: 34px; height: 46px; border-radius: 10px; cursor: pointer;
+    background: rgba(20,28,20,.5); color: #eaf6df; font-size: 22px; font-weight: 800; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,.18); display: none; }
+  #room[data-room="garden"] .g-arrow { display: flex; }
+  .g-arrow.l { left: 92px; } .g-arrow.r { right: 6px; }
+  .g-arrow:active { background: rgba(20,28,20,.7); }
 
   /* ---- The Snug (data-room="snug") — a cosy sitting room ---------------- */
   #room[data-room="snug"] { background: linear-gradient(180deg,#2e514a,#427563 64%); }
@@ -776,9 +883,9 @@
     background: radial-gradient(circle at 40% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 16px rgba(255,240,200,.6); }
   .snug .s-window .s-cross::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #eaddc4; transform: translateX(-50%); z-index: 2; }
   .snug .s-window .s-cross::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #eaddc4; transform: translateY(-50%); z-index: 2; }
-  /* round patterned rug */
-  .snug .s-rug { position: absolute; left: 50%; transform: translateX(-50%); bottom: 22px; width: 300px; height: 48px; border-radius: 50%;
-    background: radial-gradient(circle, #b8704a 0 38%, #9c5d3c 39% 58%, #b8704a 59% 78%, #8f5536 79%); opacity: .92; }
+  /* Round patterned rug — a purchasable, draggable item (any room) */
+  .item.rug { font-size: 0; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.3)); }
+  .rug-art { width: 300px; height: 50px; border-radius: 50%; opacity: .96; }
 
   /* Cosy sofa — a purchasable, draggable item */
   .item.sofa { font-size: 0; filter: drop-shadow(0 7px 6px rgba(0,0,0,0.4)); }
@@ -790,6 +897,23 @@
   .sofa-art .cush { position: absolute; bottom: 24px; width: 60px; height: 40px; border-radius: 9px; background: #cf8a5e; box-shadow: inset 0 -4px 0 rgba(0,0,0,.12); }
   .sofa-art .cush.c1 { left: 40px; } .sofa-art .cush.c2 { right: 40px; }
 
+  /* Dark green sideboard — a purchasable, resizable, draggable item */
+  .item.sideboard { font-size: 0; filter: drop-shadow(0 7px 6px rgba(0,0,0,0.42)); }
+  .sideboard-art { position: relative; width: 150px; height: 72px; }
+  .sideboard-art .top { position: absolute; top: 0; left: -3px; right: -3px; height: 10px; border-radius: 4px;
+    background: linear-gradient(180deg,#356a4c,#244a35); box-shadow: 0 2px 3px rgba(0,0,0,.3); }
+  .sideboard-art .body { position: absolute; top: 9px; left: 2px; right: 2px; bottom: 10px; border-radius: 3px;
+    background: linear-gradient(180deg,#356a4c,#274f39); border: 2px solid #1c3a29; }
+  .sideboard-art .door { position: absolute; top: 16px; bottom: 16px; width: 28%; border: 1.5px solid rgba(0,0,0,.28);
+    border-radius: 3px; background: linear-gradient(180deg,#3f7a5a,#2c5740); }
+  .sideboard-art .door::after { content: ""; position: absolute; top: 46%; width: 5px; height: 5px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%,#ffe39a,#c79436); right: 4px; }
+  .sideboard-art .door.d1 { left: 5%; } .sideboard-art .door.d2 { left: 36%; } .sideboard-art .door.d3 { left: 67%; }
+  .sideboard-art .door.d3::after { left: 4px; right: auto; }
+  .sideboard-art .leg { position: absolute; bottom: 0; width: 8px; height: 12px; border-radius: 0 0 2px 2px;
+    background: linear-gradient(180deg,#3a2a18,#241a0e); }
+  .sideboard-art .leg.l { left: 8px; } .sideboard-art .leg.r { right: 8px; }
+
   /* Warm floor lamp — a purchasable, draggable item */
   .item.lamp { font-size: 0; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.35)); }
   .lamp-art { position: relative; width: 40px; height: 152px; }
@@ -799,17 +923,39 @@
     border-radius: 6px 6px 16px 16px; background: linear-gradient(180deg,#ffe6a8,#f4c46a); box-shadow: 0 0 30px 8px rgba(255,224,150,.45); }
   .lamp-art::after { content:""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 28px; height: 7px; border-radius: 50%; background: #4a3a28; }
 
+  /* ---- Two extra bedrooms flanking the main one ------------------------ */
+  #room[data-room="bed2"] { background: linear-gradient(180deg,#7d5570,#563a54 64%); }
+  #room[data-room="bed2"] .floor { background: linear-gradient(180deg,#8a6a4f,#6f5340); }
+  #room[data-room="bed3"] { background: linear-gradient(180deg,#3f4f7a,#2b3556 64%); }
+  #room[data-room="bed3"] .floor { background: linear-gradient(180deg,#7a6a52,#5f4e3a); }
+  .bed2-only, .bed3-only { display: none; }
+  #room[data-room="bed2"] .bed2-only, #room[data-room="bed3"] .bed3-only { display: block; }
+  /* a round night window reused by the extra bedrooms */
+  .roomwin { position: absolute; top: 44px; left: 50%; transform: translateX(-50%); width: 148px; height: 148px;
+    border-radius: 50%; border: 8px solid #eaddc4; overflow: hidden; background: #1f2740; box-shadow: inset 0 0 0 2px #cdbb9c, 0 10px 22px rgba(0,0,0,.35); }
+  .roomwin::before { content:""; position: absolute; inset: 0; background: linear-gradient(180deg,#22304c,#3a3358); }
+  .roomwin .rw-moon { position: absolute; width: 30px; height: 30px; border-radius: 50%; top: 26px; left: 30px; z-index: 1;
+    background: radial-gradient(circle at 40% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 16px rgba(255,240,200,.6); }
+  .roomwin .rw-cross::before { content:""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: #eaddc4; transform: translateX(-50%); z-index: 2; }
+  .roomwin .rw-cross::after { content:""; position: absolute; top: 50%; left: 0; right: 0; height: 5px; background: #eaddc4; transform: translateY(-50%); z-index: 2; }
+  /* a soft framed picture on the wall */
+  .roomframe { position: absolute; top: 70px; width: 58px; height: 46px; border-radius: 4px; border: 5px solid #d8c39a;
+    background: linear-gradient(180deg,#b7c5d6,#8fa6c0); box-shadow: 0 4px 8px rgba(0,0,0,.3); }
+  .roomframe::after { content:""; position: absolute; left: 14%; bottom: 12%; width: 40%; height: 40%; border-radius: 50%;
+    background: radial-gradient(circle at 40% 38%,#fff,#ffe9a8); opacity: .8; }
+
   .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(90,55,30,.85);
     text-shadow: 0 1px 2px rgba(255,255,255,.4); pointer-events: none; }
   #room[data-room="garden"] .label2 { color: rgba(255,255,255,.85); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+  #room[data-room="bed2"] .label2, #room[data-room="bed3"] .label2 { color: rgba(255,255,255,.82); text-shadow: 0 1px 2px rgba(0,0,0,.45); }
 
-  /* Entering the garden: a black screen framed with jewel flowers & vines in
-     the corners, which fades out as one to reveal the garden. */
-  .garden-reveal { position: absolute; inset: 0; z-index: 75; background: #04060c; pointer-events: none;
-    animation: gardenreveal 2.8s ease forwards; }
-  @keyframes gardenreveal { 0% { opacity: 1; } 30% { opacity: 1; } 100% { opacity: 0; } }
-  .garden-reveal .gv { position: absolute; width: 64%; max-width: 300px; height: 64%; max-height: 300px;
-    filter: drop-shadow(0 0 6px rgba(255,255,255,.3)); }
+  /* Entering the garden: dainty jewel flowers & vines fill the corners and
+     gently fade away (no backdrop — the garden shows through). */
+  .garden-reveal { position: absolute; inset: 0; z-index: 75; pointer-events: none;
+    animation: gardenreveal 2.6s ease forwards; }
+  @keyframes gardenreveal { 0% { opacity: 0; } 14% { opacity: 1; } 46% { opacity: 1; } 100% { opacity: 0; } }
+  .garden-reveal .gv { position: absolute; width: 38%; max-width: 176px; height: 38%; max-height: 176px;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,.35)); }
   .garden-reveal .gv.tl { top: 0; left: 0; }
   .garden-reveal .gv.tr { top: 0; right: 0; transform: scaleX(-1); }
   .garden-reveal .gv.bl { bottom: 0; left: 0; transform: scaleY(-1); }
@@ -1024,26 +1170,55 @@
         </div>
       </div>
 
-      <!-- Door on the right wall → leads to the kitchen -->
-      <div class="door-next" id="doorNext" title="Go to the snug">
+      <!-- Door on the right wall → leads to the Blue Room -->
+      <div class="door-next" id="doorNext" title="Go to the Blue Room">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">snug →</div>
+        <div class="sign">blue room →</div>
       </div>
-      <!-- Door on the left wall → leads to the Wardrobe -->
-      <div class="door-ward" id="doorWard" title="Go to the Wardrobe">
+      <!-- Door on the left wall → leads to the Rose Room -->
+      <div class="door-ward" id="doorWard" title="Go to the Rose Room">
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
+        <div class="sign">← rose room</div>
+      </div>
+
+      <!-- ===== ROSE ROOM — an extra bedroom left of the main one ===== -->
+      <div class="bed2-only">
+        <div class="roomwin"><div class="rw-moon"></div><div class="rw-cross"></div></div>
+        <div class="roomframe" style="left:22%"></div>
+      </div>
+      <div class="label2 bed2-only" style="left:50%; transform:translateX(-50%)">🌸 Rose Room</div>
+      <div class="door-back bed2-only" id="doorBed2L" title="Go to the Wardrobe">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
         <div class="sign">← wardrobe</div>
+      </div>
+      <div class="door-wardback bed2-only" id="doorBed2R" title="Go to the bedroom">
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
+        <div class="sign">bedroom →</div>
+      </div>
+
+      <!-- ===== BLUE ROOM — an extra bedroom right of the main one ===== -->
+      <div class="bed3-only">
+        <div class="roomwin"><div class="rw-moon"></div><div class="rw-cross"></div></div>
+        <div class="roomframe" style="right:22%"></div>
+      </div>
+      <div class="label2 bed3-only" style="left:50%; transform:translateX(-50%)">💙 Blue Room</div>
+      <div class="door-back bed3-only" id="doorBed3L" title="Go to the bedroom">
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
+        <div class="sign">← bedroom</div>
+      </div>
+      <div class="door-wardback bed3-only" id="doorBed3R" title="Go to the snug">
+        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
+        <div class="sign">snug →</div>
       </div>
 
       <!-- ===== THE SNUG — between the bedroom and the kitchen ===== -->
       <div class="snug snug-only">
         <div class="s-window"><div class="s-moon"></div><div class="s-cross"></div></div>
-        <div class="s-rug"></div>
       </div>
       <div class="label2 snug-only" style="left:50%; transform:translateX(-50%)">🛋️ The Snug</div>
-      <div class="door-back snug-only" id="doorSnugBack" title="Back to the bedroom">
+      <div class="door-back snug-only" id="doorSnugBack" title="Go to the Blue Room">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">← bedroom</div>
+        <div class="sign">← blue room</div>
       </div>
       <div class="door-wardback snug-only" id="doorSnugNext" title="Go to the kitchen">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
@@ -1090,15 +1265,10 @@
         <div class="sign">garden →</div>
       </div>
 
-      <!-- ===== GARDEN ROOM — shown only when you're in it ===== -->
-      <div class="garden garden-only">
-        <div class="g-moon"></div>
-        <div class="g-lights"></div>
-        <div class="g-tree"><div class="g-trunk"></div><div class="g-leaves"></div></div>
-        <div class="g-fence"></div>
-        <div class="g-bush b1"></div>
-        <div class="g-bush b2"></div>
-      </div>
+      <!-- ===== GARDEN ROOM — a wide explorable world, built in JS ===== -->
+      <div class="garden garden-only" id="gardenWorld"></div>
+      <div class="g-arrow l garden-only" id="gArrowL" title="Explore left">‹</div>
+      <div class="g-arrow r garden-only" id="gArrowR" title="Explore right">›</div>
       <div class="label2 garden-only" style="left:50%; transform:translateX(-50%)">🌷 Garden</div>
       <div class="door-gardenback garden-only gdoor" id="doorGardenBack" title="Back into the kitchen">
         <div class="leaf">
@@ -1111,9 +1281,9 @@
 
       <!-- ===== WARDROBE ROOM — shown only when you're in it ===== -->
       <div class="label2 ward-only" style="left:50%; transform:translateX(-50%)">👗 Wardrobe</div>
-      <div class="door-wardback ward-only" id="doorWardBack" title="Back to the bedroom">
+      <div class="door-wardback ward-only" id="doorWardBack" title="Go to the Rose Room">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">bedroom →</div>
+        <div class="sign">rose room →</div>
       </div>
 
       <!-- Placed items get injected here -->
@@ -1236,6 +1406,13 @@
     // --- Snug (cosy seating) ---
     { id: "sofa_rust", name: "Cosy Sofa", ic: "🛋️", price: 36, unlockAt: 0, set: "Snug", render: "sofa" },
     { id: "lamp_floor", name: "Floor Lamp", ic: "🪔", price: 18, unlockAt: 0, set: "Snug", render: "lamp" },
+    { id: "sideboard_green", name: "Sideboard", ic: "🟩", price: 32, unlockAt: 0, set: "Snug", render: "sideboard" },
+
+    // --- Rugs (drag them under your furniture) ---
+    { id: "rug_lilac", name: "Lilac Rug", ic: "🟪", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "lilac" },
+    { id: "rug_rust",  name: "Cosy Rug",  ic: "🟫", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "rust" },
+    { id: "rug_sage",  name: "Sage Rug",  ic: "🟩", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "sage" },
+    { id: "rug_rose",  name: "Rose Rug",  ic: "🌹", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "rose" },
 
     // --- Outfits (worn by the friends via the ornate wardrobe) ---
     { id: "hat_tiara",   name: "Tiara",        ic: "👑", price: 10, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👑", art: "tiara" } },
@@ -1334,7 +1511,8 @@
       { id: "adam", x: 79,   y: 88 }
     ],
     currentRoom: "main",   // which room is on screen ("main" bedroom or "two" kitchen)
-    gardenDoorX: 68,       // horizontal % position of the kitchen's garden door (draggable)
+    gardenDoorX: 68,       // x/y % position of the kitchen's garden door (draggable in 2D)
+    gardenDoorY: 59,
     closet: [],            // clothing item ids you've bought
     outfits: { jas: {}, aqsa: {}, adam: {} },   // what each friend is wearing
     scores: { starcatcher: [], laundromat: [] },   // mini-game leaderboards
@@ -1356,13 +1534,28 @@
     s.scores = s.scores || {};
     ["starcatcher", "laundromat"].forEach(function (id) { s.scores[id] = s.scores[id] || []; });
     if (typeof s.gardenDoorX !== "number") s.gardenDoorX = 68;
+    if (typeof s.gardenDoorY !== "number") s.gardenDoorY = 59;
+    s.placed = s.placed || [];
+    var hasU = function (u) { return s.placed.some(function (p) { return p.uid === u; }); };
     // furnish the snug once with a (now removable/movable) sofa + floor lamp
     if (!s.snugFurnished) {
-      s.placed = s.placed || [];
-      var hasU = function (u) { return s.placed.some(function (p) { return p.uid === u; }); };
       if (!hasU("snug_sofa")) s.placed.push({ uid: "snug_sofa", itemId: "sofa_rust", x: 50, y: 84, room: "snug", scale: 1 });
       if (!hasU("snug_lamp")) s.placed.push({ uid: "snug_lamp", itemId: "lamp_floor", x: 14, y: 78, room: "snug", scale: 1 });
       s.snugFurnished = true;
+    }
+    // add a (movable) rug to the snug and a lilac one to the bedroom, once
+    if (!s.rugsAdded) {
+      if (!hasU("snug_rug")) s.placed.push({ uid: "snug_rug", itemId: "rug_rust", x: 50, y: 88, room: "snug", scale: 1 });
+      if (!hasU("bed_rug")) s.placed.push({ uid: "bed_rug", itemId: "rug_lilac", x: 52, y: 86, room: "main", scale: 1 });
+      s.rugsAdded = true;
+    }
+    // furnish the two extra bedrooms with a bed + rug once
+    if (!s.extraBedsAdded) {
+      if (!hasU("bed2_bed")) s.placed.push({ uid: "bed2_bed", itemId: "bed_pink", x: 50, y: 82, room: "bed2", scale: 1 });
+      if (!hasU("bed2_rug")) s.placed.push({ uid: "bed2_rug", itemId: "rug_rose", x: 52, y: 88, room: "bed2", scale: 1 });
+      if (!hasU("bed3_bed")) s.placed.push({ uid: "bed3_bed", itemId: "bed_blue", x: 50, y: 82, room: "bed3", scale: 1 });
+      if (!hasU("bed3_rug")) s.placed.push({ uid: "bed3_rug", itemId: "rug_sage", x: 52, y: 88, room: "bed3", scale: 1 });
+      s.extraBedsAdded = true;
     }
   }
 
@@ -1700,6 +1893,43 @@
     wrap.innerHTML = '<span class="pole"></span>';
     return wrap;
   }
+  var RUG_COLS = {
+    lilac: ["#c9aee6", "#b394d8", "#9c79c4"],
+    rust:  ["#b8704a", "#9c5d3c", "#8f5536"],
+    sage:  ["#a8c49a", "#8aa97c", "#6f8e62"],
+    rose:  ["#e3a3b8", "#cf8298", "#b66178"]
+  };
+  function buildRug(tint) {
+    var c = RUG_COLS[tint] || RUG_COLS.lilac;
+    var wrap = document.createElement("div");
+    wrap.className = "rug-art";
+    wrap.style.background = "radial-gradient(ellipse, " + c[0] + " 0 38%, " + c[1] + " 39% 58%, " + c[0] + " 59% 78%, " + c[2] + " 79%)";
+    return wrap;
+  }
+  function rugIcon(tint) {
+    var c = RUG_COLS[tint] || RUG_COLS.lilac;
+    return '<svg width="40" height="22" viewBox="0 0 40 22">' +
+      '<ellipse cx="20" cy="11" rx="19" ry="10" fill="' + c[0] + '"/>' +
+      '<ellipse cx="20" cy="11" rx="13" ry="6.5" fill="none" stroke="' + c[2] + '" stroke-width="2"/>' +
+      '<ellipse cx="20" cy="11" rx="7" ry="3.5" fill="' + c[1] + '"/></svg>';
+  }
+  function buildSideboard() {
+    var w = document.createElement("div");
+    w.className = "sideboard-art";
+    w.innerHTML = '<span class="top"></span><span class="body"></span>' +
+      '<span class="door d1"></span><span class="door d2"></span><span class="door d3"></span>' +
+      '<span class="leg l"></span><span class="leg r"></span>';
+    return w;
+  }
+  var SIDEBOARD_ICON =
+    '<svg width="42" height="26" viewBox="0 0 42 26">' +
+    '<rect x="1" y="3" width="40" height="5" rx="2" fill="#2f5d43"/>' +
+    '<rect x="3" y="7" width="36" height="13" rx="2" fill="#356a4c" stroke="#1c3a29" stroke-width="1.5"/>' +
+    '<rect x="6" y="9.5" width="9" height="8.5" rx="1" fill="#3c7355" stroke="#1c3a29" stroke-width="0.8"/>' +
+    '<rect x="16.5" y="9.5" width="9" height="8.5" rx="1" fill="#3c7355" stroke="#1c3a29" stroke-width="0.8"/>' +
+    '<rect x="27" y="9.5" width="9" height="8.5" rx="1" fill="#3c7355" stroke="#1c3a29" stroke-width="0.8"/>' +
+    '<circle cx="13" cy="14" r="1" fill="#e6c887"/><circle cx="23.5" cy="14" r="1" fill="#e6c887"/><circle cx="34" cy="14" r="1" fill="#e6c887"/>' +
+    '<rect x="6" y="20" width="3" height="4" fill="#241a0e"/><rect x="33" y="20" width="3" height="4" fill="#241a0e"/></svg>';
 
   // Compact wardrobe icon for the shop card.
   var WARDROBE_ICON =
@@ -1771,6 +2001,8 @@
       else if (def.render === "wardrobe") { el.classList.add("wardrobeitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildWardrobe()); }
       else if (def.render === "sofa") { el.classList.add("sofa"); el.style.zIndex = depthZ(p.y); el.appendChild(buildSofa()); }
       else if (def.render === "lamp") { el.classList.add("lamp"); el.style.zIndex = depthZ(p.y); el.appendChild(buildLamp()); }
+      else if (def.render === "rug") { el.classList.add("rug"); el.style.zIndex = 2; el.appendChild(buildRug(def.tint)); }   // rugs lie under everything
+      else if (def.render === "sideboard") { el.classList.add("sideboard"); el.style.zIndex = depthZ(p.y); el.appendChild(buildSideboard()); }
       else if (def.render === "vase") { el.classList.add("vase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVase()); }
       else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint, def.size, p.orient)); }
       else { el.style.zIndex = depthZ(p.y); el.textContent = def.ic; }
@@ -2000,6 +2232,8 @@
          : it.render === "wardrobe" ? WARDROBE_ICON
          : it.render === "vase" ? VASE_SVG
          : it.render === "bed" ? bedIcon(it.tint, it.size)
+         : it.render === "rug" ? rugIcon(it.tint)
+         : it.render === "sideboard" ? SIDEBOARD_ICON
          : it.ic;
   }
   // catalogue grouped by set, preserving the order sets first appear
@@ -3193,9 +3427,11 @@
   //  ROOMS — doors on the walls switch between the bedroom, kitchen & wardrobe.
   // =====================================================================
   var ROOM_TOASTS = {
-    snug: "🛋️ The snug — get cosy & decorate it! ← bedroom · kitchen →",
+    bed2: "🌸 The Rose Room — a cosy spare bedroom. ← wardrobe · bedroom →",
+    bed3: "💙 The Blue Room — a cosy spare bedroom. ← bedroom · snug →",
+    snug: "🛋️ The snug — get cosy & decorate it! ← blue room · kitchen →",
     two: "🍳 The kitchen — decorate it too! Tap ← to head back.",
-    garden: "🌷 The garden — a breath of night air. Tap ← to head back.",
+    garden: "🌷 The garden — drag to explore · ‹ › or ← for the kitchen.",
     wardrobe: "👗 The Wardrobe — make it yours! Tap → to head back.",
     main: "🏠 Back in the bedroom."
   };
@@ -3209,72 +3445,64 @@
       room.style.opacity = "1";
       save();
       toast(ROOM_TOASTS[name] || "🚪 A new room to decorate!");
-      if (name === "garden") gardenFlourish();
+      if (name === "garden") { panGarden(0); gardenFlourish(); }
     }, 160);
   }
 
-  // A lush corner of jewel-coloured flowers on leafy vines (SVG). The gradient
-  // ids are suffixed per corner so the four copies don't collide.
+  // A dainty corner spray of jewel-coloured flowers on slender leafy vines
+  // (SVG). The gradient ids are suffixed per corner so the copies don't collide.
   function cornerVine(idx) {
     var p = "jw" + idx + "-";
     function grad(id, a, b, c) {
-      return '<radialGradient id="' + p + id + '" cx="35%" cy="30%" r="78%">' +
-        '<stop offset="0" stop-color="' + a + '"/><stop offset="0.45" stop-color="' + b + '"/><stop offset="1" stop-color="' + c + '"/></radialGradient>';
+      return '<radialGradient id="' + p + id + '" cx="36%" cy="30%" r="80%">' +
+        '<stop offset="0" stop-color="' + a + '"/><stop offset="0.5" stop-color="' + b + '"/><stop offset="1" stop-color="' + c + '"/></radialGradient>';
     }
     var defs = '<defs>' +
-      grad('am', '#e6c2ff', '#9b59b6', '#5e2a86') + grad('sa', '#c3dbff', '#2e6fd6', '#163b80') +
-      grad('em', '#bff6db', '#1ea672', '#0c5a3e') + grad('ru', '#ffc7d8', '#d6336c', '#841842') +
-      grad('to', '#ffe9ad', '#e0a83a', '#9a6b14') + grad('ro', '#ffd0e6', '#e85aa0', '#8f2a5e') + '</defs>';
+      grad('am', '#eccdff', '#a96bc4', '#6b3593') + grad('sa', '#cfe1ff', '#4d86e0', '#22468f') +
+      grad('em', '#c9f7e1', '#2fb585', '#13654a') + grad('ru', '#ffd4e2', '#e0507f', '#8f2350') +
+      grad('to', '#ffeec0', '#ebb852', '#9a6b14') + grad('ro', '#ffd9ec', '#ef7ab2', '#9a356a') + '</defs>';
+    // a slender five-petal bloom — daintier than fat circle-clusters
     function flower(cx, cy, r, g) {
-      var s = "";
-      for (var i = 0; i < 6; i++) {
-        var a = i * Math.PI / 3, px = (cx + Math.cos(a) * r * 0.72).toFixed(1), py = (cy + Math.sin(a) * r * 0.72).toFixed(1);
-        s += '<circle cx="' + px + '" cy="' + py + '" r="' + (r * 0.52).toFixed(1) + '" fill="url(#' + p + g + ')"/>';
+      var rot = (cx * 13 + cy * 7) % 36;
+      var s = '<g transform="rotate(' + rot.toFixed(0) + ' ' + cx + ' ' + cy + ')">';
+      for (var i = 0; i < 5; i++) {
+        s += '<ellipse cx="' + cx + '" cy="' + (cy - r * 0.6).toFixed(1) + '" rx="' + (r * 0.34).toFixed(1) +
+          '" ry="' + (r * 0.62).toFixed(1) + '" transform="rotate(' + (i * 72) + ' ' + cx + ' ' + cy + ')" fill="url(#' + p + g + ')"/>';
       }
-      return s + '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.42).toFixed(1) + '" fill="#fff6d2"/>';
+      return s + '</g><circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.28).toFixed(1) + '" fill="#fff6d2"/>';
     }
     function leaf(cx, cy, rot, sz) {
-      return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + sz + '" ry="' + (sz * 0.5).toFixed(1) + '" transform="rotate(' + rot + ' ' + cx + ' ' + cy + ')"/>';
+      return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + sz + '" ry="' + (sz * 0.46).toFixed(1) + '" transform="rotate(' + rot + ' ' + cx + ' ' + cy + ')"/>';
     }
     function bud(cx, cy, r, g) {
       return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#' + p + g + ')"/>' +
-        '<circle cx="' + (cx - r * 0.3).toFixed(1) + '" cy="' + (cy - r * 0.3).toFixed(1) + '" r="' + (r * 0.3).toFixed(1) + '" fill="rgba(255,255,255,.6)"/>';
+        '<circle cx="' + (cx - r * 0.3).toFixed(1) + '" cy="' + (cy - r * 0.3).toFixed(1) + '" r="' + (r * 0.32).toFixed(1) + '" fill="rgba(255,255,255,.65)"/>';
     }
-    // two layers of stems that cross/weave, for a webby, intertwined corner
-    var stemsBack = '<g stroke="#2a6e3f" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".92">' +
-      '<path d="M2 34 C 64 26, 118 62, 196 118"/><path d="M34 2 C 26 64, 62 118, 118 196"/>' +
-      '<path d="M2 96 C 70 86, 104 118, 150 196"/><path d="M96 2 C 86 70, 118 104, 196 150"/>' +
-      '<path d="M2 160 C 50 150, 84 172, 104 198"/><path d="M160 2 C 150 50, 172 84, 198 104"/></g>';
-    var stemsFront = '<g stroke="#3a915a" stroke-width="3.2" fill="none" stroke-linecap="round">' +
-      '<path d="M2 10 C 56 44, 96 30, 162 78"/><path d="M10 2 C 44 56, 30 96, 78 162"/>' +
-      '<path d="M2 60 C 60 50, 92 92, 120 150"/><path d="M60 2 C 50 60, 92 92, 150 120"/>' +
-      '<path d="M2 120 C 44 116, 70 140, 80 184"/><path d="M120 2 C 116 44, 140 70, 184 80"/></g>';
-    var curls = '<g stroke="#4aa56a" stroke-width="2" fill="none" stroke-linecap="round">' +
-      '<path d="M150 80 c 10 -6 16 4 8 12 c -5 5 -12 1 -9 -6"/>' +
-      '<path d="M80 150 c -6 10 4 16 12 8 c 5 -5 1 -12 -6 -9"/>' +
-      '<path d="M110 110 c 8 6 2 16 -7 12 c -6 -3 -4 -11 3 -10"/>' +
-      '<path d="M52 96 c -8 4 -6 14 3 13 c 6 -1 6 -9 0 -11"/>' +
-      '<path d="M96 52 c 4 -8 14 -6 13 3 c -1 6 -9 6 -11 0"/></g>';
-    var leaves = '<g fill="#3a915a">' +
-      leaf(40, 18, 20, 9) + leaf(70, 40, 14, 9) + leaf(110, 34, -10, 8) + leaf(150, 66, 26, 9) + leaf(176, 104, 40, 9) +
-      leaf(18, 40, 70, 9) + leaf(40, 70, 76, 9) + leaf(34, 110, 100, 8) + leaf(66, 150, 64, 9) + leaf(104, 176, 50, 9) +
-      leaf(60, 60, 40, 9) + leaf(96, 96, 30, 9) + leaf(124, 120, 55, 9) + leaf(150, 150, 45, 9) +
-      leaf(84, 124, 80, 8) + leaf(124, 84, 10, 8) + '</g>';
-    var leavesDk = '<g fill="#2f7a46">' +
-      leaf(54, 32, 50, 7) + leaf(32, 54, 28, 7) + leaf(120, 60, 70, 7) + leaf(60, 120, 16, 7) +
-      leaf(160, 130, 35, 7) + leaf(130, 160, 60, 7) + '</g>';
+    // a couple of slim crossing vines (viewBox 130 — a compact corner)
+    var stemsBack = '<g stroke="#3a915a" stroke-width="1.7" fill="none" stroke-linecap="round" opacity=".85">' +
+      '<path d="M2 22 C 34 20, 64 40, 96 86"/><path d="M22 2 C 20 34, 40 64, 86 96"/>' +
+      '<path d="M2 64 C 40 58, 60 78, 70 116"/><path d="M64 2 C 58 40, 78 60, 116 70"/></g>';
+    var stemsFront = '<g stroke="#4aa56a" stroke-width="2" fill="none" stroke-linecap="round">' +
+      '<path d="M2 8 C 36 28, 62 22, 100 54"/><path d="M8 2 C 28 36, 22 62, 54 100"/>' +
+      '<path d="M2 100 C 30 96, 48 112, 56 126"/><path d="M100 2 C 96 30, 112 48, 126 56"/></g>';
+    var curls = '<g stroke="#5ab57a" stroke-width="1.4" fill="none" stroke-linecap="round">' +
+      '<path d="M96 56 c 7 -4 11 3 5 8 c -3 3 -8 1 -6 -4"/>' +
+      '<path d="M56 96 c -4 7 3 11 8 5 c 3 -3 1 -8 -4 -6"/></g>';
+    var leaves = '<g fill="#3f9a5e">' +
+      leaf(30, 16, 22, 5.5) + leaf(54, 34, 16, 5.5) + leaf(16, 30, 70, 5.5) + leaf(34, 54, 74, 5.5) +
+      leaf(70, 46, 30, 5) + leaf(46, 70, 60, 5) + leaf(96, 78, 38, 5) + leaf(78, 96, 56, 5) +
+      leaf(56, 56, 44, 5) + leaf(112, 60, 24, 5) + leaf(60, 112, 66, 5) + '</g>';
     var flowers =
-      flower(162, 78, 14, 'am') + flower(78, 162, 14, 'sa') + flower(196, 118, 12, 'em') +
-      flower(118, 196, 12, 'ru') + flower(184, 80, 11, 'to') + flower(80, 184, 11, 'ro') +
-      flower(110, 110, 15, 'am') + flower(60, 60, 11, 'em') + flower(150, 120, 12, 'ru') +
-      flower(120, 150, 12, 'to') + flower(52, 96, 9, 'sa') + flower(96, 52, 9, 'ro') + flower(16, 18, 11, 'to');
-    var buds = bud(132, 58, 4, 'ro') + bud(58, 132, 4, 'am') + bud(172, 142, 4, 'sa') +
-      bud(142, 172, 4, 'em') + bud(34, 74, 3.5, 'ru') + bud(74, 34, 3.5, 'to') + bud(100, 30, 3.5, 'am');
-    return '<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">' + defs +
-      stemsBack + leavesDk + stemsFront + curls + leaves + flowers + buds + '</svg>';
+      flower(96, 86, 8, 'am') + flower(86, 96, 8, 'sa') + flower(70, 116, 7, 'em') + flower(116, 70, 7, 'ru') +
+      flower(100, 54, 7, 'to') + flower(54, 100, 7, 'ro') + flower(60, 60, 6.5, 'am') + flower(18, 20, 6.5, 'to') +
+      flower(124, 124, 7, 'em');
+    var buds = bud(40, 28, 2.6, 'ro') + bud(28, 40, 2.6, 'am') + bud(118, 98, 2.6, 'sa') +
+      bud(98, 118, 2.6, 'em') + bud(74, 34, 2.4, 'ru') + bud(34, 74, 2.4, 'to');
+    return '<svg viewBox="0 0 130 130" preserveAspectRatio="xMidYMid meet">' + defs +
+      stemsBack + stemsFront + curls + leaves + flowers + buds + '</svg>';
   }
-  // Enter the garden: play the flourish and drop a black screen framed with
-  // jewel vines in the corners, which fades out as one to reveal the garden.
+  // Enter the garden: play the flourish and let dainty jewel flowers fill the
+  // corners and softly fade away (no backdrop — the garden shows through).
   function gardenFlourish() {
     Ambient.flourish();
     Array.prototype.slice.call(room.querySelectorAll(".garden-reveal")).forEach(function (n) { n.remove(); });
@@ -3287,11 +3515,106 @@
     setTimeout(function () { if (ov.parentNode) ov.remove(); }, 3000);
   }
 
+  // ----- The enchanted garden world (wide, scrollable, hand-built) -----------
+  var GARDEN_W = 2000, gardenScroll = 0;
+  var FCOL = ["#ff8fb0", "#ffd86b", "#c6a0ff", "#8fd0ff", "#ff7a7a", "#ffffff", "#ffb3d9", "#b6f0a0"];
+  function buildGardenScene() {
+    var w = $("gardenWorld"); if (!w) return;
+    var s = '<div class="g-sky"></div><div class="g-ground"></div><div class="g-moon"></div><div class="g-lights"></div><div class="g-path"></div>';
+    function rnd(a, b) { return a + Math.random() * (b - a); }
+    function fl(x, y, c, glow) { s += '<div class="g-fl' + (glow ? ' glow' : '') + '" style="left:' + (x | 0) + 'px;top:' + (y | 0) + 'px;--c:' + c + '"></div>'; }
+    function flowers(x0, x1, y0, y1, n, glowCh) { for (var i = 0; i < n; i++) fl(rnd(x0, x1), rnd(y0, y1), FCOL[(Math.random() * FCOL.length) | 0], Math.random() < (glowCh || 0)); }
+    function plot(x, y, ww, hh, cols) {
+      s += '<div class="g-plot" style="left:' + x + 'px;top:' + y + 'px;width:' + ww + 'px;height:' + hh + 'px"></div>';
+      for (var cy = y + 6; cy < y + hh - 6; cy += 18) for (var cx = x + 12; cx < x + ww - 6; cx += 20)
+        s += '<div class="g-crop" style="left:' + (cx - 8) + 'px;top:' + (cy - 14) + 'px"><span class="lf"></span><span class="top" style="background:' + cols[((cx + cy) / 7 | 0) % cols.length] + '"></span></div>';
+    }
+    function bush(x, y, ww, hh, kind) { s += '<div class="g-bush2 ' + (kind || '') + '" style="left:' + x + 'px;top:' + y + 'px;width:' + ww + 'px;height:' + hh + 'px"></div>'; }
+    function lantern(x, y) { s += '<div class="g-lantern" style="left:' + x + 'px;top:' + y + 'px"><span class="post"></span><span class="lamp"></span></div>'; }
+    function tree(x, y, fruit) { s += '<div class="g-tree2" style="left:' + x + 'px;top:' + y + 'px;--fruit:' + fruit + '"><span class="tk"></span><span class="cn"></span></div>'; }
+
+    // ===== Area A — the veg patch & cottage flowers =====
+    s += '<div class="g-fence2" style="left:0;top:300px;width:54px"></div>';
+    plot(46, 330, 150, 38, ["#e0654a", "#ffb347", "#8fd86b"]);
+    plot(60, 392, 176, 40, ["#9a6ad0", "#8fd86b", "#e0654a"]);
+    s += '<div class="g-box" style="left:250px;top:392px"><span class="blooms"></span><span class="crate"></span></div>';
+    lantern(232, 300);
+    s += '<div class="g-mush" style="left:300px;top:436px"><span class="stalk"></span><span class="cap"></span></div>';
+    s += '<div class="g-mush" style="left:318px;top:444px"><span class="stalk"></span><span class="cap"></span></div>';
+    s += '<div class="g-log" style="left:360px;top:448px"><span class="moss"></span></div>';
+    s += '<div class="g-rock" style="left:430px;top:430px;width:46px;height:32px"><span class="moss"></span></div>';
+    bush(470, 330, 90, 40, "bloom");
+    flowers(40, 600, 420, 500, 28, 0.18);
+
+    // ===== Area B — the pond, fountain & resting spot =====
+    s += '<div class="g-pond" style="left:660px;top:392px;width:210px;height:96px"></div>';
+    s += '<div class="g-lily" style="left:700px;top:420px"></div><div class="g-lily" style="left:760px;top:448px"></div><div class="g-lily" style="left:812px;top:418px"></div>';
+    s += '<div class="g-reed" style="left:666px;top:372px;transform:rotate(-8deg)"></div><div class="g-reed" style="left:672px;top:376px;transform:rotate(6deg)"></div>';
+    s += '<div class="g-reed" style="left:862px;top:374px;transform:rotate(7deg)"></div><div class="g-reed" style="left:856px;top:378px;transform:rotate(-6deg)"></div>';
+    s += '<div class="g-rock" style="left:632px;top:436px;width:40px;height:28px"><span class="moss"></span></div>';
+    s += '<div class="g-fountain" style="left:930px;top:250px"><span class="basin"></span><span class="water"></span><span class="tier t2"></span><span class="tier t3"></span><span class="spout"></span></div>';
+    s += '<div class="g-bench" style="left:1120px;top:402px"><span class="bk"></span><span class="seat"></span><span class="lg l"></span><span class="lg r"></span></div>';
+    lantern(1086, 300); lantern(1228, 300);
+    flowers(620, 1300, 300, 360, 18, 0.5);   // glowing magical flowers by the water
+    flowers(900, 1300, 430, 500, 16, 0.12);
+
+    // ===== Area C — the orchard & berry bushes =====
+    tree(1360, 178, "#e0507f"); tree(1520, 196, "#ffcf4a"); tree(1690, 182, "#c84a4a");
+    bush(1420, 432, 80, 42, "berry"); bush(1600, 430, 84, 44, "berry"); bush(1760, 436, 78, 40, "bloom");
+    s += '<div class="g-hedge" style="left:1330px;top:430px;width:120px;height:34px"></div>';
+    s += '<div class="g-trellis" style="left:1860px;top:300px"><span class="frame"></span><span class="vine"></span></div>';
+    lantern(1820, 300);
+    s += '<div class="g-fence2" style="left:1940px;top:300px;width:60px"></div>';
+    flowers(1330, 1960, 440, 500, 26, 0.15);
+    bush(1300, 470, 70, 34, "bloom");
+
+    // scattered hedges + extra bushes to soften the layout
+    s += '<div class="g-hedge" style="left:540px;top:466px;width:120px;height:30px"></div>';
+    bush(880, 472, 80, 34, "bloom"); bush(1180, 474, 76, 32, "berry");
+
+    // ambient magic — fireflies + drifting petals
+    for (var i = 0; i < 16; i++) s += '<div class="g-fly" style="left:' + (rnd(40, 1960) | 0) + 'px;top:' + (rnd(320, 470) | 0) + 'px;animation-delay:' + (-rnd(0, 7)).toFixed(1) + 's;animation-duration:' + rnd(6, 10).toFixed(1) + 's"></div>';
+    for (var j = 0; j < 12; j++) s += '<div class="g-petal" style="left:' + (rnd(60, 1960) | 0) + 'px;top:' + (rnd(120, 300) | 0) + 'px;background:' + FCOL[(Math.random() * FCOL.length) | 0] + ';animation-delay:' + (-rnd(0, 9)).toFixed(1) + 's"></div>';
+    w.innerHTML = s;
+  }
+  function panGarden(to) {
+    var max = GARDEN_W - 800;
+    gardenScroll = Math.max(0, Math.min(max, to));
+    var w = $("gardenWorld"); if (w) w.style.transform = "translateX(" + (-gardenScroll) + "px)";
+  }
+  function initGardenPan() {
+    var w = $("gardenWorld"); if (!w) return;
+    buildGardenScene();
+    var dragging = false, startX = 0, startScroll = 0;
+    function down(e) {
+      dragging = true; var pt = e.touches ? e.touches[0] : e; startX = pt.clientX; startScroll = gardenScroll;
+      if (e.cancelable) e.preventDefault();
+      window.addEventListener("mousemove", mv); window.addEventListener("touchmove", mv, { passive: false });
+      window.addEventListener("mouseup", up); window.addEventListener("touchend", up);
+    }
+    function mv(e) {
+      if (!dragging) return;
+      var pt = e.touches ? e.touches[0] : e, rect = room.getBoundingClientRect(), scale = rect.width / 800;
+      panGarden(startScroll - (pt.clientX - startX) / scale);
+      if (e.cancelable) e.preventDefault();
+    }
+    function up() {
+      dragging = false;
+      window.removeEventListener("mousemove", mv); window.removeEventListener("touchmove", mv);
+      window.removeEventListener("mouseup", up); window.removeEventListener("touchend", up);
+    }
+    w.addEventListener("mousedown", down); w.addEventListener("touchstart", down, { passive: false });
+    $("gArrowL").addEventListener("click", function () { panGarden(gardenScroll - 320); });
+    $("gArrowR").addEventListener("click", function () { panGarden(gardenScroll + 320); });
+  }
+
   // House overview — a little floor plan of every room (left to right, the way
   // the doors connect: Wardrobe · Bedroom · Kitchen). Tap a room to go there.
   var HOUSE_ROOMS = [
-    { id: "wardrobe", name: "👗 Wardrobe", wall: "linear-gradient(180deg,#4a3a52,#6f5570)", floor: "linear-gradient(180deg,#a98a6a,#876a4a)" },
+    { id: "wardrobe", name: "👗 Wardrobe", wall: "linear-gradient(180deg,#4a3a52,#6f5570)", floor: "linear-gradient(180deg,#dccbef,#c6b2e6)" },
+    { id: "bed2",     name: "🌸 Rose Room", wall: "linear-gradient(180deg,#7d5570,#563a54)", floor: "linear-gradient(180deg,#8a6a4f,#6f5340)" },
     { id: "main",     name: "🛏️ Bedroom",  wall: "linear-gradient(180deg,#4a3a63,#6b5184)", floor: "linear-gradient(180deg,#8a6a4f,#74573f)" },
+    { id: "bed3",     name: "💙 Blue Room", wall: "linear-gradient(180deg,#3f4f7a,#2b3556)", floor: "linear-gradient(180deg,#7a6a52,#5f4e3a)" },
     { id: "snug",     name: "🛋️ The Snug", wall: "linear-gradient(180deg,#2e514a,#427563)", floor: "linear-gradient(180deg,#9a7445,#7c5a32)" },
     { id: "two",      name: "🍳 Kitchen", wall: "linear-gradient(180deg,#6a5594,#48366e)", floor: "linear-gradient(180deg,#7a5638,#5f4029)" },
     { id: "garden",   name: "🌷 Garden",  wall: "linear-gradient(180deg,#202a4c,#36406a)", floor: "linear-gradient(180deg,#3f6f3c,#2c5230)" }
@@ -3731,35 +4054,43 @@
   $("btnMemory").addEventListener("click", openMemories);
   $("btnSave").addEventListener("click", openSaveMenu);
   $("btnMute").addEventListener("click", function () { Ambient.toggle(); });
-  $("doorNext").addEventListener("click", function () { goToRoom("snug"); });
+  $("doorNext").addEventListener("click", function () { goToRoom("bed3"); });     // bedroom → Blue Room
   $("doorBack").addEventListener("click", function () { goToRoom("snug"); });
-  $("doorSnugBack").addEventListener("click", function () { goToRoom("main"); });
+  $("doorSnugBack").addEventListener("click", function () { goToRoom("bed3"); }); // snug → Blue Room
   $("doorSnugNext").addEventListener("click", function () { goToRoom("two"); });
-  $("doorWard").addEventListener("click", function () { goToRoom("wardrobe"); });
-  $("doorWardBack").addEventListener("click", function () { goToRoom("main"); });
+  $("doorWard").addEventListener("click", function () { goToRoom("bed2"); });     // bedroom → Rose Room
+  $("doorWardBack").addEventListener("click", function () { goToRoom("bed2"); }); // wardrobe → Rose Room
+  $("doorBed2L").addEventListener("click", function () { goToRoom("wardrobe"); });
+  $("doorBed2R").addEventListener("click", function () { goToRoom("main"); });
+  $("doorBed3L").addEventListener("click", function () { goToRoom("main"); });
+  $("doorBed3R").addEventListener("click", function () { goToRoom("snug"); });
   $("doorGardenBack").addEventListener("click", function () { goToRoom("two"); });
   // The garden door can be dragged along the kitchen wall; a tap (no drag) opens the garden.
   function initGardenDoorDrag() {
     var el = $("doorGarden"); if (!el) return;
-    var DOOR_PCT = 78 / 800 * 100;                 // door width as % of the room
-    function setX(pct) {
-      pct = Math.max(0, Math.min(100 - DOOR_PCT, pct));
-      state.gardenDoorX = pct; el.style.left = pct + "%";
+    var DOOR_W = 78 / 800 * 100, DOOR_H = 214 / 520 * 100;   // door size as % of the room
+    function place() {
+      var x = Math.max(0, Math.min(100 - DOOR_W, state.gardenDoorX));
+      var y = Math.max(2, Math.min(100 - DOOR_H, state.gardenDoorY));
+      state.gardenDoorX = x; state.gardenDoorY = y;
+      el.style.left = x + "%"; el.style.top = y + "%"; el.style.bottom = "auto";
     }
-    setX(state.gardenDoorX);                        // place it from the saved position
-    var dragging = false, moved = false, startX = 0;
+    place();                                         // place it from the saved position
+    var dragging = false, moved = false, startX = 0, startY = 0;
     function down(e) {
       e.preventDefault(); dragging = true; moved = false;
-      startX = (e.touches ? e.touches[0] : e).clientX;
+      var pt = e.touches ? e.touches[0] : e; startX = pt.clientX; startY = pt.clientY;
       window.addEventListener("mousemove", move); window.addEventListener("touchmove", move, { passive: false });
       window.addEventListener("mouseup", up); window.addEventListener("touchend", up);
     }
     function move(e) {
       if (!dragging) return; e.preventDefault();
       var pt = e.touches ? e.touches[0] : e;
-      if (Math.abs(pt.clientX - startX) > 4) moved = true;
+      if (Math.abs(pt.clientX - startX) > 4 || Math.abs(pt.clientY - startY) > 4) moved = true;
       var rect = room.getBoundingClientRect();
-      setX(((pt.clientX - rect.left) / rect.width) * 100 - DOOR_PCT / 2);   // centre under the pointer
+      state.gardenDoorX = ((pt.clientX - rect.left) / rect.width) * 100 - DOOR_W / 2;   // centre under the pointer
+      state.gardenDoorY = ((pt.clientY - rect.top) / rect.height) * 100 - DOOR_H / 2;
+      place();
     }
     function up() {
       if (!dragging) return; dragging = false;
@@ -3795,6 +4126,7 @@
     initFurnitureDrag();
     initCharacters();
     initGardenDoorDrag();
+    initGardenPan();
     updateHud();
     Pet.init();
     Ambient.updateBtn();

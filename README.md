@@ -1,61 +1,56 @@
-# Flappy Beans 🫘
+# Pride, Prejudice & Pestilence 🖤🌹
 
-A little Flappy Bird–style game, but you play as a bean! Tap the screen to make
-the bean flap and fly through the gaps. It's one single web page — nothing to
-install — and it works great in Safari on an iPhone.
+*A moonlit courtship in three nights.* An atmospheric, cute-goth horror game
+where Regency romance meets the Wolfman — with baby zambies. It's one single
+web page — nothing to install — and it's made for playing on a phone.
 
-## ▶️ How to play
+> “It is a truth universally acknowledged, that a single gentleman in
+> possession of a dreadful curse must be in want of a wife.”
 
-- **Tap the screen** (or press the **Space bar** on a computer) to flap.
-- Fly through the gaps between the green stalks.
-- Each gap you pass = **+1 point**. Don't hit the stalks or the ground!
-- Your **best score is saved** on your phone automatically.
+You are **Miss Lizzy Nightshade**, gathering Mr Darcymoor's scattered love
+letters from the gardens of Pemberley by lantern-light. Unfortunately the
+parish's infants have risen *peckish* from their naps, and your suitor has
+a small lunar condition.
 
-### 🔴 Laser Eyes (secret power!)
+## 🌕 How to play
 
-- **Touch the screen with two fingers** to switch the bean's laser eyes on or off.
-  (One finger still flaps as normal.) A little "LASER ON" badge shows at the top
-  when they're active, and the setting is remembered next time.
-- When the lasers are on, beams shoot from the bean's eye in the direction it's
-  looking. **Hold the beam steady on a green stalk for about 2 seconds** and it
-  heats up and **vaporizes** — clearing a path to fly through!
-- It takes focus: aim through the gap and nothing happens, so the lasers don't
-  make the game too easy.
-- On a computer, press the **L** key to toggle the lasers.
+- **Hold or tap** anywhere in the garden to guide Lizzy (arrow keys / WASD on
+  a computer).
+- 💌 **Gather every love letter** to survive the night. Three nights wins his
+  heart.
+- 🧟 **Baby zambies** waddle toward you — a nibble costs a heart. You have
+  three hearts; lose them all and the night must be attempted again.
+- 🌹 A **rose** grants a brief *lace veil of protection*.
+- 🌕 When the **moon blushes red** and Mr Darcymoor rears back with a howl —
+  **run**. He forgets his manners for a few seconds, then apologises
+  profusely.
+- 🔔 Tap the bell to mute/unmute the music box and howls.
 
-## 📱 How to put it on your iPhone (one-time setup)
+Each night brings more letters, more infants, and a swifter wolf.
 
-The game lives in this GitHub project. To get a link you can open on your
-phone, you turn on a free feature called **GitHub Pages**. You only do this
-once:
+## 📱 Playing it on your phone
+
+The game lives in **`index.html`**, so once **GitHub Pages** is switched on
+(one-time setup), you get a link you can open in Safari or Chrome:
 
 1. Go to this project on **GitHub.com** (on a computer is easiest).
-2. Click the **Settings** tab (top right of the project).
-3. In the left menu, click **Pages**.
-4. Under **"Build and deployment" → Source**, choose **"Deploy from a branch"**.
-5. For **Branch**, pick **`claude/flappy-beans-game-52erwe`** and the folder
-   **`/ (root)`**, then click **Save**.
-6. Wait about a minute. GitHub will show a green link near the top of that page,
-   something like:
+2. Click the **Settings** tab → **Pages** (left menu).
+3. Under **"Build and deployment" → Source**, choose **"Deploy from a branch"**.
+4. For **Branch**, pick **`claude/horror-game-prototype-klbb40`** (or `main`
+   once merged) and the folder **`/ (root)`**, then click **Save**.
+5. Wait about a minute, then open the green link it shows you — something like
+   `https://londonista.github.io/game/` — on your phone. 🎉
+6. Optional: in Safari, tap **Share → "Add to Home Screen"** so it opens
+   full-screen like a real app.
 
-   ```
-   https://londonista.github.io/game/
-   ```
+## 🫘 Flappy Beans
 
-7. **Open that link on your iPhone** in Safari. 🎉
-
-### 💡 Add it to your home screen (so it feels like a real app)
-
-1. Open the link in **Safari** on your iPhone.
-2. Tap the **Share** button (the square with an arrow at the bottom).
-3. Tap **"Add to Home Screen"**.
-4. Now there's a Flappy Beans icon you can tap any time — it opens full-screen
-   with no browser bars.
+The previous game hasn't gone anywhere! It now lives at
+**`flappy-beans.html`** — open `https://londonista.github.io/game/flappy-beans.html`
+to play it. (Tap to flap; two fingers toggle the secret laser eyes.)
 
 ## 🛠️ For the curious
 
-The whole game is in **`index.html`** — just HTML, CSS, and JavaScript drawn on
-a `<canvas>`. No frameworks, no build step, no internet needed once it's loaded.
-
-> Tip: Later, if these changes get merged into the project's `main` branch, you
-> can switch GitHub Pages (step 5 above) to use `main` instead for a tidier setup.
+The whole game is one file of HTML, CSS, and JavaScript drawn on a `<canvas>` —
+no frameworks, no build step. The music box, howls, and zombie coos are
+synthesized live with the Web Audio API, so there are no sound files either.

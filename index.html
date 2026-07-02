@@ -965,20 +965,75 @@
   /* a long red carpet runner along the corridor floor */
   .hallrunner { position: absolute; left: 9%; right: 9%; bottom: 10px; height: 40px; border-radius: 5px;
     background: linear-gradient(180deg,#9a3a3a,#7a2a2a); box-shadow: inset 0 0 0 4px #b85a5a; opacity: .9; }
-  /* a couple of framed pictures along the corridor wall */
-  /* staircase (click to change floors) */
-  .stairs { position: absolute; bottom: 60px; width: 156px; height: 116px; z-index: 3; cursor: pointer; }
-  .stairs .step { position: absolute; left: 0; height: 18px; border-radius: 2px;
-    background: linear-gradient(180deg,#b07e46,#8a5a30); box-shadow: 0 2px 2px rgba(0,0,0,.32); }
-  .stairs .step::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: #9a3a3a; opacity: .8; }
-  .stairs .rail { position: absolute; left: 2px; bottom: 14px; width: 196px; height: 5px; border-radius: 3px; background: #6b4423;
-    transform-origin: left bottom; transform: rotate(-35deg); box-shadow: 0 2px 2px rgba(0,0,0,.3); }
-  .stairs .hint { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); white-space: nowrap;
-    font-size: 11px; font-weight: 800; color: #ffe7c0; text-shadow: 0 1px 2px rgba(0,0,0,.6);
+  /* spiral staircase (click to change floors) — treads built in JS */
+  .ss { position: absolute; bottom: 46px; width: 150px; height: 190px; z-index: 3; cursor: pointer; }
+  .ss-pole { position: absolute; left: 66px; bottom: 6px; width: 12px; height: 168px; border-radius: 6px;
+    background: linear-gradient(90deg,#6b4423,#8a5a30 45%,#5a3a1e); box-shadow: 0 2px 4px rgba(0,0,0,.35); z-index: 40; }
+  .ss-pole::after { content: ""; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    width: 20px; height: 20px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%,#ffe7a6,#d3a23e 60%,#a9761f); box-shadow: 0 2px 5px rgba(0,0,0,.4); }
+  .ss-step { position: absolute; height: 13px; border-radius: 3px;
+    box-shadow: 0 2px 3px rgba(0,0,0,.3); }
+  .ss-step::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px;
+    border-radius: 3px 3px 0 0; background: rgba(255,255,255,.16); }
+  .ss-post { position: absolute; width: 4px; border-radius: 2px;
+    background: linear-gradient(180deg,#7a5230,#4a3018); box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+  .ss-post::after { content: ""; position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+    width: 8px; height: 8px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%,#ffe7a6,#c79436); box-shadow: 0 0 5px rgba(255,210,120,.5); }
+  .ss .hint { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+    font-size: 11px; font-weight: 800; color: #ffe7c0; text-shadow: 0 1px 2px rgba(0,0,0,.6); z-index: 60;
     background: rgba(0,0,0,.42); padding: 2px 9px; border-radius: 999px; animation: doorhint 2.2s ease-in-out infinite; }
-  .stairs.down { transform: scaleX(-1); }
-  .stairs.down .hint { transform: translateX(-50%) scaleX(-1); }
-  .stairs:hover .step { filter: brightness(1.08); }
+  .ss:hover .ss-step { filter: brightness(1.09); }
+  /* --- cosy hallway fixtures --- */
+  /* decorative front door (leads nowhere) */
+  .h-front { position: absolute; bottom: 52px; width: 96px; height: 208px; z-index: 3; cursor: pointer; }
+  .h-front .leaf { position: absolute; inset: 0; background: linear-gradient(180deg,#3f7a5a,#2f5c44);
+    border: 5px solid #274a37; border-radius: 10px 10px 0 0;
+    box-shadow: inset 0 0 0 3px rgba(255,255,255,.08), 0 6px 16px rgba(0,0,0,.35); }
+  .h-front .lite { position: absolute; left: 16px; right: 16px; top: 16px; height: 62px; border-radius: 5px;
+    background: linear-gradient(180deg,#bfe3e8,#8fbfca); border: 3px solid #274a37; overflow: hidden; }
+  .h-front .lite::before, .h-front .lite::after { content: ""; position: absolute; background: rgba(39,74,55,.7); }
+  .h-front .lite::before { left: 50%; top: 0; bottom: 0; width: 3px; transform: translateX(-50%); }
+  .h-front .lite::after { top: 50%; left: 0; right: 0; height: 3px; transform: translateY(-50%); }
+  .h-front .pnl { position: absolute; left: 16px; right: 16px; top: 92px; bottom: 22px; border-radius: 5px;
+    background: linear-gradient(180deg,#356a4d,#274f3a); border: 3px solid rgba(0,0,0,.2); }
+  .h-front .knob { position: absolute; top: 118px; right: 22px; width: 10px; height: 10px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%,#ffe39a,#c79436); box-shadow: 0 0 6px rgba(255,210,120,.6); }
+  .h-front .mat { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); width: 128px; height: 22px;
+    border-radius: 6px; background: linear-gradient(180deg,#b98a52,#8a6238); box-shadow: inset 0 0 0 3px rgba(255,255,255,.14), 0 3px 5px rgba(0,0,0,.3); }
+  .h-front:hover .leaf { filter: brightness(1.1); }
+  /* console sideboard */
+  .h-side { position: absolute; bottom: 56px; width: 148px; height: 78px; z-index: 3; }
+  .h-side .stop { position: absolute; top: 0; left: -4px; right: -4px; height: 12px; border-radius: 4px;
+    background: linear-gradient(180deg,#7a5230,#5a3a1e); box-shadow: 0 3px 5px rgba(0,0,0,.3); }
+  .h-side .sbody { position: absolute; top: 12px; left: 4px; right: 4px; height: 44px; border-radius: 3px;
+    background: linear-gradient(180deg,#6b482a,#4f3620);
+    background-image: linear-gradient(90deg,transparent 48%,rgba(0,0,0,.28) 48%,rgba(0,0,0,.28) 52%,transparent 52%);
+    border: 2px solid rgba(0,0,0,.2); }
+  .h-side .sbody::after { content: ""; position: absolute; top: 20px; left: 34%; width: 7px; height: 7px; border-radius: 50%;
+    box-shadow: 0 0 0 0 #c79436, 32px 0 0 0 #c79436;
+    background: radial-gradient(circle at 35% 35%,#ffe39a,#c79436); }
+  .h-side .sleg { position: absolute; bottom: 0; width: 8px; height: 22px; border-radius: 0 0 3px 3px;
+    background: linear-gradient(180deg,#5a3a1e,#3a2412); }
+  .h-side .sleg.l { left: 10px; } .h-side .sleg.r { right: 10px; }
+  /* floor lamp */
+  .h-lamp { position: absolute; bottom: 56px; width: 60px; height: 200px; z-index: 3; }
+  .h-lamp .pole { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 6px; height: 150px;
+    background: linear-gradient(90deg,#8a6238,#b98a52 50%,#7a5230); border-radius: 3px; }
+  .h-lamp .pole::after { content: ""; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+    width: 40px; height: 10px; border-radius: 50%; background: radial-gradient(ellipse at center,#5a3a1e,#3a2412); }
+  .h-lamp .shade { position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 52px; height: 44px; border-radius: 26px 26px 8px 8px;
+    background: linear-gradient(180deg,#ffe6a8,#e8b45c); box-shadow: 0 0 26px 8px rgba(255,214,120,.4); }
+  /* framed artwork on the wall */
+  .h-art { position: absolute; z-index: 2; width: 62px; height: 76px; border-radius: 4px;
+    background: #6b482a; border: 5px solid #8a6238; box-shadow: 0 4px 9px rgba(0,0,0,.32), inset 0 0 0 2px rgba(0,0,0,.25); }
+  .h-art::after { content: ""; position: absolute; inset: 5px; border-radius: 2px; }
+  .h-art.a1::after { background: linear-gradient(160deg,#7fb4d6 0%,#4d86b3 55%,#2f5f86 100%);
+    box-shadow: inset 0 -14px 12px rgba(255,255,255,.18); }
+  .h-art.a2::after { background: linear-gradient(160deg,#e6a8c4 0%,#c76d9a 55%,#8f4d72 100%);
+    box-shadow: inset 0 -14px 12px rgba(255,255,255,.2); }
   /* named doors along the landing wall */
   .hdoor { position: absolute; top: 196px; width: 64px; height: 166px; z-index: 3; cursor: pointer; }
   .hdoor .leaf { position: absolute; inset: 0; background: linear-gradient(180deg,#7a5230,#5a3a20);
@@ -1250,15 +1305,17 @@
       <!-- ===== HALLWAY (downstairs) — left of the kitchen, with stairs up ===== -->
       <div class="label2 hall-only" style="left:50%; transform:translateX(-50%)">🪜 Hallway</div>
       <div class="hallrunner hall-only"></div>
-      <div class="stairs up hall-only" id="stairsUp" style="left:322px" title="Upstairs to the landing">
+      <div class="ss hall-only" id="stairsUp" style="left:110px" title="Upstairs to the landing">
         <div class="hint">↑ upstairs</div>
-        <div class="rail"></div>
-        <span class="step" style="bottom:0;left:0;width:156px"></span>
-        <span class="step" style="bottom:18px;left:24px;width:132px"></span>
-        <span class="step" style="bottom:36px;left:48px;width:108px"></span>
-        <span class="step" style="bottom:54px;left:72px;width:84px"></span>
-        <span class="step" style="bottom:72px;left:96px;width:60px"></span>
-        <span class="step" style="bottom:90px;left:120px;width:36px"></span>
+      </div>
+      <!-- cosy furnishings -->
+      <div class="h-art a1 hall-only" style="left:370px; top:88px"></div>
+      <div class="h-art a2 hall-only" style="left:440px; top:96px"></div>
+      <div class="h-lamp hall-only" style="left:284px"><div class="shade"></div><div class="pole"></div></div>
+      <div class="h-side hall-only" style="left:340px"><div class="stop"></div><div class="sbody"></div><div class="sleg l"></div><div class="sleg r"></div></div>
+      <div class="h-front hall-only" id="doorFront" style="left:544px" title="The front door">
+        <div class="leaf"><div class="lite"></div><div class="pnl"></div><div class="knob"></div></div>
+        <div class="mat"></div>
       </div>
       <div class="door-back hall-only" id="doorHallL" title="Go to the Snug">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
@@ -1272,15 +1329,8 @@
       <!-- ===== LANDING (upstairs) — stairs down + four named doors ===== -->
       <div class="label2 landing-only" style="left:50%; transform:translateX(-50%)">🛗 Upstairs Landing</div>
       <div class="hallrunner landing-only"></div>
-      <div class="stairs down landing-only" id="stairsDown" style="left:8px" title="Downstairs to the hallway">
+      <div class="ss landing-only" id="stairsDown" style="left:20px" title="Downstairs to the hallway">
         <div class="hint">↓ downstairs</div>
-        <div class="rail"></div>
-        <span class="step" style="bottom:0;left:0;width:156px"></span>
-        <span class="step" style="bottom:18px;left:24px;width:132px"></span>
-        <span class="step" style="bottom:36px;left:48px;width:108px"></span>
-        <span class="step" style="bottom:54px;left:72px;width:84px"></span>
-        <span class="step" style="bottom:72px;left:96px;width:60px"></span>
-        <span class="step" style="bottom:90px;left:120px;width:36px"></span>
       </div>
       <div class="hdoor landing-only" id="doorAqsa" style="left:214px" title="Aqsa's Room">
         <div class="plate">Aqsa</div><div class="leaf"></div><div class="panel"></div><div class="knob"></div>
@@ -4154,6 +4204,7 @@
   $("doorJas").addEventListener("click", function () { goToRoom("main"); });
   $("doorAdam").addEventListener("click", function () { goToRoom("bed3"); });
   $("doorBath").addEventListener("click", function () { toast("🛁 The bathroom's occupied — try again later!"); });
+  $("doorFront").addEventListener("click", function () { toast("🚪 The front door — but it's Monday night, we're staying in! 💛"); });
   $("stairsUp").addEventListener("click", function () { goToRoom("landing"); });
   $("stairsDown").addEventListener("click", function () { goToRoom("hall"); });
   $("doorHallL").addEventListener("click", function () { goToRoom("snug"); });
@@ -4217,10 +4268,57 @@
   // =====================================================================
   //  BOOT
   // =====================================================================
+  // Build a wooden spiral staircase inside a `.ss` container: treads wind
+  // around a central pole, near treads wide & bright, far treads slim & dim.
+  function mix(a, b, t) {
+    var pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+    var r = Math.round((pa >> 16 & 255) * (1 - t) + (pb >> 16 & 255) * t);
+    var g = Math.round((pa >> 8 & 255) * (1 - t) + (pb >> 8 & 255) * t);
+    var bl = Math.round((pa & 255) * (1 - t) + (pb & 255) * t);
+    return "rgb(" + r + "," + g + "," + bl + ")";
+  }
+  function buildSpiralStairs(el) {
+    if (!el || el.dataset.built) return;
+    var N = 12, step = 0.60, pole = document.createElement("div");
+    pole.className = "ss-pole"; el.appendChild(pole);
+    for (var i = 0; i < N; i++) {
+      var ang = i * step;                       // rotation as we climb
+      var y = 4 + i * 12.6;                      // rising up the pole
+      var front = (Math.cos(ang) + 1) / 2;       // 1 = facing us, 0 = behind
+      var w = 30 + 44 * front;                   // near treads are wider
+      var cx = 72 + Math.sin(ang) * 24;          // swing left/right of the pole
+      var z = Math.round(front * 10) + 5;
+      var t = document.createElement("div");
+      t.className = "ss-step";
+      t.style.bottom = y + "px";
+      t.style.left = (cx - w / 2) + "px";
+      t.style.width = w + "px";
+      t.style.zIndex = z;
+      t.style.background = "linear-gradient(180deg," +
+        mix("#7a4e26", "#c08a4e", front) + "," + mix("#4a3018", "#8a5a30", front) + ")";
+      t.style.opacity = String(0.72 + 0.28 * front);
+      el.appendChild(t);
+      // a little banister post on the outer edge of the front-facing treads
+      if (front > 0.45) {
+        var p = document.createElement("div");
+        p.className = "ss-post";
+        var outer = cx + (Math.sin(ang) >= 0 ? 1 : -1) * (w / 2 - 3);
+        p.style.left = outer + "px";
+        p.style.bottom = (y + 8) + "px";
+        p.style.height = (16 + 10 * front) + "px";
+        p.style.zIndex = z + 1;
+        el.appendChild(p);
+      }
+    }
+    el.dataset.built = "1";
+  }
+
   function boot() {
     renderSeason();
     fitRoom();
     renderRoom();
+    buildSpiralStairs($("stairsUp"));
+    buildSpiralStairs($("stairsDown"));
     initFurnitureDrag();
     initCharacters();
     initGardenDoorDrag();

@@ -49,8 +49,8 @@
   @keyframes twinkle{ from{ opacity:.2; } to{ opacity:.6; } }
 
   .moon{
-    position:fixed; top:34px; right:26px;
-    width:74px; height:74px; border-radius:50%;
+    position:fixed; top:calc(env(safe-area-inset-top, 0px) + 8px); right:14px;
+    width:52px; height:52px; border-radius:50%;
     background:radial-gradient(circle at 38% 35%, #fbf3dd, var(--moon) 60%, #e8d9ae);
     box-shadow:0 0 44px 12px rgba(246,236,210,.22);
     z-index:0;

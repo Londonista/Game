@@ -1,84 +1,47 @@
-# Pride, Prejudice & Pestilence 🖤🌹
+# The Games Parlour 🕯️
 
-*A moonlit courtship in five nights.* An atmospheric, cute-goth horror game
-where Regency romance meets the Wolfman — with baby zambies. It's one single
-web page — nothing to install — and it's made for playing on a phone.
+One little website, all the games. Open the link on your phone and a menu
+appears — pick a game and play. Everything is plain HTML/CSS/JavaScript,
+one file per game, nothing to install.
 
-> “It is a truth universally acknowledged, that a single gentleman in
-> possession of a dreadful curse must be in want of a wife.”
+| Game | File | In one line |
+|---|---|---|
+| 🖤 **Pride, Prejudice & Pestilence** | `pestilence.html` | A cute-goth horror courtship in five nights — gather love letters, dodge baby zambies, a wolfish suitor, a vampire patroness, a ghost governess, a headless captain, and a monstrous nursemaid. Hide in hedges; trust in tea. |
+| 🌙 **Monday Night Simulator** | `monday-night-simulator.html` | A cozy hangout for three — Jas · Aqsa · Adam — with rooms to potter about in and mini-games (Star Catcher, Aqsa's Laundromat). |
+| 🫘 **Flappy Beans** | `flappy-beans.html` | Tap to flap through the stalks. Two fingers toggle the secret laser eyes. |
 
-You are **Miss Lizzy Nightshade**, gathering Mr Darcymoor's scattered love
-letters from the gardens of Pemberley by lantern-light. Unfortunately the
-parish's infants have risen *peckish* from their naps, your suitor has a
-small lunar condition, and each night a new caller arrives — more dreadful
-than the last.
+The menu lives in **`index.html`**, so the main link always opens the parlour.
 
-## 🌕 How to play
+## 📱 Getting the link (GitHub Pages, one-time setup)
 
-- **Hold or tap** anywhere in the garden to guide Lizzy (arrow keys / WASD on
-  a computer).
-- 💌 **Gather every love letter** to survive the night. Five nights wins his
-  heart.
-- 🧟 **Baby zambies** waddle toward you — a nibble costs a heart. You have
-  three hearts; lose them all and the night must be attempted again.
-- 🌕 When the **moon blushes red** and Mr Darcymoor rears back with a howl —
-  **run**. He forgets his manners for a few seconds, then apologises
-  profusely.
-- 🌳 **Hollow hedges are hiding places.** Slip into an archway and Lizzy dims
-  her lantern: pursuers lose her scent and wander off. (Infants close enough
-  to sniff her out are not fooled — no camping!)
-- 🔔 Tap the bell to mute/unmute the music box and howls.
+1. On **GitHub.com**, open this project → **Settings** → **Pages**.
+2. Under **"Build and deployment" → Source**, choose **"Deploy from a branch"**.
+3. Pick the branch — **`main`** is the tidy choice — folder **/ (root)**, and **Save**.
+4. After a minute, open the green link it shows (something like
+   `https://londonista.github.io/Game/`) on your phone. 🎉
+5. In Safari: **Share → "Add to Home Screen"** to make it feel like a real app.
 
-## 👥 The callers, night by night
+If you ever update the games and the phone still shows an old version, pull
+down to refresh or open the link once in a private tab.
 
-Every villain who arrives **stays** for the later nights, so the garden grows
-steadily more crowded:
+## 🖤 Pride, Prejudice & Pestilence — how to play
 
-1. **Night the First — the baby zambies** (and Mr Darcymoor's lunar episodes).
-2. **Night the Second — Lady Catherine de Bat**, an uninvited patroness who
-   circles above and dive-bombs. Watch for her shadow on the lawn.
-3. **Night the Third — Miss Graves, the Late Governess**, a ghost who drifts
-   toward you without pause or pity. She cannot fathom hiding in a hedge.
-4. **Night the Fourth — Captain Wickhead**, a headless officer who charges
-   clean across the garden along a flashing red line. Quit his lane.
-5. **Night the Fifth — Nurse Rottingham**, a vast zombie nursemaid who
-   produces fresh infants as she walks. Everyone attends this one.
-
-Letters, infant numbers, and the wolf's temper all escalate night by night.
-
-## 🎁 Trinkets (power-ups)
-
-One appears in the garden every so often:
-
-- 🌹 **Rose** — a brief *lace veil of protection* (invulnerable a few seconds).
-- 🫖 **A cup of tea** — most fortifying: Lizzy walks much faster for a while.
-- 🍪 **Biscuits** — every infant on the lawn settles down for a five-second nap.
-- ⌚ **Pocket watch** — time, being polite, pauses: all villains freeze briefly.
-- 💚 **Smelling salts** — restores one lost heart (only appears when hurt).
-
-## 📱 Playing it on your phone
-
-The game lives in **`index.html`**, so once **GitHub Pages** is switched on
-(one-time setup), you get a link you can open in Safari or Chrome:
-
-1. Go to this project on **GitHub.com** (on a computer is easiest).
-2. Click the **Settings** tab → **Pages** (left menu).
-3. Under **"Build and deployment" → Source**, choose **"Deploy from a branch"**.
-4. For **Branch**, pick **`claude/horror-game-prototype-klbb40`** (or `main`
-   once merged) and the folder **`/ (root)`**, then click **Save**.
-5. Wait about a minute, then open the green link it shows you — something like
-   `https://londonista.github.io/game/` — on your phone. 🎉
-6. Optional: in Safari, tap **Share → "Add to Home Screen"** so it opens
-   full-screen like a real app.
-
-## 🫘 Flappy Beans
-
-The previous game hasn't gone anywhere! It now lives at
-**`flappy-beans.html`** — open `https://londonista.github.io/game/flappy-beans.html`
-to play it. (Tap to flap; two fingers toggle the secret laser eyes.)
+- **Hold or tap** the garden to guide Miss Lizzy Nightshade (WASD/arrows on a
+  computer). Gather every **love letter** 💌; five nights wins Mr Darcymoor's
+  heart. Three hearts per night.
+- When the **moon blushes red**, he howls and forgets his manners — *run*.
+- **Hollow hedges are hiding places** 🌳: slip into an archway and pursuers
+  lose your scent (infants right beside you are not fooled).
+- A new caller arrives each night and stays: **Lady Catherine de Bat** 🦇
+  (dodge her shadow), **the Late Governess** 👻 (she never stops; hedges
+  baffle her), **Captain Wickhead** ⚔️ (quit his red charging lane), and
+  **Nurse Rottingham** 🍼 (slow, vast, endlessly producing infants).
+- Trinkets help: 🌹 lace-veil shield · 🫖 fortifying speed · 🍪 infant
+  naptime · ⌚ time politely pauses · 💚 restores a heart.
+- 🔔 mutes the music box, howls, and coos (all synthesized live — no sound
+  files anywhere).
 
 ## 🛠️ For the curious
 
-The whole game is one file of HTML, CSS, and JavaScript drawn on a `<canvas>` —
-no frameworks, no build step. The music box, howls, and zombie coos are
-synthesized live with the Web Audio API, so there are no sound files either.
+Each game is a single self-contained HTML file drawn on a `<canvas>` (the
+parlour menu is plain HTML/CSS). No frameworks, no build step, no assets.

@@ -241,6 +241,15 @@ const AudioBox = {
     this.tone({freq:75, dur:0.35, vol:0.10, type:"sine", slide:-30});
   },
   coo(){ this.tone({freq:rand(500,640), dur:0.35, vol:0.035, type:"sine", slide:rand(120,240)}); },
+  screech(){ // Lady Catherine announces herself
+    this.tone({freq:1500, type:"sawtooth", dur:0.35, vol:0.05, slide:-800});
+    this.tone({freq:1800, type:"square", dur:0.3, vol:0.03, slide:-900, t0:0.05});
+  },
+  sigh(){ this.tone({freq:700, type:"sine", dur:0.9, vol:0.045, slide:-350}); },
+  gallop(){ for (let i = 0; i < 6; i++) this.tone({freq:95, type:"square", dur:0.09, vol:0.07, t0:i*0.16 + (i%2 ? 0.02 : 0)}); },
+  tick(){ for (let i = 0; i < 4; i++) this.tone({freq:i%2 ? 900 : 1300, type:"square", dur:0.045, vol:0.05, t0:i*0.22}); },
+  clink(){ this.tone({freq:1900, type:"sine", dur:0.15, vol:0.06}); this.tone({freq:2500, type:"sine", dur:0.2, vol:0.04, t0:0.06}); },
+  yawn(){ this.tone({freq:500, type:"sine", dur:0.7, vol:0.05, slide:-260}); },
   howl(){
     if (!this.ctx || this.muted) return;
     const t = this.ctx.currentTime;
@@ -282,11 +291,18 @@ muteBtn.addEventListener("click", (e) => {
    GAME STATE
    ========================================================= */
 const NIGHTS = [
-  { letters:5, zMax:4,  zEvery:5.0, zSpeed:26, wolfChase:120, surgeEvery:[13,17], surgeLen:[3.5,4.5] },
-  { letters:6, zMax:6,  zEvery:3.8, zSpeed:31, wolfChase:138, surgeEvery:[10,14], surgeLen:[4.0,5.5] },
-  { letters:7, zMax:8,  zEvery:3.0, zSpeed:36, wolfChase:156, surgeEvery:[8,12],  surgeLen:[4.5,6.0] },
+  { letters:5, zMax:4, zEvery:5.0, zSpeed:26, wolfChase:118, surgeEvery:[13,17], surgeLen:[3.5,4.5] },
+  { letters:6, zMax:5, zEvery:4.2, zSpeed:29, wolfChase:128, surgeEvery:[11,15], surgeLen:[3.5,5.0],
+    bat:{ every:[9,13], dive:400 } },
+  { letters:7, zMax:6, zEvery:3.6, zSpeed:31, wolfChase:136, surgeEvery:[10,14], surgeLen:[4.0,5.0],
+    bat:{ every:[9,13], dive:420 }, ghost:{ speed:42 } },
+  { letters:8, zMax:7, zEvery:3.1, zSpeed:33, wolfChase:146, surgeEvery:[9,13],  surgeLen:[4.0,5.5],
+    bat:{ every:[8,12], dive:440 }, ghost:{ speed:48 }, captain:{ every:[9,13], dash:430 } },
+  { letters:9, zMax:8, zEvery:2.7, zSpeed:36, wolfChase:154, surgeEvery:[8,12],  surgeLen:[4.5,6.0],
+    bat:{ every:[8,12], dive:460 }, ghost:{ speed:54 }, captain:{ every:[8,12], dash:470 },
+    nurse:{ speed:30, spawnEvery:7 } },
 ];
-const ROMAN = ["I", "II", "III"];
+const NIGHT_NAMES = ["First", "Second", "Third", "Fourth", "Fifth"];
 
 const G = {
   state: "title",          // title | play | dead | won
@@ -297,14 +313,26 @@ const G = {
   started: false,          // has any night begun (keeps the lawn empty behind the title)
   shake: 0,
   flash: 0,                // red vignette pulse on hurt
+  freezeT: 0,              // pocket-watch time-stop
 };
 
-const player = { x:0, y:0, tx:0, ty:0, r:14, speed:150, face:1, moving:false, inv:0, veil:0, bob:0 };
+const player = { x:0, y:0, tx:0, ty:0, r:14, speed:150, face:1, moving:false,
+                 inv:0, veil:0, bob:0, speedT:0, hidden:false };
 const wolf = { x:0, y:0, tx:0, ty:0, r:16, face:1,
                phase:"gent",          // gent | tele | wolf
                phaseT: 0, nextSurge: 14 };
-let zombies = [], letters = [], roses = [], particles = [];
-let zTimer = 0, roseTimer = 6, cooTimer = 2;
+/* the wider cast of villains — awakened night by night */
+const bat = { x:0, y:0, state:"off",  // off | fly | aim | swoop
+              timer:0, t:0, phaseT:0, aimX:0, aimY:0, dx:0, dy:0, ax:0.5, warned:false };
+const ghost = { x:0, y:0, state:"off",  // off | roam | gone
+                timer:0, wt:null, wtT:0 };
+const captain = { x:0, y:0, state:"off",  // off | wait | tele | charge
+                  timer:0, phaseT:0, dir:1, face:1, warned:false };
+const nurse = { x:0, y:0, state:"off",  // off | roam
+                face:1, spawnT:0, pauseT:0, wt:null, wtT:0 };
+const lastSeen = { x:0, y:0 };           // where Lizzy was last spotted (hiding freezes it)
+let zombies = [], letters = [], trinkets = [], particles = [];
+let zTimer = 0, trinketTimer = 6, cooTimer = 2;
 
 function allActors(){ return [player, wolf, ...zombies]; }
 
@@ -314,6 +342,10 @@ const DECOR = [
   { t:"hedge", x:.30, y:.44 }, { t:"hedge", x:.90, y:.70 }, { t:"hedge", x:.08, y:.88 },
   { t:"grave", x:.45, y:.68 }, { t:"hedge", x:.55, y:.93 },
 ];
+/* hollow topiaries — step into the arch to hide */
+const HIDES = [ { x:.20, y:.58 }, { x:.78, y:.78 }, { x:.50, y:.46 } ];
+const decorY = f => horizonY() + (H - horizonY()) * (f - 0.34) / 0.66;
+const hideSpots = () => HIDES.map(h => ({ x: h.x * W, y: decorY(h.y), r: 30 * S() }));
 const STARS = Array.from({length:46}, () => ({ x:Math.random(), y:Math.random()*0.30, s:rand(0.6,1.7), p:rand(0,TAU) }));
 const FOG = Array.from({length:4}, (_, i) => ({ x:Math.random(), y:0.38 + i*0.16, w:rand(0.5,0.85), h:rand(0.05,0.09), v:rand(4,10) * (i%2 ? 1 : -1), a:rand(0.05,0.10) }));
 const FLIES = Array.from({length:11}, () => ({ x:Math.random(), y:rand(0.4,0.95), p:rand(0,TAU), v:rand(0.3,0.9) }));
@@ -321,10 +353,12 @@ const FLIES = Array.from({length:11}, () => ({ x:Math.random(), y:rand(0.4,0.95)
 /* =========================================================
    NIGHT SETUP / FLOW
    ========================================================= */
-function randomLawnSpot(minFromPlayer = 90){
+function randomLawnSpot(minFromPlayer = 90, avoidHides = false){
   for (let i = 0; i < 40; i++) {
     const p = { x: rand(W*0.08, W*0.92), y: rand(horizonY() + 40*S(), H - 40) };
-    if (Math.hypot(p.x - player.x, p.y - player.y) > minFromPlayer * S()) return p;
+    if (Math.hypot(p.x - player.x, p.y - player.y) <= minFromPlayer * S()) continue;
+    if (avoidHides && hideSpots().some(hd => Math.hypot(p.x - hd.x, p.y - hd.y) < hd.r + 16 * S())) continue;
+    return p;
   }
   return { x: W/2, y: H*0.7 };
 }
@@ -337,10 +371,21 @@ function startNight(n){
   wolf.x = W*0.15; wolf.y = horizonY() + 60*S();
   wolf.phase = "gent"; wolf.phaseT = 0; wolf.nextSurge = rand(...cfg.surgeEvery) * 0.6;
   wolf.tx = wolf.x; wolf.ty = wolf.y;
-  zombies = []; roses = []; particles = [];
-  zTimer = 1.5; roseTimer = 8;
+  zombies = []; trinkets = []; particles = [];
+  zTimer = 1.5; trinketTimer = 8;
+  lastSeen.x = player.x; lastSeen.y = player.y;
+  G.freezeT = 0; player.speedT = 0; player.hidden = false;
+  // wake tonight's villains
+  bat.state = cfg.bat ? "fly" : "off"; bat.warned = false;
+  if (cfg.bat) { bat.timer = rand(...cfg.bat.every) * 0.7; bat.ax = rand(0.2, 0.8); bat.x = W * bat.ax; bat.y = H * 0.15; }
+  ghost.state = cfg.ghost ? "gone" : "off";
+  ghost.timer = 3; ghost.wt = null; ghost.wtT = 0;
+  captain.state = cfg.captain ? "wait" : "off"; captain.warned = false;
+  if (cfg.captain) captain.timer = rand(...cfg.captain.every);
+  nurse.state = cfg.nurse ? "roam" : "off";
+  if (cfg.nurse) { nurse.x = W * 0.5; nurse.y = horizonY() + 24 * S(); nurse.spawnT = cfg.nurse.spawnEvery; nurse.pauseT = 0; nurse.wt = null; nurse.wtT = 0; }
   letters = Array.from({length: cfg.letters}, () => {
-    const p = randomLawnSpot(120);
+    const p = randomLawnSpot(120, true);
     return { x:p.x, y:p.y, r:12, p:rand(0,TAU) };
   });
   hud.style.display = "flex";
@@ -356,7 +401,7 @@ function startNight(n){
 function updateHUD(){
   heartsEl.innerHTML = Array.from({length:3}, (_, i) =>
     `<span class="${i < G.hearts ? "" : "lost"}">🖤</span>`).join("");
-  nightEl.textContent = `~ Night the ${["First","Second","Third"][G.night]} ~`;
+  nightEl.textContent = `~ Night the ${NIGHT_NAMES[G.night]} ~`;
   letterEl.textContent = `${G.got} / ${NIGHTS[G.night].letters}`;
 }
 
@@ -375,18 +420,20 @@ function showTitle(){
   card.innerHTML = `
     <div class="fleuron">❦ 🌹 ❦</div>
     <h1>Pride, Prejudice<br><span class="amp">&amp;</span> Pestilence</h1>
-    <div class="sub">a moonlit courtship in three nights</div>
+    <div class="sub">a moonlit courtship in five nights</div>
     <p class="quote">“It is a truth universally acknowledged, that a single
     gentleman in possession of a dreadful curse must be in want of a wife.”</p>
     <p>Miss Lizzy Nightshade must gather Mr&nbsp;Darcymoor's scattered love letters
-    from the gardens of Pemberley — though the hour is late, and the parish's
-    unfortunate infants have risen <i>peckish</i> from their naps.</p>
+    from the gardens of Pemberley — though the hour is late, the parish's
+    unfortunate infants have risen <i>peckish</i> from their naps, and each night
+    brings a new caller more dreadful than the last.</p>
     <div class="rules">
       ☞ <b>Hold or tap</b> the garden to guide Lizzy<br>
       💌 Gather every <b>love letter</b><br>
       🧟 Do not let the <b>baby zambies</b> nibble you<br>
       🌕 When the moon <b>blushes red</b> — <i>run.</i><br>
-      🌹 A rose lends a <b>lace veil</b> of protection
+      🌳 Slip into a <b>hollow hedge</b> to hide from pursuers<br>
+      🫖 Teacups, biscuits &amp; trinkets lend <b>timely aid</b>
     </div>
     <br><button class="fancy" id="beginBtn">Begin the Courtship</button>
     <div class="tiny">headphones recommended · best held upright, like one's posture</div>`;
@@ -398,11 +445,20 @@ function showTitle(){
 
 const NIGHT_CARDS = [
   { title:"An Agreeable Stroll",
-    quote:"“She could not fix upon the hour, or the spot, or the look which laid the foundation of her affection. The howling, however, she remembered precisely.”" },
-  { title:"A Most Peckish Parish",
-    quote:"“The infants of the parish were universally acknowledged to be adorable — and, of late, ambulatory.”" },
-  { title:"The Moon Insists",
-    quote:"“In vain have I struggled. It will not do. My feelings will not be repressed. Also, I appear to have fur.” — Mr Darcymoor" },
+    quote:"“She could not fix upon the hour, or the spot, or the look which laid the foundation of her affection. The howling, however, she remembered precisely.”",
+    tip:"The parish's infants are peckish, and Mr Darcymoor is… lunar. The hollow hedges 🌳 make a fine hiding place." },
+  { title:"An Uninvited Patroness",
+    quote:"“Miss Nightshade, are the shades of Pemberley to be thus haunted? Yes. By me.” — Lady Catherine de Bat",
+    tip:"A new caller: Lady Catherine 🦇 circles above. When her shadow falls upon the lawn, step smartly aside." },
+  { title:"The Late Governess",
+    quote:"“Deportment, Miss Nightshade. The dead maintain excellent posture.” — Miss Graves, governess (retired; deceased)",
+    tip:"A new caller: Miss Graves 👻 drifts toward you without pause or pity — but cannot fathom that a lady would hide in a hedge." },
+  { title:"An Officer, Scarcely a Gentleman",
+    quote:"“Captain Wickhead lost his head at the card table, and his manners shortly after.”",
+    tip:"A new caller: the Captain ⚔️ charges clean across the garden with military punctuality. Mind the red line; quit his lane." },
+  { title:"The Nursemaid's Rounds",
+    quote:"“Old Nurse Rottingham has risen to gather her charges — and means to add you to the nursery.”",
+    tip:"A final caller: the Nursemaid 🍼 is slow, vast, and endlessly producing infants. Tonight, every terror of Pemberley walks." },
 ];
 function showNightIntro(n){
   G.state = "title";
@@ -411,9 +467,10 @@ function showNightIntro(n){
   const c = NIGHT_CARDS[n];
   card.innerHTML = `
     <div class="fleuron">❦</div>
-    <h2>Night the ${["First","Second","Third"][n]}</h2>
+    <h2>Night the ${NIGHT_NAMES[n]}</h2>
     <div class="sub">“${c.title}”</div>
     <p class="quote">${c.quote}</p>
+    <p>${c.tip}</p>
     <p>${NIGHTS[n].letters} letters lie waiting in the dark. 💌</p>
     <button class="fancy" id="goBtn">Step into the Garden</button>`;
   document.getElementById("goBtn").addEventListener("click", () => { AudioBox.ensure(); startNight(n); });
@@ -504,8 +561,11 @@ function update(dt){
   AudioBox.music(dt);
   const cfg = NIGHTS[G.night];
   const s = S();
+  const frozen = G.freezeT > 0;
+  G.freezeT = Math.max(0, G.freezeT - dt);
 
   /* ----- player ----- */
+  const spd = player.speed * (player.speedT > 0 ? 1.45 : 1) * s;
   let dx = 0, dy = 0;
   if (keys.ArrowLeft || keys.a) dx -= 1;
   if (keys.ArrowRight || keys.d) dx += 1;
@@ -513,15 +573,15 @@ function update(dt){
   if (keys.ArrowDown || keys.s) dy += 1;
   if (dx || dy) {
     const m = Math.hypot(dx, dy);
-    player.x += dx / m * player.speed * s * dt;
-    player.y += dy / m * player.speed * s * dt;
+    player.x += dx / m * spd * dt;
+    player.y += dy / m * spd * dt;
     player.tx = player.x; player.ty = player.y;
     player.moving = true;
     if (dx) player.face = dx > 0 ? 1 : -1;
   } else {
     const d = Math.hypot(player.tx - player.x, player.ty - player.y);
     if (d > 4) {
-      const step = Math.min(d, player.speed * s * dt);
+      const step = Math.min(d, spd * dt);
       player.x += (player.tx - player.x) / d * step;
       player.y += (player.ty - player.y) / d * step;
       player.moving = true;
@@ -533,14 +593,22 @@ function update(dt){
   player.bob += dt * (player.moving ? 11 : 3);
   player.inv = Math.max(0, player.inv - dt);
   player.veil = Math.max(0, player.veil - dt);
+  player.speedT = Math.max(0, player.speedT - dt);
+
+  /* ----- hiding: hollow hedges dim the lantern ----- */
+  const wasHidden = player.hidden;
+  player.hidden = hideSpots().some(hd => Math.hypot(player.x - hd.x, player.y - hd.y) < hd.r);
+  if (!player.hidden) { lastSeen.x = player.x; lastSeen.y = player.y; }
+  else if (!wasHidden) toast(pick(["Hidden! Most unladylike. Most effective.", "Quiet as a mouse in muslin…"]));
 
   /* ----- wolfman: gentleman → telegraph → beast ----- */
+  if (!frozen) {
   wolf.phaseT += dt;
   if (wolf.phase === "gent") {
     wolf.nextSurge -= dt;
     // strolls with dignity toward polite viewing distance
     const dW = dist(wolf, player);
-    if (dW > 170 * s) { wolf.tx = player.x; wolf.ty = player.y; }
+    if (!player.hidden && dW > 170 * s) { wolf.tx = lastSeen.x; wolf.ty = lastSeen.y; }
     else if (Math.hypot(wolf.tx - wolf.x, wolf.ty - wolf.y) < 20) {
       const p = randomLawnSpot(0); wolf.tx = p.x; wolf.ty = p.y;
     }
@@ -557,18 +625,22 @@ function update(dt){
       wolf.surgeLen = rand(...cfg.surgeLen);
     }
   } else { // wolf!
-    wolf.tx = player.x; wolf.ty = player.y;
+    wolf.tx = lastSeen.x; wolf.ty = lastSeen.y;
     moveToward(wolf, cfg.wolfChase * s, dt);
-    if (dist(wolf, player) < (wolf.r + player.r) * s * 1.05) hurtPlayer(wolf.x, wolf.y);
-    if (wolf.phaseT > wolf.surgeLen) {
+    if (!player.hidden && dist(wolf, player) < (wolf.r + player.r) * s * 1.05) hurtPlayer(wolf.x, wolf.y);
+    const lostScent = player.hidden && Math.hypot(wolf.x - lastSeen.x, wolf.y - lastSeen.y) < 26 * s;
+    if (wolf.phaseT > wolf.surgeLen || lostScent) {
       wolf.phase = "gent"; wolf.phaseT = 0;
       wolf.nextSurge = rand(...cfg.surgeEvery);
       const p = randomLawnSpot(0); wolf.tx = p.x; wolf.ty = p.y;
-      toast(pick(["Mr Darcymoor apologises profusely.", "“Do forgive me. The moon, you understand.”"]));
+      toast(lostScent ? "He has quite lost your scent."
+                      : pick(["Mr Darcymoor apologises profusely.", "“Do forgive me. The moon, you understand.”"]));
     }
+  }
   }
 
   /* ----- baby zambies ----- */
+  if (!frozen) {
   zTimer -= dt;
   if (zTimer <= 0 && zombies.length < cfg.zMax) {
     zTimer = cfg.zEvery * rand(0.8, 1.25);
@@ -576,7 +648,7 @@ function update(dt){
     const z = {
       x: side === 0 ? -20 : side === 1 ? W + 20 : rand(0, W),
       y: side === 2 ? horizonY() + 6 : side === 3 ? H + 20 : rand(horizonY() + 20, H),
-      r: 11, wob: rand(0, TAU), stun: 0, vx: 0, vy: 0,
+      r: 11, wob: rand(0, TAU), stun: 0, sleep: 0, vx: 0, vy: 0, wt: null, wtT: 0,
       speed: cfg.zSpeed * rand(0.85, 1.2),
     };
     zombies.push(z);
@@ -585,16 +657,25 @@ function update(dt){
   if (cooTimer <= 0) { cooTimer = rand(2.5, 5); if (zombies.length) AudioBox.coo(); }
 
   for (const z of zombies) {
+    if (z.sleep > 0) { z.sleep -= dt; continue; }   // naptime — biscuits work wonders
     z.wob += dt * 6;
     if (z.stun > 0) {
       z.stun -= dt;
       z.x += z.vx * dt; z.y += z.vy * dt;
       z.vx *= 0.9; z.vy *= 0.9;
     } else {
-      const d = dist(z, player) || 1;
-      z.x += (player.x - z.x) / d * z.speed * s * dt;
-      z.y += (player.y - z.y) / d * z.speed * s * dt;
-      if (d < (z.r + player.r) * s) {
+      const dp = dist(z, player) || 1;
+      // hidden Lizzy fools them — unless they're close enough to sniff her out
+      let tx = player.x, ty = player.y;
+      if (player.hidden && dp > 60 * s) {
+        z.wtT -= dt;
+        if (!z.wt || z.wtT <= 0) { z.wt = randomLawnSpot(0); z.wtT = rand(1.5, 3); }
+        tx = z.wt.x; ty = z.wt.y;
+      }
+      const d = Math.hypot(tx - z.x, ty - z.y) || 1;
+      z.x += (tx - z.x) / d * z.speed * s * dt;
+      z.y += (ty - z.y) / d * z.speed * s * dt;
+      if (dp < (z.r + player.r) * s) {
         hurtPlayer(z.x, z.y);
         const a = Math.atan2(z.y - player.y, z.x - player.x);
         z.vx = Math.cos(a) * 140 * s; z.vy = Math.sin(a) * 140 * s;
@@ -604,8 +685,136 @@ function update(dt){
     z.x = clamp(z.x, -30, W + 30);
     z.y = clamp(z.y, horizonY(), H + 30);
   }
+  }
 
-  /* ----- letters & roses ----- */
+  /* ----- Lady Catherine de Bat: circles, screeches, swoops ----- */
+  if (bat.state !== "off" && !frozen) {
+    bat.t += dt;
+    if (bat.state === "fly") {
+      const hx = W * bat.ax + Math.sin(bat.t * 0.9) * W * 0.08;
+      const hy = H * 0.15 + Math.sin(bat.t * 1.7) * H * 0.03;
+      const ease = 1 - Math.pow(0.15, dt);
+      bat.x = lerp(bat.x, hx, ease);
+      bat.y = lerp(bat.y, hy, ease);
+      bat.timer -= dt;
+      if (bat.timer <= 0) {
+        bat.state = "aim"; bat.phaseT = 0;
+        bat.aimX = lastSeen.x; bat.aimY = lastSeen.y;
+        AudioBox.screech();
+        if (!bat.warned) { bat.warned = true; toast("Lady Catherine descends to give her opinion!"); }
+      }
+    } else if (bat.state === "aim") {
+      bat.phaseT += dt;
+      if (bat.phaseT > 1.1) {
+        const d = Math.hypot(bat.aimX - bat.x, bat.aimY - bat.y) || 1;
+        bat.dx = (bat.aimX - bat.x) / d; bat.dy = (bat.aimY - bat.y) / d;
+        bat.state = "swoop";
+      }
+    } else { // swoop
+      bat.x += bat.dx * cfg.bat.dive * s * dt;
+      bat.y += bat.dy * cfg.bat.dive * s * dt;
+      if (!player.hidden && Math.hypot(bat.x - player.x, bat.y - (player.y - 10 * s)) < (13 + player.r) * s) {
+        hurtPlayer(bat.x, bat.y);
+        bat.state = "fly"; bat.ax = rand(0.2, 0.8); bat.timer = rand(...cfg.bat.every);
+      } else if (bat.x < -70 || bat.x > W + 70 || bat.y > H + 70 || bat.y < -80) {
+        bat.state = "fly"; bat.ax = rand(0.2, 0.8);
+        bat.x = clamp(bat.x, -60, W + 60); bat.y = -40;
+        bat.timer = rand(...cfg.bat.every);
+      }
+    }
+  }
+
+  /* ----- the Late Governess: drifts without pause or pity ----- */
+  if (ghost.state !== "off" && !frozen) {
+    if (ghost.state === "gone") {
+      ghost.timer -= dt;
+      if (ghost.timer <= 0) {
+        ghost.state = "roam";
+        ghost.x = Math.random() < 0.5 ? -20 : W + 20;
+        ghost.y = rand(horizonY() + 30, H - 40);
+        AudioBox.sigh();
+      }
+    } else {
+      let tx = player.x, ty = player.y;
+      if (player.hidden) {   // she cannot fathom hiding in a hedge
+        ghost.wtT -= dt;
+        if (!ghost.wt || ghost.wtT <= 0) { ghost.wt = randomLawnSpot(0); ghost.wtT = rand(2, 4); }
+        tx = ghost.wt.x; ty = ghost.wt.y;
+      }
+      const d = Math.hypot(tx - ghost.x, ty - ghost.y) || 1;
+      ghost.x += (tx - ghost.x) / d * cfg.ghost.speed * s * dt + Math.sin(G.t * 2.3) * 12 * s * dt;
+      ghost.y += (ty - ghost.y) / d * cfg.ghost.speed * s * dt;
+      if (!player.hidden && Math.hypot(ghost.x - player.x, ghost.y - player.y) < (12 + player.r) * s) {
+        hurtPlayer(ghost.x, ghost.y);
+        ghost.state = "gone"; ghost.timer = 5;
+        puff(ghost.x, ghost.y - 14 * s, "#cfc3de", 12);
+        AudioBox.sigh();
+      }
+    }
+  }
+
+  /* ----- Captain Wickhead: charges with military punctuality ----- */
+  if (captain.state !== "off" && !frozen) {
+    if (captain.state === "wait") {
+      captain.timer -= dt;
+      if (captain.timer <= 0) {
+        captain.state = "tele"; captain.phaseT = 0;
+        captain.dir = lastSeen.x > W / 2 ? 1 : -1;
+        captain.x = captain.dir === 1 ? -24 : W + 24;
+        captain.y = clamp(lastSeen.y, horizonY() + 24 * s, H - 24);
+        captain.face = captain.dir;
+        AudioBox.gallop();
+        if (!captain.warned) { captain.warned = true; toast("Hoofbeats! Captain Wickhead charges!"); }
+      }
+    } else if (captain.state === "tele") {
+      captain.phaseT += dt;
+      if (captain.phaseT > 1.0) captain.state = "charge";
+    } else { // charge
+      captain.x += captain.dir * cfg.captain.dash * s * dt;
+      if (!player.hidden && Math.hypot(captain.x - player.x, captain.y - player.y) < (15 + player.r) * s)
+        hurtPlayer(captain.x, captain.y);
+      if (captain.x < -60 || captain.x > W + 60) {
+        captain.state = "wait"; captain.timer = rand(...cfg.captain.every);
+      }
+    }
+  }
+
+  /* ----- Nurse Rottingham: slow, vast, endlessly producing infants ----- */
+  if (nurse.state !== "off" && !frozen) {
+    nurse.spawnT -= dt;
+    if (nurse.pauseT > 0) nurse.pauseT -= dt;
+    else {
+      let tx = lastSeen.x, ty = lastSeen.y;
+      if (player.hidden) {
+        nurse.wtT -= dt;
+        if (!nurse.wt || nurse.wtT <= 0) { nurse.wt = randomLawnSpot(0); nurse.wtT = rand(2, 4); }
+        tx = nurse.wt.x; ty = nurse.wt.y;
+      }
+      const d = Math.hypot(tx - nurse.x, ty - nurse.y) || 1;
+      if (d > 6) {
+        nurse.x += (tx - nurse.x) / d * cfg.nurse.speed * s * dt;
+        nurse.y += (ty - nurse.y) / d * cfg.nurse.speed * s * dt;
+        nurse.face = tx > nurse.x ? 1 : -1;
+      }
+    }
+    if (nurse.spawnT <= 0) {
+      nurse.spawnT = cfg.nurse.spawnEvery;
+      if (zombies.length < cfg.zMax + 3) {
+        nurse.pauseT = 1.2;
+        zombies.push({ x: nurse.x + rand(-20, 20) * s,
+                       y: clamp(nurse.y + rand(10, 24) * s, horizonY() + 10, H - 16),
+                       r: 11, wob: rand(0, TAU), stun: 0, sleep: 0, vx: 0, vy: 0, wt: null, wtT: 0,
+                       speed: cfg.zSpeed * rand(0.85, 1.2) });
+        puff(nurse.x, nurse.y - 10 * s, "#a8c69f", 8);
+        AudioBox.coo();
+      }
+    }
+    if (!player.hidden && Math.hypot(nurse.x - player.x, nurse.y - player.y) < (18 + player.r) * s)
+      hurtPlayer(nurse.x, nurse.y);
+    nurse.y = clamp(nurse.y, horizonY() + 10, H - 16);
+  }
+
+  /* ----- letters & trinkets ----- */
   for (let i = letters.length - 1; i >= 0; i--) {
     const L = letters[i];
     L.p += dt * 2.4;
@@ -621,20 +830,21 @@ function update(dt){
       }
     }
   }
-  roseTimer -= dt;
-  if (roseTimer <= 0 && roses.length === 0) {
-    roseTimer = rand(11, 16);
-    const p = randomLawnSpot(70);
-    roses.push({ x:p.x, y:p.y, r:11, p:rand(0,TAU) });
+  trinketTimer -= dt;
+  if (trinketTimer <= 0 && trinkets.length === 0) {
+    trinketTimer = rand(9, 14);
+    const roll = Math.random();
+    let type = roll < 0.28 ? "rose" : roll < 0.52 ? "tea" : roll < 0.74 ? "biscuit" : roll < 0.90 ? "watch" : "salts";
+    if (type === "salts" && G.hearts >= 3) type = "tea";
+    const p = randomLawnSpot(70, true);
+    trinkets.push({ type, x:p.x, y:p.y, r:11, p:rand(0,TAU) });
   }
-  for (let i = roses.length - 1; i >= 0; i--) {
-    const R = roses[i];
-    R.p += dt * 3;
-    if (Math.hypot(R.x - player.x, R.y - player.y) < (R.r + player.r + 4) * s) {
-      roses.splice(i, 1);
-      player.veil = 5; AudioBox.rose();
-      puff(R.x, R.y, "#f2d9e4", 10, true);
-      toast("A lace veil of protection! (briefly)");
+  for (let i = trinkets.length - 1; i >= 0; i--) {
+    const T = trinkets[i];
+    T.p += dt * 3;
+    if (Math.hypot(T.x - player.x, T.y - player.y) < (T.r + player.r + 4) * s) {
+      trinkets.splice(i, 1);
+      applyTrinket(T);
     }
   }
 
@@ -648,6 +858,28 @@ function update(dt){
   }
   G.shake = Math.max(0, G.shake - dt * 22);
   G.flash = Math.max(0, G.flash - dt * 1.4);
+}
+
+function applyTrinket(T){
+  puff(T.x, T.y, "#f2d9e4", 10, true);
+  if (T.type === "rose") {
+    player.veil = 5; AudioBox.rose();
+    toast("A lace veil of protection! (briefly)");
+  } else if (T.type === "tea") {
+    player.speedT = 6; AudioBox.clink();
+    toast("A fortifying cup of tea! Such vigour!");
+  } else if (T.type === "biscuit") {
+    for (const z of zombies) { z.sleep = 5; z.stun = 0; }
+    AudioBox.yawn();
+    toast("Biscuits! The infants settle down for naptime.");
+  } else if (T.type === "watch") {
+    G.freezeT = 4; AudioBox.tick();
+    toast("The pocket watch! Time, being polite, pauses.");
+  } else { // smelling salts
+    G.hearts = Math.min(3, G.hearts + 1);
+    updateHUD(); AudioBox.chime();
+    toast("Smelling salts! One's constitution is restored.");
+  }
 }
 
 function moveToward(e, speed, dt){
@@ -677,18 +909,30 @@ function draw(){
   // painter's order: sort lawn objects by y
   const items = [];
   if (G.started && (G.state === "play" || G.state === "title")) {
+    if (bat.state === "aim") drawBatShadow(s);
+    if (captain.state === "tele") drawChargeLane(s);
+    for (const hd of hideSpots()) items.push({ y:hd.y + 12*s, f:() => drawHide(hd, s) });
     for (const L of letters) items.push({ y:L.y, f:() => drawLetter(L, s) });
-    for (const R of roses)  items.push({ y:R.y, f:() => drawRose(R, s) });
+    for (const T of trinkets) items.push({ y:T.y, f:() => drawTrinket(T, s) });
     for (const z of zombies) items.push({ y:z.y, f:() => drawZombie(z, s) });
+    if (ghost.state === "roam") items.push({ y:ghost.y, f:() => drawGhost(s) });
+    if (nurse.state !== "off") items.push({ y:nurse.y, f:() => drawNurse(s) });
+    if (captain.state === "tele" || captain.state === "charge") items.push({ y:captain.y, f:() => drawCaptain(s) });
     items.push({ y:wolf.y, f:() => drawWolf(s) });
     items.push({ y:player.y, f:() => drawPlayer(s) });
   }
   items.sort((a, b) => a.y - b.y);
   for (const it of items) it.f();
 
+  if (G.started && bat.state !== "off" && (G.state === "play" || G.state === "title")) drawBat(s);
+
   drawParticles(s);
   drawFog();
   drawFireflies(s);
+  if (G.freezeT > 0) {   // the hour, politely paused
+    ctx.fillStyle = `rgba(140,170,230,${0.10 * Math.min(1, G.freezeT)})`;
+    ctx.fillRect(0, 0, W, H);
+  }
   drawVignette(surging);
   ctx.restore();
 }
@@ -864,16 +1108,19 @@ function drawPlayer(s){
   const bob = Math.sin(player.bob) * (player.moving ? 1.6 : 0.7) * s;
   const blink = player.inv > 0 && Math.floor(G.t * 12) % 2 === 0;
   if (blink) ctx.globalAlpha = 0.35;
+  else if (player.hidden) ctx.globalAlpha = 0.5;
 
   shadow(x, y + 1*s, 13, s);
 
-  // lantern glow — she carries a little light
-  const lx = x + 13 * player.face * s, ly = y - 8*s + bob;
-  const lg = ctx.createRadialGradient(lx, ly, 2*s, lx, ly, 46*s);
-  lg.addColorStop(0, "rgba(255,196,110,0.28)");
-  lg.addColorStop(1, "rgba(255,196,110,0)");
-  ctx.fillStyle = lg;
-  ctx.beginPath(); ctx.arc(lx, ly, 46*s, 0, TAU); ctx.fill();
+  if (!player.hidden) {
+    // lantern glow — she carries a little light (dimmed when hiding)
+    const lx = x + 13 * player.face * s, ly = y - 8*s + bob;
+    const lg = ctx.createRadialGradient(lx, ly, 2*s, lx, ly, 46*s);
+    lg.addColorStop(0, "rgba(255,196,110,0.28)");
+    lg.addColorStop(1, "rgba(255,196,110,0)");
+    ctx.fillStyle = lg;
+    ctx.beginPath(); ctx.arc(lx, ly, 46*s, 0, TAU); ctx.fill();
+  }
 
   ctx.save();
   ctx.translate(x, y + bob);
@@ -1157,7 +1404,21 @@ function drawZombie(z, s){
   drawHeart(5.5*s, -10*s, 1.8*s);
   // face: button eye + stitched X eye + stitched smile
   ctx.fillStyle = "#241627";
-  if (z.stun > 0) {
+  if (z.sleep > 0) {
+    // fast asleep — biscuits work wonders
+    ctx.strokeStyle = "#241627";
+    ctx.lineWidth = 0.9 * s;
+    ctx.beginPath();
+    ctx.arc(-2.2*s, -12.6*s, 1.1*s, 0.15 * Math.PI, 0.85 * Math.PI);
+    ctx.moveTo(3.4*s, -12.6*s);
+    ctx.arc(2.3*s, -12.6*s, 1.1*s, 0.15 * Math.PI, 0.85 * Math.PI);
+    ctx.stroke();
+    ctx.fillStyle = "#b9a7c9";
+    ctx.font = `italic ${Math.round(7 * s)}px Georgia`;
+    ctx.textAlign = "center";
+    ctx.fillText("z z", 9*s, -19*s);
+    ctx.fillStyle = "#241627";
+  } else if (z.stun > 0) {
     ctx.font = `${Math.round(5 * s)}px Georgia`;
     ctx.textAlign = "center";
     ctx.fillText("~  ~", 0, -11.5*s);
@@ -1208,27 +1469,360 @@ function drawLetter(L, s){
   ctx.fillText("✦", L.x + 11*s, L.y - 14*s + bob);
 }
 
-function drawRose(R, s){
-  const bob = Math.sin(R.p) * 1.6 * s;
+function drawTrinket(T, s){
+  const bob = Math.sin(T.p) * 1.6 * s;
+  const g = ctx.createRadialGradient(T.x, T.y - 6*s, 1*s, T.x, T.y - 6*s, 20*s);
+  g.addColorStop(0, "rgba(246,236,210,0.18)");
+  g.addColorStop(1, "rgba(246,236,210,0)");
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(T.x, T.y - 6*s, 20*s, 0, TAU); ctx.fill();
   ctx.save();
-  ctx.translate(R.x, R.y + bob);
-  ctx.strokeStyle = "#3d5c3a";
-  ctx.lineWidth = 1.6 * s;
-  ctx.beginPath(); ctx.moveTo(0, 4*s); ctx.quadraticCurveTo(1.5*s, -1*s, 0, -5*s); ctx.stroke();
-  ctx.fillStyle = "#3d5c3a";
-  ctx.beginPath(); ctx.ellipse(-3*s, 0, 3*s, 1.6*s, -0.5, 0, TAU); ctx.fill();
-  ctx.fillStyle = "#b34d76";
-  ctx.beginPath(); ctx.arc(0, -7*s, 5*s, 0, TAU); ctx.fill();
-  ctx.fillStyle = "#e77fa4";
-  ctx.beginPath(); ctx.arc(-1*s, -8*s, 3*s, 0, TAU); ctx.fill();
-  ctx.fillStyle = "#f2d9e4";
-  ctx.beginPath(); ctx.arc(-1.5*s, -8.5*s, 1.4*s, 0, TAU); ctx.fill();
+  ctx.translate(T.x, T.y + bob);
+  if (T.type === "rose") {
+    ctx.strokeStyle = "#3d5c3a";
+    ctx.lineWidth = 1.6 * s;
+    ctx.beginPath(); ctx.moveTo(0, 4*s); ctx.quadraticCurveTo(1.5*s, -1*s, 0, -5*s); ctx.stroke();
+    ctx.fillStyle = "#3d5c3a";
+    ctx.beginPath(); ctx.ellipse(-3*s, 0, 3*s, 1.6*s, -0.5, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#b34d76";
+    ctx.beginPath(); ctx.arc(0, -7*s, 5*s, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#e77fa4";
+    ctx.beginPath(); ctx.arc(-1*s, -8*s, 3*s, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#f2d9e4";
+    ctx.beginPath(); ctx.arc(-1.5*s, -8.5*s, 1.4*s, 0, TAU); ctx.fill();
+  } else if (T.type === "tea") {
+    // a fortifying cup of tea, still steaming
+    ctx.fillStyle = "#e7dcc8";
+    ctx.beginPath(); ctx.ellipse(0, 0, 8*s, 2*s, 0, 0, TAU); ctx.fill();   // saucer
+    ctx.fillStyle = "#f6ecd2";
+    ctx.beginPath();
+    ctx.moveTo(-6*s, -8*s); ctx.quadraticCurveTo(-5*s, -1*s, 0, -1*s);
+    ctx.quadraticCurveTo(5*s, -1*s, 6*s, -8*s);
+    ctx.fill();
+    ctx.strokeStyle = "#f6ecd2"; ctx.lineWidth = 1.2*s;
+    ctx.beginPath(); ctx.arc(7.5*s, -5.5*s, 2.2*s, -1.2, 1.6); ctx.stroke();  // handle
+    ctx.fillStyle = "#8a5a3b";
+    ctx.beginPath(); ctx.ellipse(0, -7.5*s, 5*s, 1.4*s, 0, 0, TAU); ctx.fill(); // the tea itself
+    ctx.fillStyle = "#e77fa4";
+    drawHeart(0, -4*s, 1.6*s);
+    ctx.strokeStyle = `rgba(239,230,242,${0.4 + 0.3 * Math.sin(T.p * 2)})`;
+    ctx.lineWidth = 1*s;
+    ctx.beginPath();
+    ctx.moveTo(-1.5*s, -10*s); ctx.quadraticCurveTo(-3*s, -13*s, -1*s, -16*s);
+    ctx.moveTo(2*s, -10*s); ctx.quadraticCurveTo(0.5*s, -13*s, 2.5*s, -16*s);
+    ctx.stroke();
+  } else if (T.type === "biscuit") {
+    ctx.fillStyle = "#d8b98a";
+    ctx.beginPath(); ctx.arc(-3*s, -5*s, 4.5*s, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(4*s, -3*s, 4*s, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#b3906a";
+    for (const [bx, by] of [[-4.5,-6.5],[-1.5,-4],[4,-4.5],[5.5,-2]]) {
+      ctx.beginPath(); ctx.arc(bx*s, by*s, 0.8*s, 0, TAU); ctx.fill();
+    }
+    ctx.fillStyle = "#e77fa4";
+    drawHeart(-3*s, -5*s, 1.4*s);
+  } else if (T.type === "watch") {
+    ctx.strokeStyle = "#e9c87a"; ctx.lineWidth = 1.2*s;
+    ctx.beginPath(); ctx.moveTo(0, -14*s); ctx.quadraticCurveTo(4*s, -12*s, 2*s, -9.5*s); ctx.stroke();
+    ctx.fillStyle = "#e9c87a";
+    ctx.beginPath(); ctx.arc(0, -5*s, 6*s, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#f6ecd2";
+    ctx.beginPath(); ctx.arc(0, -5*s, 4.6*s, 0, TAU); ctx.fill();
+    ctx.strokeStyle = "#241627"; ctx.lineWidth = 1*s;
+    ctx.beginPath();
+    ctx.moveTo(0, -5*s); ctx.lineTo(0, -8.5*s);
+    ctx.moveTo(0, -5*s); ctx.lineTo(2.6*s, -4*s);
+    ctx.stroke();
+  } else { // smelling salts
+    ctx.fillStyle = "#9fd6c9";
+    ctx.beginPath();
+    ctx.moveTo(-3.5*s, -1*s); ctx.lineTo(-3.5*s, -8*s); ctx.lineTo(-2*s, -10*s); ctx.lineTo(-2*s, -12*s);
+    ctx.lineTo(2*s, -12*s); ctx.lineTo(2*s, -10*s); ctx.lineTo(3.5*s, -8*s); ctx.lineTo(3.5*s, -1*s);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#b34d76";
+    ctx.fillRect(-2.2*s, -13.5*s, 4.4*s, 2*s);
+    ctx.fillStyle = "#efe6f2";
+    drawHeart(0, -5.5*s, 1.8*s);
+  }
   ctx.restore();
-  const tw = 0.5 + 0.5 * Math.sin(R.p * 2 + 1);
+  const tw = 0.5 + 0.5 * Math.sin(T.p * 2 + 1);
   ctx.fillStyle = `rgba(231,127,164,${0.3 + 0.5 * tw})`;
   ctx.font = `${Math.round(8 * s)}px Georgia`;
   ctx.textAlign = "center";
-  ctx.fillText("✦", R.x - 9*s, R.y - 12*s);
+  ctx.fillText("✦", T.x - 9*s, T.y - 14*s);
+}
+
+/* ----- a hollow topiary — Lizzy's refuge ----- */
+function drawHide(hd, s){
+  const { x, y } = hd;
+  ctx.fillStyle = "rgba(0,0,0,0.28)";
+  ctx.beginPath(); ctx.ellipse(x, y + 14*s, 30*s, 7*s, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = "#233127";
+  ctx.beginPath();
+  ctx.ellipse(x, y - 6*s, 30*s, 20*s, 0, 0, TAU);
+  ctx.ellipse(x - 20*s, y + 2*s, 16*s, 12*s, 0, 0, TAU);
+  ctx.ellipse(x + 20*s, y + 2*s, 16*s, 12*s, 0, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = "#2b3d30";
+  ctx.beginPath();
+  ctx.ellipse(x - 8*s, y - 14*s, 12*s, 8*s, 0, 0, TAU);
+  ctx.ellipse(x + 10*s, y - 12*s, 10*s, 7*s, 0, 0, TAU);
+  ctx.fill();
+  // the hollow archway
+  ctx.fillStyle = "#10160f";
+  ctx.beginPath();
+  ctx.moveTo(x - 10*s, y + 12*s);
+  ctx.lineTo(x - 10*s, y - 2*s);
+  ctx.arc(x, y - 2*s, 10*s, Math.PI, 0);
+  ctx.lineTo(x + 10*s, y + 12*s);
+  ctx.fill();
+  // climbing roses on the trim
+  ctx.fillStyle = "rgba(231,127,164,0.75)";
+  ctx.beginPath();
+  ctx.arc(x - 14*s, y - 16*s, 1.8*s, 0, TAU);
+  ctx.arc(x + 18*s, y - 10*s, 1.8*s, 0, TAU);
+  ctx.arc(x + 2*s, y - 22*s, 1.8*s, 0, TAU);
+  ctx.fill();
+  // when Lizzy is within: her lantern glints in the dark
+  if (player.hidden && Math.hypot(player.x - x, player.y - y) < hd.r) {
+    ctx.fillStyle = `rgba(255,196,110,${0.45 + 0.3 * Math.sin(G.t * 6)})`;
+    ctx.beginPath(); ctx.arc(x + 2*s, y + 3*s, 2*s, 0, TAU); ctx.fill();
+  }
+}
+
+/* ----- Lady Catherine de Bat, an uninvited patroness ----- */
+function drawBat(s){
+  const { x, y } = bat;
+  const flap = Math.sin(G.t * (bat.state === "swoop" ? 26 : 12));
+  const sz = 1.4 * s;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = "#241a30";
+  for (const dir of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(dir*14*sz, -8*sz - flap*6*sz, dir*22*sz, 2*sz - flap*8*sz);
+    ctx.quadraticCurveTo(dir*14*sz, 2*sz, dir*8*sz, 4*sz);
+    ctx.quadraticCurveTo(dir*4*sz, 6*sz, 0, 4*sz);
+    ctx.fill();
+  }
+  ctx.fillStyle = "#2e2140";
+  ctx.beginPath(); ctx.ellipse(0, 2*sz, 6*sz, 7*sz, 0, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.arc(0, -5*sz, 5*sz, 0, TAU); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-4*sz, -8*sz); ctx.lineTo(-6*sz, -13*sz); ctx.lineTo(-1*sz, -9.5*sz);
+  ctx.moveTo(4*sz, -8*sz); ctx.lineTo(6*sz, -13*sz); ctx.lineTo(1*sz, -9.5*sz);
+  ctx.fill();
+  // her tiara — she is, after all, a Lady
+  ctx.fillStyle = "#f6ecd2";
+  ctx.beginPath();
+  ctx.moveTo(-3.5*sz, -10*sz); ctx.lineTo(-2*sz, -13*sz); ctx.lineTo(-0.5*sz, -10.5*sz);
+  ctx.lineTo(1*sz, -13.5*sz); ctx.lineTo(2.5*sz, -10*sz);
+  ctx.fill();
+  // a string of pearls
+  ctx.fillStyle = "#efe6f2";
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath(); ctx.arc(i*2*sz, 8.5*sz + Math.abs(i)*0.6*sz, 1*sz, 0, TAU); ctx.fill();
+  }
+  // imperious glowing eyes with disapproving brows
+  ctx.fillStyle = "#ffb347";
+  ctx.shadowColor = "#ffb347"; ctx.shadowBlur = 5*s;
+  ctx.beginPath(); ctx.arc(-2*sz, -5.5*sz, 1.1*sz, 0, TAU); ctx.arc(2*sz, -5.5*sz, 1.1*sz, 0, TAU); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = "#0d0812"; ctx.lineWidth = 0.9*s;
+  ctx.beginPath();
+  ctx.moveTo(-3.5*sz, -7.5*sz); ctx.lineTo(-1*sz, -6.8*sz);
+  ctx.moveTo(3.5*sz, -7.5*sz); ctx.lineTo(1*sz, -6.8*sz);
+  ctx.stroke();
+  ctx.fillStyle = "#efe6f2";
+  ctx.beginPath();
+  ctx.moveTo(-1.5*sz, -2.5*sz); ctx.lineTo(-1*sz, -1*sz); ctx.lineTo(-0.5*sz, -2.5*sz);
+  ctx.moveTo(0.5*sz, -2.5*sz); ctx.lineTo(1*sz, -1*sz); ctx.lineTo(1.5*sz, -2.5*sz);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawBatShadow(s){
+  const k = clamp(bat.phaseT / 1.1, 0, 1);
+  ctx.fillStyle = `rgba(0,0,0,${0.15 + 0.2 * k})`;
+  ctx.beginPath();
+  ctx.ellipse(bat.aimX, bat.aimY, (26 - 10*k)*s, (9 - 3.5*k)*s, 0, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = `rgba(255,138,138,${0.5 + 0.5 * Math.sin(G.t * 12)})`;
+  ctx.font = `italic ${Math.round(15*s)}px Georgia, serif`;
+  ctx.textAlign = "center";
+  ctx.fillText("!", bat.aimX, bat.aimY - 14*s);
+}
+
+/* ----- Miss Graves, the Late Governess ----- */
+function drawGhost(s){
+  const { x, y } = ghost;
+  const wav = Math.sin(G.t * 3) * 2 * s;
+  ctx.save();
+  ctx.globalAlpha = 0.55 + 0.15 * Math.sin(G.t * 2.1);
+  ctx.translate(x, y + wav);
+  const g = ctx.createLinearGradient(0, -34*s, 0, 8*s);
+  g.addColorStop(0, "#ddd3ea");
+  g.addColorStop(0.7, "rgba(221,211,234,0.55)");
+  g.addColorStop(1, "rgba(221,211,234,0)");
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(-6*s, -26*s);
+  ctx.quadraticCurveTo(-12*s, -8*s, -9*s + Math.sin(G.t*4)*2*s, 6*s);
+  ctx.quadraticCurveTo(-3*s, 2*s, 0, 7*s);
+  ctx.quadraticCurveTo(3*s, 2*s, 9*s + Math.cos(G.t*3.4)*2*s, 6*s);
+  ctx.quadraticCurveTo(12*s, -8*s, 6*s, -26*s);
+  ctx.fill();
+  ctx.fillStyle = "#ddd3ea";
+  ctx.beginPath(); ctx.arc(0, -30*s, 6.5*s, 0, TAU); ctx.fill();
+  // a severe spectral bun
+  ctx.fillStyle = "#b9a7c9";
+  ctx.beginPath(); ctx.arc(0, -37*s, 2.8*s, 0, TAU); ctx.fill();
+  // spectacles, worn low, seeing everything
+  ctx.strokeStyle = "#6d5b80"; ctx.lineWidth = 0.9*s;
+  ctx.beginPath();
+  ctx.arc(-2.4*s, -30.5*s, 2*s, 0, TAU);
+  ctx.moveTo(4.4*s, -30.5*s);
+  ctx.arc(2.4*s, -30.5*s, 2*s, 0, TAU);
+  ctx.stroke();
+  ctx.fillStyle = "#241627";
+  ctx.beginPath(); ctx.arc(-2.4*s, -30.5*s, 1*s, 0, TAU); ctx.arc(2.4*s, -30.5*s, 1*s, 0, TAU); ctx.fill();
+  ctx.strokeStyle = "#6d5b80";
+  ctx.beginPath(); ctx.moveTo(-1.6*s, -26.5*s); ctx.lineTo(1.6*s, -26.5*s); ctx.stroke();
+  // a ruler, for correcting posture
+  ctx.strokeStyle = "#b9a7c9"; ctx.lineWidth = 1.6*s;
+  ctx.beginPath(); ctx.moveTo(6*s, -20*s); ctx.lineTo(12*s, -12*s); ctx.stroke();
+  ctx.restore();
+}
+
+/* ----- Captain Wickhead, an officer scarcely a gentleman ----- */
+function drawChargeLane(s){
+  const a = 0.35 + 0.4 * Math.abs(Math.sin(G.t * 8));
+  ctx.strokeStyle = `rgba(255,120,120,${a})`;
+  ctx.lineWidth = 2*s;
+  ctx.setLineDash([8*s, 8*s]);
+  ctx.beginPath();
+  ctx.moveTo(0, captain.y); ctx.lineTo(W, captain.y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawCaptain(s){
+  const { x, y } = captain;
+  const run = Math.sin(G.t * 18) * 2.5 * s;
+  shadow(x, y + 1*s, 13, s);
+  ctx.save();
+  ctx.translate(x, y - Math.abs(run) * 0.5);
+  ctx.scale(captain.face, 1);
+  // legs mid-sprint
+  ctx.strokeStyle = "#efe6f2";
+  ctx.lineWidth = 2.6*s; ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-1*s, -8*s); ctx.lineTo(-5*s - run, 2*s);
+  ctx.moveTo(1*s, -8*s); ctx.lineTo(5*s + run, 2*s);
+  ctx.stroke();
+  // redcoat with gold sash
+  ctx.fillStyle = "#8e2f3c";
+  ctx.beginPath();
+  ctx.moveTo(-6*s, -22*s);
+  ctx.quadraticCurveTo(-8*s, -10*s, -5*s, -7*s);
+  ctx.lineTo(5*s, -7*s);
+  ctx.quadraticCurveTo(8*s, -10*s, 6*s, -22*s);
+  ctx.fill();
+  ctx.strokeStyle = "#e9c87a"; ctx.lineWidth = 1.4*s;
+  ctx.beginPath(); ctx.moveTo(-5*s, -20*s); ctx.lineTo(4*s, -9*s); ctx.stroke();
+  ctx.fillStyle = "#e9c87a";
+  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(0, (-18 + i*4)*s, 0.9*s, 0, TAU); ctx.fill(); }
+  // where a head should be: crisp collar and a faint spectral wisp
+  ctx.fillStyle = "#efe6f2";
+  ctx.beginPath(); ctx.ellipse(0, -23*s, 4*s, 1.6*s, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = "rgba(185,167,201,0.5)";
+  ctx.beginPath(); ctx.ellipse(0, -27*s, 2.5*s, 3.5*s, 0, 0, TAU); ctx.fill();
+  // sabre raised
+  ctx.strokeStyle = "#8e2f3c"; ctx.lineWidth = 2.4*s;
+  ctx.beginPath(); ctx.moveTo(4*s, -18*s); ctx.quadraticCurveTo(9*s, -22*s, 11*s, -26*s); ctx.stroke();
+  ctx.strokeStyle = "#cfd4de"; ctx.lineWidth = 1.4*s;
+  ctx.beginPath(); ctx.moveTo(11*s, -26*s); ctx.lineTo(17*s, -34*s); ctx.stroke();
+  // his head, carried under the other arm — still flirting
+  ctx.strokeStyle = "#8e2f3c"; ctx.lineWidth = 2.4*s;
+  ctx.beginPath(); ctx.moveTo(-4*s, -16*s); ctx.quadraticCurveTo(-8*s, -14*s, -9*s, -11*s); ctx.stroke();
+  ctx.fillStyle = "#f3e3d3";
+  ctx.beginPath(); ctx.arc(-10*s, -9*s, 4.5*s, 0, TAU); ctx.fill();
+  ctx.fillStyle = "#14101c";
+  ctx.beginPath(); ctx.ellipse(-10*s, -12.5*s, 5.5*s, 2*s, -0.15, 0, TAU); ctx.fill(); // bicorne
+  ctx.strokeStyle = "#241627"; ctx.lineWidth = 0.9*s;
+  ctx.beginPath(); ctx.moveTo(-12*s, -9.5*s); ctx.lineTo(-10.8*s, -9.5*s); ctx.stroke(); // winking
+  ctx.fillStyle = "#241627";
+  ctx.beginPath(); ctx.arc(-8.6*s, -9.5*s, 0.8*s, 0, TAU); ctx.fill();
+  ctx.strokeStyle = "#241627";
+  ctx.beginPath(); ctx.moveTo(-11.5*s, -7.4*s); ctx.quadraticCurveTo(-10*s, -6.4*s, -8.5*s, -7.4*s); ctx.stroke();
+  ctx.restore();
+}
+
+/* ----- Nurse Rottingham, gathering her charges ----- */
+function drawNurse(s){
+  const { x, y } = nurse;
+  const wob = Math.sin(G.t * 4) * 0.05;
+  shadow(x, y + 2*s, 20, s);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(wob);
+  ctx.scale(nurse.face, 1);
+  // great grey gown
+  ctx.fillStyle = "#4a4152";
+  ctx.beginPath();
+  ctx.moveTo(-8*s, -30*s);
+  ctx.quadraticCurveTo(-20*s, -6*s, -16*s, 4*s);
+  ctx.quadraticCurveTo(0, 9*s, 16*s, 4*s);
+  ctx.quadraticCurveTo(20*s, -6*s, 8*s, -30*s);
+  ctx.fill();
+  // apron, much mended
+  ctx.fillStyle = "#ded4c8";
+  ctx.beginPath();
+  ctx.moveTo(-7*s, -24*s);
+  ctx.quadraticCurveTo(-11*s, -4*s, -9*s, 2*s);
+  ctx.quadraticCurveTo(0, 6*s, 9*s, 2*s);
+  ctx.quadraticCurveTo(11*s, -4*s, 7*s, -24*s);
+  ctx.fill();
+  ctx.strokeStyle = "#a89a8a"; ctx.lineWidth = 1*s;
+  ctx.strokeRect(-4*s, -12*s, 8*s, 7*s);
+  // arms reaching with big mitts
+  ctx.strokeStyle = "#8ba883"; ctx.lineWidth = 3.4*s; ctx.lineCap = "round";
+  const reach = Math.sin(G.t * 5) * 2*s;
+  ctx.beginPath();
+  ctx.moveTo(-10*s, -22*s); ctx.lineTo(-18*s, -18*s - reach);
+  ctx.moveTo(10*s, -22*s); ctx.lineTo(18*s, -18*s + reach);
+  ctx.stroke();
+  // head — kindly, if decomposing
+  ctx.fillStyle = "#8ba883";
+  ctx.beginPath(); ctx.arc(0, -36*s, 9*s, 0, TAU); ctx.fill();
+  // a truly enormous bonnet
+  ctx.fillStyle = "#efe6f2";
+  ctx.beginPath(); ctx.arc(0, -38*s, 9.6*s, Math.PI * 0.85, Math.PI * 2.15); ctx.fill();
+  ctx.strokeStyle = "#efe6f2"; ctx.lineWidth = 1.6*s;
+  ctx.beginPath(); ctx.moveTo(-8.5*s, -34*s); ctx.quadraticCurveTo(0, -30*s, 8.5*s, -34*s); ctx.stroke();
+  ctx.fillStyle = "#e77fa4";
+  drawHeart(8*s, -32*s, 2.2*s);
+  // spectacles low on the nose, stitched smile
+  ctx.strokeStyle = "#241627"; ctx.lineWidth = 1.1*s;
+  ctx.beginPath();
+  ctx.arc(-3*s, -36*s, 2.2*s, 0, TAU);
+  ctx.moveTo(5.2*s, -36*s);
+  ctx.arc(3*s, -36*s, 2.2*s, 0, TAU);
+  ctx.stroke();
+  ctx.fillStyle = "#241627";
+  ctx.beginPath(); ctx.arc(-3*s, -36*s, 1*s, 0, TAU); ctx.arc(3*s, -36*s, 1*s, 0, TAU); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-3.5*s, -31.5*s); ctx.quadraticCurveTo(0, -29.5*s, 3.5*s, -31.5*s);
+  ctx.stroke();
+  for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(i*2.2*s, -31.9*s); ctx.lineTo(i*2.2*s, -30*s); ctx.stroke(); }
+  ctx.restore();
+  if (nurse.pauseT > 0) {
+    ctx.fillStyle = "#f6ecd2";
+    ctx.font = `italic ${Math.round(12*s)}px Georgia, serif`;
+    ctx.textAlign = "center";
+    ctx.fillText("hush now…", x, y - 52*s);
+  }
 }
 
 function drawParticles(s){
@@ -1296,6 +1890,9 @@ function frame(now){
 resize();
 showTitle();
 requestAnimationFrame(frame);
+
+// a discreet side door, for testing one's nights
+window.__PPP = { G, startNight, player, wolf, bat, ghost, captain, nurse };
 
 })();
 </script>

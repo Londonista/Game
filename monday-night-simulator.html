@@ -477,6 +477,38 @@
     pointer-events: none; animation: squeakfloat .9s ease-out forwards; }
   @keyframes squeakfloat { 0%{ opacity:0; transform: translate(-50%,0) scale(.6);} 20%{ opacity:1;} 100%{ opacity:0; transform: translate(-50%,-28px) scale(1.05);} }
 
+  /* ---- Moonbeam: now and then a shaft of moonlight falls on the garden.
+     Friends standing in it become cute little wolves & howl at the moon. */
+  .moonbeam { position: absolute; top: 0; bottom: 38px; width: 150px; z-index: 40;
+    pointer-events: none; opacity: 0; transition: opacity 1.8s ease; }
+  .moonbeam.on { opacity: 1; }
+  .moonbeam .shaft { position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(214,228,255,.06), rgba(216,232,255,.26) 55%, rgba(228,240,255,.4));
+    clip-path: polygon(34% 0, 66% 0, 100% 100%, 0 100%);
+    filter: blur(1px); animation: mbshimmer 3.4s ease-in-out infinite; }
+  .moonbeam .pool { position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+    width: 152px; height: 34px; border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(232,242,255,.5), rgba(222,236,255,.12) 60%, transparent 72%);
+    animation: mbshimmer 3.4s ease-in-out infinite; }
+  @keyframes mbshimmer { 0%,100% { opacity: .8; } 50% { opacity: 1; } }
+  .moonbeam .mote { position: absolute; bottom: 24px; width: 4px; height: 4px; border-radius: 50%;
+    background: #eaf2ff; box-shadow: 0 0 6px 2px rgba(200,220,255,.8); animation: mbrise 4.4s linear infinite; }
+  @keyframes mbrise { 0% { transform: translateY(0); opacity: 0; } 12% { opacity: 1; }
+    100% { transform: translateY(-270px); opacity: 0; } }
+  /* the wolf form: silvery fur, pointy ears, a happy snoot and a little tail */
+  .avatar.wolf .body { background: linear-gradient(180deg,#9aa4b5,#6e7787) !important; }
+  .avatar.wolf .body::before, .avatar.wolf .body::after { content: ""; position: absolute; top: -9px;
+    width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent;
+    border-bottom: 12px solid #7d8698; }
+  .avatar.wolf .body::before { left: 4px; transform: rotate(-14deg); }
+  .avatar.wolf .body::after { right: 4px; transform: rotate(14deg); }
+  .avatar.wolf::before { content: ""; position: absolute; bottom: 18px; right: -6px; width: 20px; height: 9px;
+    border-radius: 8px; background: #7d8698; transform: rotate(-24deg); }
+  .avatar.wolf .face { color: #2e3340; }
+  .avatar.howl .body { animation: howlpose .95s ease; }
+  @keyframes howlpose { 0%,100% { transform: rotate(0); } 35% { transform: rotate(-16deg) translateY(-3px); }
+    70% { transform: rotate(-13deg) translateY(-2px); } }
+
   /* ---- Two rooms: a door on the right wall leads to "the kitchen" ------- */
   #room { transition: opacity .16s ease; }              /* gentle fade on room change */
 
@@ -1565,6 +1597,14 @@
 
       <!-- ===== GARDEN ROOM — a wide explorable world, built in JS ===== -->
       <div class="garden garden-only" id="gardenWorld"></div>
+      <!-- a shaft of moonlight that visits the garden every now and then -->
+      <div class="moonbeam garden-only" id="moonbeam">
+        <div class="shaft"></div><div class="pool"></div>
+        <div class="mote" style="left:44%"></div>
+        <div class="mote" style="left:58%;animation-delay:1.3s"></div>
+        <div class="mote" style="left:36%;animation-delay:2.2s"></div>
+        <div class="mote" style="left:66%;animation-delay:3.1s"></div>
+      </div>
       <div class="g-arrow l garden-only" id="gArrowL" title="Explore left">‹</div>
       <div class="g-arrow r garden-only" id="gArrowR" title="Explore right">›</div>
       <div class="label2 garden-only" style="left:50%; transform:translateX(-50%)">🌷 Garden</div>
@@ -3457,6 +3497,29 @@
       o.start(t); o.stop(t + (dur || 0.08) + 0.02);
     }
 
+    // A soft two-voice wolf howl: rise, hold, and a wavering fall.
+    function howl() {
+      var c = getCtx(); if (!c) return;
+      if (c.state === "suspended") c.resume();
+      var t = c.currentTime;
+      var voice = function (start, base, peak, dur, vol) {
+        var o = c.createOscillator(), g = c.createGain();
+        o.type = "sine";
+        o.frequency.setValueAtTime(base, start);
+        o.frequency.exponentialRampToValueAtTime(peak, start + dur * 0.35);
+        o.frequency.setValueAtTime(peak, start + dur * 0.55);
+        o.frequency.exponentialRampToValueAtTime(base * 1.2, start + dur);
+        g.gain.setValueAtTime(0.0001, start);
+        g.gain.exponentialRampToValueAtTime(vol, start + dur * 0.3);
+        g.gain.setValueAtTime(vol, start + dur * 0.6);
+        g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        o.connect(g); g.connect(c.destination);
+        o.start(start); o.stop(start + dur + 0.05);
+      };
+      voice(t, 220, 440, 1.25, 0.06);
+      voice(t + 0.14, 330, 660, 1.1, 0.03);
+    }
+
     // A bright "cha-ching!" for a laundromat sale (two ascending bell notes).
     function chaching() {
       var c = getCtx(); if (!c) return;
@@ -3567,7 +3630,7 @@
     }
 
     return { start: start, toggle: toggle, squeak: squeak, charSqueak: charSqueak, blip: blip,
-             chaching: chaching, startTune: startTune, stopTune: stopTune, flourish: flourish,
+             chaching: chaching, howl: howl, startTune: startTune, stopTune: stopTune, flourish: flourish,
              updateBtn: updateBtn, level: level, isMuted: function () { return muted; },
              ctxState: function () { return ctx ? ctx.state : "none"; } };
   })();
@@ -3943,6 +4006,75 @@
     w.addEventListener("mousedown", down); w.addEventListener("touchstart", down, { passive: false });
     $("gArrowL").addEventListener("click", function () { panGarden(gardenScroll - 320); });
     $("gArrowR").addEventListener("click", function () { panGarden(gardenScroll + 320); });
+  }
+
+  // ----- Moonbeam — every now and then a shaft of moonlight falls on the
+  // garden; friends standing in it become cute little wolves and howl. -----
+  var MB = { on: false, x: 0, w: 150, next: 0, checkId: null };
+  var wolves = {};   // char id -> { face: original face, t: howl-again timer }
+  function initMoonbeam() {
+    if (!$("moonbeam")) return;
+    MB.next = Date.now() + 8000;                   // first beam soon after arriving
+    setInterval(function () {
+      if (state.currentRoom !== "garden") { if (MB.on) endMoonbeam(); return; }
+      if (!MB.on && Date.now() >= MB.next) startMoonbeam();
+    }, 800);
+  }
+  function startMoonbeam() {
+    MB.on = true;
+    MB.x = 120 + Math.random() * 480;              // room-space px, clear of the edges
+    var el = $("moonbeam");
+    el.style.left = MB.x + "px";
+    el.classList.add("on");
+    MB.checkId = setInterval(checkWolves, 420);
+    setTimeout(endMoonbeam, 9500);
+  }
+  function endMoonbeam() {
+    if (!MB.on) return;
+    MB.on = false;
+    $("moonbeam").classList.remove("on");
+    clearInterval(MB.checkId);
+    MB.next = Date.now() + 16000 + Math.random() * 14000;   // next visit in 16-30s
+    ["jas", "aqsa", "adam"].forEach(function (id) {
+      var el = room.querySelector('[data-char="' + id + '"]');
+      if (el) unwolf(el, id);
+    });
+  }
+  function checkWolves() {
+    if (!MB.on) return;
+    ["jas", "aqsa", "adam"].forEach(function (id) {
+      var c = charById(id), px = c.x / 100 * 800;
+      var inBeam = c.y > 40 && px > MB.x + 10 && px < MB.x + MB.w - 10;
+      var el = room.querySelector('[data-char="' + id + '"]');
+      if (!el) return;
+      if (inBeam && !wolves[id]) wolfify(el, id);
+      else if (!inBeam && wolves[id]) unwolf(el, id);
+    });
+  }
+  function wolfify(el, id) {
+    var face = el.querySelector(".face");
+    wolves[id] = { face: face ? face.textContent : "", t: setInterval(function () { doHowl(el); }, 4200) };
+    el.classList.add("wolf");
+    if (face) face.textContent = "ᵔᴥᵔ";
+    doHowl(el);
+  }
+  function doHowl(el) {
+    el.classList.remove("howl"); void el.offsetWidth; el.classList.add("howl");
+    Ambient.howl();
+    var note = document.createElement("div");
+    note.className = "squeaknote";
+    note.textContent = "Awooo! 🌕";
+    el.appendChild(note);
+    setTimeout(function () { if (note.parentNode) note.remove(); }, 1100);
+    setTimeout(function () { el.classList.remove("howl"); }, 990);
+  }
+  function unwolf(el, id) {
+    if (!wolves[id]) return;
+    clearInterval(wolves[id].t);
+    el.classList.remove("wolf", "howl");
+    var face = el.querySelector(".face");
+    if (face) face.textContent = wolves[id].face;
+    delete wolves[id];
   }
 
   // House overview — a little floor plan of every room (left to right, the way
@@ -4514,6 +4646,7 @@
   }
 
   function boot() {
+    state.currentRoom = "main";   // every session starts in Jas's bedroom
     renderSeason();
     fitRoom();
     renderRoom();
@@ -4523,6 +4656,7 @@
     initCharacters();
     initGardenDoorDrag();
     initGardenPan();
+    initMoonbeam();
     updateHud();
     Pet.init();
     Ambient.updateBtn();

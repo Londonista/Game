@@ -1215,11 +1215,11 @@
     radial-gradient(circle at 30% 72%, #35507a 0 18%, transparent 19%),
     linear-gradient(30deg,#efe0bd 55%,#e0c99c 55%); }
   /* named doors along the landing wall */
-  .hdoor { position: absolute; top: 196px; width: 64px; height: 166px; z-index: 3; cursor: pointer; }
-  .hdoor .leaf { position: absolute; inset: 0; background: linear-gradient(180deg,#7a5230,#5a3a20);
-    border: 4px solid #44301c; border-radius: 8px 8px 0 0; box-shadow: inset 0 0 0 3px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.3); }
+  .hdoor { position: absolute; top: 196px; width: 74px; height: 166px; z-index: 3; cursor: pointer; }
+  .hdoor .leaf { position: absolute; inset: 0; background: linear-gradient(180deg,#fbf7ef,#e6e0d1);
+    border: 4px solid #c6bfae; border-radius: 8px 8px 0 0; box-shadow: inset 0 0 0 3px rgba(0,0,0,.05), 0 4px 12px rgba(0,0,0,.3); }
   .hdoor .dpnl { position: absolute; left: 10px; right: 10px; top: 14px; bottom: 30px; border-radius: 5px;
-    background: linear-gradient(180deg,#6b482a,#503620); border: 3px solid rgba(0,0,0,.18); }
+    background: linear-gradient(180deg,#f4efe3,#e0d9c6); border: 3px solid rgba(120,110,88,.28); }
   .hdoor .knob { position: absolute; top: 52%; right: 10px; width: 8px; height: 8px; border-radius: 50%;
     background: radial-gradient(circle at 35% 35%,#ffe39a,#c79436); box-shadow: 0 0 6px rgba(255,210,120,.6); }
   .hdoor .plate { position: absolute; top: -34px; left: 50%; transform: translateX(-50%); white-space: nowrap;
@@ -1527,16 +1527,16 @@
       <div class="ss landing-only" id="stairsDown" style="left:20px" title="Downstairs to the hallway">
         <div class="hint">↓ downstairs</div>
       </div>
-      <div class="hdoor landing-only" id="doorAqsa" style="left:228px" title="Aqsa's Room">
+      <div class="hdoor landing-only" id="doorAqsa" style="left:222px" title="Aqsa's Room">
         <div class="plate">Aqsa</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="garl"></div>
       </div>
-      <div class="hdoor landing-only" id="doorJas" style="left:352px" title="Jas's Room">
+      <div class="hdoor landing-only" id="doorJas" style="left:348px" title="Jas's Room">
         <div class="plate">Jas</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="garl"></div>
       </div>
-      <div class="hdoor landing-only" id="doorAdam" style="left:476px" title="Adam's Room">
+      <div class="hdoor landing-only" id="doorAdam" style="left:474px" title="Adam's Room">
         <div class="plate">Adam</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="garl"></div>
       </div>
-      <div class="hdoor landing-only" id="doorBath" style="left:616px" title="The bathroom">
+      <div class="hdoor landing-only" id="doorBath" style="left:612px" title="The bathroom">
         <div class="plate">🛁 Bath</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="garl"></div>
       </div>
 
@@ -1839,7 +1839,7 @@
     // Positions of the built-in furniture (x = centre %, y = floor-contact %).
     // Drag a piece upward (smaller y) to send it to the back of the room.
     furniture: [
-      { id: "wardrobe",  x: 8.5,  y: 91 },
+      { id: "wardrobe",  x: 30,  y: 91 },   // clear of the landing door on the left
       { id: "desk",      x: 79,   y: 94 }
     ],
     // Where the three friends are standing (x = centre %, y = floor-contact %).
@@ -1886,6 +1886,12 @@
       if (!hasU("snug_rug")) s.placed.push({ uid: "snug_rug", itemId: "rug_rust", x: 50, y: 88, room: "snug", scale: 1 });
       if (!hasU("bed_rug")) s.placed.push({ uid: "bed_rug", itemId: "rug_lilac", x: 52, y: 86, room: "main", scale: 1 });
       s.rugsAdded = true;
+    }
+    // nudge the wardrobe off the bedroom's landing door once (it used to
+    // sit right on top of the only exit — players can still drag it back)
+    if (!s.wardrobeNudged) {
+      (s.furniture || []).forEach(function (f) { if (f.id === "wardrobe" && f.x < 20) f.x = 30; });
+      s.wardrobeNudged = true;
     }
     // furnish the two extra bedrooms with a bed + rug once
     if (!s.extraBedsAdded) {

@@ -290,6 +290,7 @@
   .shop-card:hover { transform: translateY(-2px); border-color: var(--accent); }
   .shop-card .ic { font-size: 34px; }
   .shop-card .nm { font-size: 12px; font-weight: 700; margin-top: 4px; }
+  .shop-card .bl { font-size: 10px; color: #9a7a52; line-height: 1.3; margin-top: 2px; min-height: 26px; font-style: italic; }
   .shop-card .pr { font-size: 12px; color: #b07a2a; font-weight: 800; margin-top: 3px; }
   .shop-card.locked { opacity: .55; cursor: not-allowed; }
   .shop-card.cant { opacity: .7; }
@@ -483,9 +484,9 @@
     color: #ffd86b; font-size: 12px; text-shadow: 0 1px 3px rgba(0,0,0,.55);
     animation: selbob 1.1s ease-in-out infinite; pointer-events: none; }
   @keyframes selbob { 0%,100% { transform: translate(-50%,0); } 50% { transform: translate(-50%,-5px); } }
-  .avatar.walking .body { animation: waddle .38s ease-in-out infinite; }
-  @keyframes waddle { 0%,100% { transform: rotate(0); } 25% { transform: rotate(6deg) translateY(-2px); }
-    75% { transform: rotate(-6deg) translateY(-2px); } }
+  .avatar.walking .body { animation: waddle .52s ease-in-out infinite; }
+  @keyframes waddle { 0%,100% { transform: rotate(0) translateY(0); } 25% { transform: rotate(5deg) translateY(-4px); }
+    50% { transform: rotate(0) translateY(0); } 75% { transform: rotate(-5deg) translateY(-4px); } }
 
   /* ---- Moonbeam: now and then a shaft of moonlight falls on the garden.
      Friends standing in it become cute little wolves & howl at the moon. */
@@ -808,8 +809,11 @@
     radial-gradient(2px 2px at 40% 60%, rgba(0,0,0,.12), transparent),
     radial-gradient(2px 2px at 70% 40%, rgba(255,255,255,.1), transparent),
     radial-gradient(2px 2px at 90% 70%, rgba(0,0,0,.12), transparent); background-size: 80px 80px; }
-  .g-moon { position: absolute; top: 40px; left: 90px; width: 50px; height: 50px; border-radius: 50%;
-    background: radial-gradient(circle at 38% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 30px rgba(255,240,200,.5); }
+  /* the big garden moon — fixed to the frame, centred in the sky (a distant
+     moon shouldn't slide past as you pan). The house windows keep their own. */
+  .gmoon { position: absolute; top: 44px; left: 50%; transform: translateX(-50%); width: 58px; height: 58px;
+    border-radius: 50%; z-index: 2; pointer-events: none;
+    background: radial-gradient(circle at 38% 38%, #fffdf0, #ffe9a8); box-shadow: 0 0 36px rgba(255,240,200,.55); }
   .g-lights { position: absolute; top: 26px; left: 10px; right: 10px; height: 16px; border-top: 2px solid rgba(30,22,14,.5);
     background: radial-gradient(circle at 14px 9px, #ffd87a 0 3px, transparent 4px) repeat-x; background-size: 54px 16px;
     filter: drop-shadow(0 0 3px rgba(255,210,120,.75)); }
@@ -1033,6 +1037,23 @@
   #room[data-room="garden"] .g-arrow { display: flex; }
   .g-arrow.l { left: 92px; } .g-arrow.r { right: 6px; }
   .g-arrow:active { background: rgba(20,28,20,.7); }
+  /* ---- the season touches the garden (summer is the baseline look) ------ */
+  #gardenWorld[data-season="autumn"] .g-tree2 .cn { background: radial-gradient(circle at 40% 34%, #c07a2e, #8a4e1e);
+    box-shadow: -28px 18px 0 -10px #a8641f, 30px 14px 0 -8px #a8641f; }
+  #gardenWorld[data-season="autumn"] .g-ground { background: linear-gradient(180deg,#7a7a3a,#4e4e26); }
+  #gardenWorld[data-season="autumn"] .g-bush2, #gardenWorld[data-season="autumn"] .g-hedge { filter: sepia(.35) saturate(.9); }
+  #gardenWorld[data-season="autumn"] .g-petal { border-radius: 60% 0 60% 0; }
+  #gardenWorld[data-season="winter"] .g-ground { background: linear-gradient(180deg,#e6edf6,#b9c8da); }
+  #gardenWorld[data-season="winter"] .g-tree2 .cn { background: radial-gradient(circle at 40% 34%, #eef4fa, #b9c8da);
+    box-shadow: -28px 18px 0 -10px #d8e2ee, 30px 14px 0 -8px #d8e2ee; }
+  #gardenWorld[data-season="winter"] .g-tree2 .cn::after { opacity: 0; }          /* no fruit in the snow */
+  #gardenWorld[data-season="winter"] .g-bush2, #gardenWorld[data-season="winter"] .g-hedge { filter: saturate(.45) brightness(1.35); }
+  #gardenWorld[data-season="winter"] .g-pond { background: radial-gradient(circle at 42% 32%, #cfe6f3, #8fb6d0); }
+  #gardenWorld[data-season="winter"] .g-petal { border-radius: 50%; box-shadow: 0 0 4px rgba(255,255,255,.8); }
+  #gardenWorld[data-season="winter"] .g-path { opacity: .45; }
+  #gardenWorld[data-season="spring"] .g-tree2 .cn { background: radial-gradient(circle at 40% 34%, #e8a8c8, #c8749e);
+    box-shadow: -28px 18px 0 -10px #d88cb2, 30px 14px 0 -8px #d88cb2; }
+  #gardenWorld[data-season="spring"] .g-ground { background: linear-gradient(180deg,#579450,#3a6a3c); }
 
   /* ---- The Snug (data-room="snug") — a cosy sitting room ---------------- */
   #room[data-room="snug"] { background: linear-gradient(180deg,#2e514a,#427563 64%); }
@@ -1607,6 +1628,7 @@
 
       <!-- ===== GARDEN ROOM — a wide explorable world, built in JS ===== -->
       <div class="garden garden-only" id="gardenWorld"></div>
+      <div class="gmoon garden-only"></div>
       <!-- a shaft of moonlight that visits the garden every now and then -->
       <div class="moonbeam garden-only" id="moonbeam">
         <div class="shaft"></div><div class="pool"></div>
@@ -1702,118 +1724,118 @@
   // =====================================================================
   var CATALOGUE = [
     // --- Starter cosies (available from night 1) ---
-    { id: "rug",      name: "Cozy Rug",     ic: "🟫", price: 8,  unlockAt: 0, set: "Starter" },
-    { id: "plantpot", name: "Little Plant", ic: "🪴", price: 10, unlockAt: 0, set: "Starter" },
-    { id: "lamp",     name: "Warm Lamp",    ic: "💡", price: 12, unlockAt: 0, set: "Starter" },
-    { id: "beanbag",  name: "Bean Bag",     ic: "🛋️", price: 14, unlockAt: 0, set: "Starter" },
-    { id: "books",    name: "Book Stack",   ic: "📚", price: 9,  unlockAt: 0, set: "Starter" },
-    { id: "candle",   name: "Candle",       ic: "🕯️", price: 7,  unlockAt: 0, set: "Starter" },
+    { id: "rug",      name: "Cozy Rug",     ic: "🟫", price: 8,  unlockAt: 0, set: "Starter", bl: "For cold toes during film debates." },
+    { id: "plantpot", name: "Little Plant", ic: "🪴", price: 10, unlockAt: 0, set: "Starter", bl: "Adam swears he'll water it. He won't." },
+    { id: "lamp",     name: "Warm Lamp",    ic: "💡", price: 12, unlockAt: 0, set: "Starter", bl: "The official glow of Monday nights." },
+    { id: "beanbag",  name: "Bean Bag",     ic: "🛋️", price: 14, unlockAt: 0, set: "Starter", bl: "First one in gets it. House rules." },
+    { id: "books",    name: "Book Stack",   ic: "📚", price: 9,  unlockAt: 0, set: "Starter", bl: "Three bookmarks, zero finished." },
+    { id: "candle",   name: "Candle",       ic: "🕯️", price: 7,  unlockAt: 0, set: "Starter", bl: "Smells like 'cosy autumn hug', allegedly." },
 
     // --- Lighting (all available from night 1) ---
     // String Lights renders as a garland that hangs across the room (see buildGarland).
-    { id: "string",      name: "String Lights", ic: "✨", price: 16, unlockAt: 0, set: "Lighting", render: "garland" },
-    { id: "fairylights", name: "Fairy Lights",  ic: "🎇", price: 16, unlockAt: 0, set: "Lighting" },
-    { id: "lantern",     name: "Paper Lantern", ic: "🏮", price: 14, unlockAt: 0, set: "Lighting" },
-    { id: "floorlamp",   name: "Floor Lamp",    ic: "🪔", price: 18, unlockAt: 0, set: "Lighting" },
-    { id: "glowstars",   name: "Glow Stars",    ic: "🌟", price: 12, unlockAt: 0, set: "Lighting" },
-    { id: "neon",        name: "Neon Sign",     ic: "💟", price: 22, unlockAt: 0, set: "Lighting" },
-    { id: "sunsetlamp",  name: "Sunset Lamp",   ic: "🌇", price: 20, unlockAt: 0, set: "Lighting" },
+    { id: "string",      name: "String Lights", ic: "✨", price: 16, unlockAt: 0, set: "Lighting", render: "garland", bl: "Jas insists these stay up all year." },
+    { id: "fairylights", name: "Fairy Lights",  ic: "🎇", price: 16, unlockAt: 0, set: "Lighting", bl: "For a room that twinkles back." },
+    { id: "lantern",     name: "Paper Lantern", ic: "🏮", price: 14, unlockAt: 0, set: "Lighting", bl: "Soft light for soft evenings." },
+    { id: "floorlamp",   name: "Floor Lamp",    ic: "🪔", price: 18, unlockAt: 0, set: "Lighting", bl: "Tall, warm and quietly dependable." },
+    { id: "glowstars",   name: "Glow Stars",    ic: "🌟", price: 12, unlockAt: 0, set: "Lighting", bl: "A ceiling of tiny green galaxies." },
+    { id: "neon",        name: "Neon Sign",     ic: "💟", price: 22, unlockAt: 0, set: "Lighting", bl: "Aqsa's pick. It hums a little. It's fine." },
+    { id: "sunsetlamp",  name: "Sunset Lamp",   ic: "🌇", price: 20, unlockAt: 0, set: "Lighting", bl: "Golden hour, on demand, forever." },
 
     // --- Greenery: mini plants ---
-    { id: "sprout",    name: "Tiny Sprout",      ic: "🌱", price: 6,  unlockAt: 0, set: "Greenery" },
-    { id: "succulent", name: "Mini Succulent",   ic: "🌵", price: 9,  unlockAt: 0, set: "Greenery" },
-    { id: "flowers",   name: "Vase of Flowers",  ic: "💐", price: 12, unlockAt: 0, set: "Greenery" },
-    { id: "vase",      name: "Glass Vase",       ic: "🏺", price: 10, unlockAt: 0, set: "Greenery", render: "vase" },
-    { id: "bamboo",    name: "Lucky Bamboo",     ic: "🎍", price: 11, unlockAt: 0, set: "Greenery" },
-    { id: "herb",      name: "Herb Pot",         ic: "🌿", price: 8,  unlockAt: 0, set: "Greenery" },
-    { id: "tulip",     name: "Potted Tulip",     ic: "🌷", price: 10, unlockAt: 0, set: "Greenery" },
+    { id: "sprout",    name: "Tiny Sprout",      ic: "🌱", price: 6,  unlockAt: 0, set: "Greenery", bl: "Small now. Believe in it." },
+    { id: "succulent", name: "Mini Succulent",   ic: "🌵", price: 9,  unlockAt: 0, set: "Greenery", bl: "Thrives on neglect, like the group chat." },
+    { id: "flowers",   name: "Vase of Flowers",  ic: "💐", price: 12, unlockAt: 0, set: "Greenery", bl: "Because somebody deserves them." },
+    { id: "vase",      name: "Glass Vase",       ic: "🏺", price: 10, unlockAt: 0, set: "Greenery", render: "vase", bl: "Elegant. Please nobody bonk near it." },
+    { id: "bamboo",    name: "Lucky Bamboo",     ic: "🎍", price: 11, unlockAt: 0, set: "Greenery", bl: "For luck with next week's star catch." },
+    { id: "herb",      name: "Herb Pot",         ic: "🌿", price: 8,  unlockAt: 0, set: "Greenery", bl: "Kitchen dreams of future feasts." },
+    { id: "tulip",     name: "Potted Tulip",     ic: "🌷", price: 10, unlockAt: 0, set: "Greenery", bl: "Nods along to your conversations." },
 
     // --- Wall Art: paintings & posters ---
-    { id: "landscape", name: "Landscape Painting", ic: "🏞️", price: 16, unlockAt: 0, set: "Wall Art" },
-    { id: "abstract",  name: "Abstract Art",       ic: "🎨", price: 14, unlockAt: 0, set: "Wall Art" },
-    { id: "mappost",   name: "Vintage Map",        ic: "🗺️", price: 10, unlockAt: 0, set: "Wall Art", render: "map" },
-    { id: "filmposter",name: "Film Poster",        ic: "🎭", price: 13, unlockAt: 0, set: "Wall Art" },
-    { id: "framedpic", name: "Framed Photo",       ic: "🖼️", price: 12, unlockAt: 0, set: "Wall Art" },
-    { id: "tapestry",  name: "Tapestry",           ic: "🧵", price: 15, unlockAt: 0, set: "Wall Art" },
+    { id: "landscape", name: "Landscape Painting", ic: "🏞️", price: 16, unlockAt: 0, set: "Wall Art", bl: "Somewhere the three of you should go." },
+    { id: "abstract",  name: "Abstract Art",       ic: "🎨", price: 14, unlockAt: 0, set: "Wall Art", bl: "Adam says it's upside down. Is it?" },
+    { id: "mappost",   name: "Vintage Map",        ic: "🗺️", price: 10, unlockAt: 0, set: "Wall Art", render: "map", bl: "For plotting trips you'll plan at 1am." },
+    { id: "filmposter",name: "Film Poster",        ic: "🎭", price: 13, unlockAt: 0, set: "Wall Art", bl: "From THAT film. You know the one." },
+    { id: "framedpic", name: "Framed Photo",       ic: "🖼️", price: 12, unlockAt: 0, set: "Wall Art", bl: "The three of you, mid-laugh." },
+    { id: "tapestry",  name: "Tapestry",           ic: "🧵", price: 15, unlockAt: 0, set: "Wall Art", bl: "Instant 'we have taste' energy." },
 
     // --- Study: an empty ornate bookcase + things to fill it ---
-    { id: "bookcase",  name: "Bookcase",      ic: "📚", price: 28, unlockAt: 0, set: "Study", render: "bookcase" },
-    { id: "globe",     name: "Globe",         ic: "🌐", price: 16, unlockAt: 0, set: "Study" },
-    { id: "skull",     name: "Skull Décor",   ic: "💀", price: 12, unlockAt: 0, set: "Study" },
-    { id: "penpot",    name: "Pen Pot",       ic: "🖊️", price: 8,  unlockAt: 0, set: "Study" },
-    { id: "redbook",   name: "Red Book",      ic: "📕", price: 5,  unlockAt: 0, set: "Study" },
-    { id: "greenbook", name: "Green Book",    ic: "📗", price: 5,  unlockAt: 0, set: "Study" },
-    { id: "bluebook",  name: "Blue Book",     ic: "📘", price: 5,  unlockAt: 0, set: "Study" },
-    { id: "orangebook",name: "Orange Book",   ic: "📙", price: 5,  unlockAt: 0, set: "Study" },
-    { id: "openbook",  name: "Open Book",     ic: "📖", price: 6,  unlockAt: 0, set: "Study" },
+    { id: "bookcase",  name: "Bookcase",      ic: "📚", price: 28, unlockAt: 0, set: "Study", render: "bookcase", bl: "Waiting to hold everyone's favourites." },
+    { id: "globe",     name: "Globe",         ic: "🌐", price: 16, unlockAt: 0, set: "Study", bl: "Spin it, point, promise to visit." },
+    { id: "skull",     name: "Skull Décor",   ic: "💀", price: 12, unlockAt: 0, set: "Study", bl: "Alas! It pairs well with candles." },
+    { id: "penpot",    name: "Pen Pot",       ic: "🖊️", price: 8,  unlockAt: 0, set: "Study", bl: "Every pen borrowed, none returned." },
+    { id: "redbook",   name: "Red Book",      ic: "📕", price: 5,  unlockAt: 0, set: "Study", bl: "Jas's pick for the shelf." },
+    { id: "greenbook", name: "Green Book",    ic: "📗", price: 5,  unlockAt: 0, set: "Study", bl: "Aqsa's pick for the shelf." },
+    { id: "bluebook",  name: "Blue Book",     ic: "📘", price: 5,  unlockAt: 0, set: "Study", bl: "Adam's pick for the shelf." },
+    { id: "orangebook",name: "Orange Book",   ic: "📙", price: 5,  unlockAt: 0, set: "Study", bl: "The book club book. Week four of it." },
+    { id: "openbook",  name: "Open Book",     ic: "📖", price: 6,  unlockAt: 0, set: "Study", bl: "Left open at the good bit." },
 
     // --- Boudoir ---
-    { id: "vanity",    name: "Dressing Table", ic: "🪞", price: 34, unlockAt: 0, set: "Boudoir", render: "vanity" },
-    { id: "wardrobe_white", name: "Ornate Wardrobe", ic: "👗", price: 40, unlockAt: 0, set: "Boudoir", render: "wardrobe" },
+    { id: "vanity",    name: "Dressing Table", ic: "🪞", price: 34, unlockAt: 0, set: "Boudoir", render: "vanity", bl: "For getting ready to go nowhere." },
+    { id: "wardrobe_white", name: "Ornate Wardrobe", ic: "👗", price: 40, unlockAt: 0, set: "Boudoir", render: "wardrobe", bl: "Tap it to dress the three of you up." },
 
     // --- Snug (cosy seating) ---
-    { id: "sofa_rust", name: "Cosy Sofa", ic: "🛋️", price: 36, unlockAt: 0, set: "Snug", render: "sofa" },
-    { id: "lamp_floor", name: "Floor Lamp", ic: "🪔", price: 18, unlockAt: 0, set: "Snug", render: "lamp" },
-    { id: "sideboard_green", name: "Sideboard", ic: "🟩", price: 32, unlockAt: 0, set: "Snug", render: "sideboard" },
+    { id: "sofa_rust", name: "Cosy Sofa", ic: "🛋️", price: 36, unlockAt: 0, set: "Snug", render: "sofa", bl: "Seats three friends, no arguing." },
+    { id: "lamp_floor", name: "Floor Lamp", ic: "🪔", price: 18, unlockAt: 0, set: "Snug", render: "lamp", bl: "Reading-corner warmth, dialled in." },
+    { id: "sideboard_green", name: "Sideboard", ic: "🟩", price: 32, unlockAt: 0, set: "Snug", render: "sideboard", bl: "What's in the drawers? Nobody knows." },
 
     // --- Rugs (drag them under your furniture) ---
-    { id: "rug_lilac", name: "Lilac Rug", ic: "🟪", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "lilac" },
-    { id: "rug_rust",  name: "Cosy Rug",  ic: "🟫", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "rust" },
-    { id: "rug_sage",  name: "Sage Rug",  ic: "🟩", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "sage" },
-    { id: "rug_rose",  name: "Rose Rug",  ic: "🌹", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "rose" },
+    { id: "rug_lilac", name: "Lilac Rug", ic: "🟪", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "lilac", bl: "Jas's colour, obviously." },
+    { id: "rug_rust",  name: "Cosy Rug",  ic: "🟫", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "rust", bl: "Warm as a mug of Monday tea." },
+    { id: "rug_sage",  name: "Sage Rug",  ic: "🟩", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "sage", bl: "Calm floors, calm minds." },
+    { id: "rug_rose",  name: "Rose Rug",  ic: "🌹", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "rose", bl: "Soft enough to nap on. Tested." },
 
     // --- Outfits (worn by the friends via the ornate wardrobe) ---
-    { id: "hat_tiara",   name: "Tiara",        ic: "👑", price: 10, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👑", art: "tiara" } },
-    { id: "hat_bow",     name: "Hair Bow",     ic: "🎀", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🎀", art: "bow" } },
-    { id: "hat_sun",     name: "Sun Hat",      ic: "👒", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👒", art: "sunhat" } },
-    { id: "hat_flower",  name: "Flower Crown", ic: "🌸", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🌸", art: "flower" } },
-    { id: "hat_cap",     name: "Beanie",       ic: "🧢", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🧢", art: "beanie" } },
-    { id: "gl_shades",   name: "Sunglasses",   ic: "🕶️", price: 7,  unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "🕶️", art: "shades" } },
-    { id: "gl_reading",  name: "Reading Glasses", ic: "👓", price: 7, unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "👓", art: "reading" } },
+    { id: "hat_tiara",   name: "Tiara",        ic: "👑", price: 10, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👑", art: "tiara" }, bl: "Whoever wins the mini-game wears it." },
+    { id: "hat_bow",     name: "Hair Bow",     ic: "🎀", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🎀", art: "bow" }, bl: "Instant plus two to cuteness." },
+    { id: "hat_sun",     name: "Sun Hat",      ic: "👒", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👒", art: "sunhat" }, bl: "For garden strolls under the moon." },
+    { id: "hat_flower",  name: "Flower Crown", ic: "🌸", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🌸", art: "flower" }, bl: "Garden-party royalty, all three of you." },
+    { id: "hat_cap",     name: "Beanie",       ic: "🧢", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🧢", art: "beanie" }, bl: "Adam's signature look, probably." },
+    { id: "gl_shades",   name: "Sunglasses",   ic: "🕶️", price: 7,  unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "🕶️", art: "shades" }, bl: "Indoors. At night. Iconic." },
+    { id: "gl_reading",  name: "Reading Glasses", ic: "👓", price: 7, unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "👓", art: "reading" }, bl: "For looking wise during book club." },
 
     // --- Beds (different colours) ---
-    { id: "bed_pink",   name: "Pink Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "pink" },
-    { id: "bed_blue",   name: "Blue Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "blue" },
-    { id: "bed_green",  name: "Green Bed",  ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "green" },
-    { id: "bed_yellow", name: "Yellow Bed", ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "yellow" },
-    { id: "bed_lilac",  name: "Lilac Bed",  ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "lilac" },
-    { id: "bed_teal",   name: "Teal Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "teal" },
-    { id: "dbed_pink",   name: "Pink Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "pink",   size: "double" },
-    { id: "dbed_blue",   name: "Blue Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "blue",   size: "double" },
-    { id: "dbed_green",  name: "Green Double",  ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "green",  size: "double" },
-    { id: "dbed_yellow", name: "Yellow Double", ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "yellow", size: "double" },
-    { id: "dbed_lilac",  name: "Lilac Double",  ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "lilac",  size: "double" },
-    { id: "dbed_teal",   name: "Teal Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "teal",   size: "double" },
+    { id: "bed_pink",   name: "Pink Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "pink", bl: "Sunset-cheek pink, like Jas." },
+    { id: "bed_blue",   name: "Blue Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "blue", bl: "Adam-blue. Dreams guaranteed." },
+    { id: "bed_green",  name: "Green Bed",  ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "green", bl: "For dreaming of the garden." },
+    { id: "bed_yellow", name: "Yellow Bed", ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "yellow", bl: "Wake up on the sunny side." },
+    { id: "bed_lilac",  name: "Lilac Bed",  ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "lilac", bl: "Matches the famous lilac rug." },
+    { id: "bed_teal",   name: "Teal Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "teal", bl: "Aqsa-teal, cool and calm." },
+    { id: "dbed_pink",   name: "Pink Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "pink",   size: "double", bl: "Twice the pink, twice the nap." },
+    { id: "dbed_blue",   name: "Blue Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "blue",   size: "double", bl: "Starfish sleeping, fully unlocked." },
+    { id: "dbed_green",  name: "Green Double",  ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "green",  size: "double", bl: "A meadow's worth of mattress." },
+    { id: "dbed_yellow", name: "Yellow Double", ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "yellow", size: "double", bl: "Big, bright and blanket-ready." },
+    { id: "dbed_lilac",  name: "Lilac Double",  ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "lilac",  size: "double", bl: "Maximum lilac. Jas approves." },
+    { id: "dbed_teal",   name: "Teal Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "teal",   size: "double", bl: "Deep-sea calm, king-sized." },
 
     // --- Unlocks at 3 Mondays ---
-    { id: "lava",     name: "Lava Lamp",    ic: "🔮", price: 18, unlockAt: 3, set: "Glow Up" },
-    { id: "poster",   name: "Poster",       ic: "🖼️", price: 13, unlockAt: 3, set: "Glow Up" },
-    { id: "guitar",   name: "Guitar",       ic: "🎸", price: 22, unlockAt: 3, set: "Glow Up" },
+    { id: "lava",     name: "Lava Lamp",    ic: "🔮", price: 18, unlockAt: 3, set: "Glow Up", bl: "Hypnotic. Conversations improve 40%." },
+    { id: "poster",   name: "Poster",       ic: "🖼️", price: 13, unlockAt: 3, set: "Glow Up", bl: "Three Mondays earned this wall." },
+    { id: "guitar",   name: "Guitar",       ic: "🎸", price: 22, unlockAt: 3, set: "Glow Up", bl: "Someone knows four chords. Enough." },
 
     // --- Toys ---
-    { id: "bat",      name: "Baseball Bat", ic: "🏏", price: 15, unlockAt: 0, set: "Toys" },
+    { id: "bat",      name: "Baseball Bat", ic: "🏏", price: 15, unlockAt: 0, set: "Toys", bl: "Unlocks tap-to-bonk. Use with love." },
 
     // --- Unlocks at 6 Mondays ---
-    { id: "cat",      name: "Cat Plushie",  ic: "🐱", price: 30, unlockAt: 6, set: "Friends" },
-    { id: "tea",      name: "Pot of Tea",   ic: "🫖", price: 11, unlockAt: 6, set: "Friends" },
-    { id: "cake",     name: "Snack Cake",   ic: "🍰", price: 12, unlockAt: 6, set: "Friends" },
-    { id: "vinyl",    name: "Record Player",ic: "📻", price: 24, unlockAt: 6, set: "Friends" },
+    { id: "cat",      name: "Cat Plushie",  ic: "🐱", price: 30, unlockAt: 6, set: "Friends", bl: "So the real cat has a friend too." },
+    { id: "tea",      name: "Pot of Tea",   ic: "🫖", price: 11, unlockAt: 6, set: "Friends", bl: "Six Mondays deep — you've earned a pot." },
+    { id: "cake",     name: "Snack Cake",   ic: "🍰", price: 12, unlockAt: 6, set: "Friends", bl: "Three forks, one plate, no crumbs left." },
+    { id: "vinyl",    name: "Record Player",ic: "📻", price: 24, unlockAt: 6, set: "Friends", bl: "For the songs everyone knows by heart." },
 
     // --- Unlocks at 10 Mondays ---
-    { id: "fairy",    name: "Fairy Window", ic: "✨", price: 28, unlockAt: 10, set: "Twinkle" },
-    { id: "balloon",  name: "Party Balloon",ic: "🎈", price: 15, unlockAt: 10, set: "Twinkle" },
-    { id: "mirror",   name: "Round Mirror", ic: "🪞", price: 20, unlockAt: 10, set: "Twinkle" },
-    { id: "clock",    name: "Wall Clock",   ic: "🕰️", price: 17, unlockAt: 10, set: "Twinkle" },
+    { id: "fairy",    name: "Fairy Window", ic: "✨", price: 28, unlockAt: 10, set: "Twinkle", bl: "Ten weeks of Mondays, made of light." },
+    { id: "balloon",  name: "Party Balloon",ic: "🎈", price: 15, unlockAt: 10, set: "Twinkle", bl: "Celebrating nothing. Celebrating everything." },
+    { id: "mirror",   name: "Round Mirror", ic: "🪞", price: 20, unlockAt: 10, set: "Twinkle", bl: "Looking great, all three of you." },
+    { id: "clock",    name: "Wall Clock",   ic: "🕰️", price: 17, unlockAt: 10, set: "Twinkle", bl: "Counts down to next Monday night." },
 
     // --- Unlocks at 15 Mondays ---
-    { id: "fish",     name: "Fish Tank",    ic: "🐠", price: 40, unlockAt: 15, set: "Deluxe" },
-    { id: "piano",    name: "Tiny Piano",   ic: "🎹", price: 45, unlockAt: 15, set: "Deluxe" },
-    { id: "disco",    name: "Disco Ball",   ic: "🪩", price: 38, unlockAt: 15, set: "Deluxe" },
+    { id: "fish",     name: "Fish Tank",    ic: "🐠", price: 40, unlockAt: 15, set: "Deluxe", bl: "Name them after each other. Do it." },
+    { id: "piano",    name: "Tiny Piano",   ic: "🎹", price: 45, unlockAt: 15, set: "Deluxe", bl: "Fifteen Mondays deserves a fanfare." },
+    { id: "disco",    name: "Disco Ball",   ic: "🪩", price: 38, unlockAt: 15, set: "Deluxe", bl: "Kitchen dance floor: activated." },
 
     // --- IN-JOKES (TODO(personalise): swap these for your real in-jokes!) ---
-    { id: "joke1",    name: "Beans (!!)",   ic: "🫘", price: 6,  unlockAt: 0, set: "In-Jokes", joke: true },
-    { id: "joke2",    name: "Fave Snack",   ic: "🍫", price: 9,  unlockAt: 0, set: "In-Jokes", joke: true },
-    { id: "joke3",    name: "The Poster",   ic: "🎬", price: 14, unlockAt: 3, set: "In-Jokes", joke: true }
+    { id: "joke1",    name: "Beans (!!)",   ic: "🫘", price: 6,  unlockAt: 0, set: "In-Jokes", joke: true, bl: "If you know, you know." },
+    { id: "joke2",    name: "Fave Snack",   ic: "🍫", price: 9,  unlockAt: 0, set: "In-Jokes", joke: true, bl: "Hidden from Adam. Especially Adam." },
+    { id: "joke3",    name: "The Poster",   ic: "🎬", price: 14, unlockAt: 3, set: "In-Jokes", joke: true, bl: "It's been quoted every week since." }
   ];
 
   // Mini-games unlock over time too.
@@ -2638,6 +2660,7 @@
       if (owned) html += '<span class="tag">owned</span>';
       if (!unlocked) html += '<span class="lock">🔒</span>';
       html += '<div class="ic">' + shopIcon(it) + '</div><div class="nm">' + it.name + '</div>';
+      if (it.bl) html += '<div class="bl">' + it.bl + '</div>';
       html += owned ? '<div class="pr">✓ owned</div>'
                     : unlocked ? '<div class="pr">🪙 ' + it.price + '</div>'
                                : '<div class="pr">Wk ' + (it.unlockAt + 1) + '</div>';
@@ -3777,7 +3800,7 @@
     var el = room.querySelector('[data-char="' + id + '"]'); if (!el) return;
     var c = charById(id);
     x = Math.max(4, Math.min(96, x)); y = Math.max(30, Math.min(98, y));
-    var dur = Math.max(0.5, Math.min(2.6, Math.hypot(x - c.x, y - c.y) / 38));
+    var dur = Math.max(0.9, Math.min(6, Math.hypot(x - c.x, y - c.y) / 16));   // a gentle walking pace
     el.classList.add("walking");
     el.style.transition = "left " + dur + "s ease-in-out, top " + dur + "s ease-in-out, transform " + dur + "s ease-in-out";
     c.x = x; c.y = y;
@@ -3951,7 +3974,15 @@
   var FCOL = ["#ff8fb0", "#ffd86b", "#c6a0ff", "#8fd0ff", "#ff7a7a", "#ffffff", "#ffb3d9", "#b6f0a0"];
   function buildGardenScene() {
     var w = $("gardenWorld"); if (!w) return;
-    var s = '<div class="g-sky"></div><div class="g-ground"></div><div class="g-moon"></div><div class="g-lights"></div><div class="g-path"></div>';
+    // the season touches the garden: summer is the baseline look; autumn,
+    // winter & spring re-dress the trees, ground and falling petals via CSS.
+    var season = currentSeason().key;
+    w.dataset.season = season;
+    var petalCols = season === "autumn" ? ["#c07a2e", "#e09a4a", "#a8641f", "#c84a2a", "#e0b45a"]
+                  : season === "winter" ? ["#ffffff", "#eef4ff", "#dce8f8"]
+                  : FCOL;
+    var petalN = season === "winter" ? 30 : 18;
+    var s = '<div class="g-sky"></div><div class="g-ground"></div><div class="g-lights"></div><div class="g-path"></div>';
     function rnd(a, b) { return a + Math.random() * (b - a); }
     function fl(x, y, c, glow) { s += '<div class="g-fl' + (glow ? ' glow' : '') + '" style="left:' + (x | 0) + 'px;top:' + (y | 0) + 'px;--c:' + c + '"></div>'; }
     function flowers(x0, x1, y0, y1, n, glowCh) { for (var i = 0; i < n; i++) fl(rnd(x0, x1), rnd(y0, y1), FCOL[(Math.random() * FCOL.length) | 0], Math.random() < (glowCh || 0)); }
@@ -4041,7 +4072,7 @@
 
     // ambient magic — fireflies, drifting petals & the odd shooting star
     for (var i = 0; i < 24; i++) s += '<div class="g-fly" style="left:' + (rnd(40, 2960) | 0) + 'px;top:' + (rnd(320, 470) | 0) + 'px;animation-delay:' + (-rnd(0, 7)).toFixed(1) + 's;animation-duration:' + rnd(6, 10).toFixed(1) + 's"></div>';
-    for (var j = 0; j < 18; j++) s += '<div class="g-petal" style="left:' + (rnd(60, 2960) | 0) + 'px;top:' + (rnd(120, 300) | 0) + 'px;background:' + FCOL[(Math.random() * FCOL.length) | 0] + ';animation-delay:' + (-rnd(0, 9)).toFixed(1) + 's"></div>';
+    for (var j = 0; j < petalN; j++) s += '<div class="g-petal" style="left:' + (rnd(60, 2960) | 0) + 'px;top:' + (rnd(120, 300) | 0) + 'px;background:' + petalCols[(Math.random() * petalCols.length) | 0] + ';animation-delay:' + (-rnd(0, 9)).toFixed(1) + 's"></div>';
     for (var k = 0; k < 3; k++) s += '<div class="g-shoot" style="left:' + (rnd(400, 2800) | 0) + 'px;top:' + (rnd(50, 140) | 0) + 'px;animation-delay:' + (k * 3.1).toFixed(1) + 's"></div>';
     w.innerHTML = s;
   }

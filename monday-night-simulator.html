@@ -4257,7 +4257,7 @@
     // multiplied points, and enjoy the occasional star-shower bonus round.
     function StarCatcher(onOver) {
       var paddle, items, pops, score, lives, spawnT, over, awarded, keyDir, tick;
-      var level, levelTarget, msg, msgT, paused, downX, downMoved;
+      var level, levelT, msg, msgT, paused, downX, downMoved;
       var combo, best, newBest, shower, showerPend, junkT, metT, powerT, wideT, flashT;
       // star kinds: the plain gold star is the common one; smaller / faster /
       // rarer stars (and the rainbow) are worth more points.
@@ -4274,7 +4274,7 @@
       function reset() {
         paddle = { x: W / 2, w: 52, y: H - 18 }; items = []; pops = []; score = 0; lives = 3;
         spawnT = 0; over = false; awarded = false; keyDir = 0; tick = 0;
-        level = 1; levelTarget = 10; msg = ""; msgT = 0; paused = false; downMoved = false;
+        level = 1; levelT = 600; msg = ""; msgT = 0; paused = false; downMoved = false;
         combo = 0; newBest = false; shower = 0; showerPend = 0;
         junkT = 0; metT = 0; powerT = 0; wideT = 0; flashT = 0;
         best = (topScores("starcatcher")[0] || { score: 0 }).score;
@@ -4293,7 +4293,7 @@
       function transition(txt, sub) { inter = { t: 110, dur: 110, txt: txt, sub: sub || "" }; }
       // each level introduces something new, and sometimes a star shower follows
       function levelUp() {
-        level++; levelTarget += 10 + level * 4;
+        level++; levelT = 600;                              // each level lasts ~10 seconds
         transition("LEVEL " + level,
           level === 2 ? "space junk falls now — dodge it!" :
           level === 3 ? "stardust breeze — the stars drift!" :
@@ -4356,6 +4356,8 @@
           if (flashT > 0) flashT--;
           if (showerPend > 0 && --showerPend === 0) startShower();
           if (shower > 0) shower--;
+          // the level clock only runs during normal play (not bonus rounds)
+          else if (showerPend === 0 && --levelT <= 0) levelUp();
           paddle.x = Math.max(pw() / 2, Math.min(W - pw() / 2, paddle.x + keyDir * 5));
           // ---- stars (during a shower they rain thick and fast) ----
           if (--spawnT <= 0) {
@@ -4404,7 +4406,6 @@
               pops.push({ x: s.x, y: s.y - 6, txt: "+" + pts, col: s.kind === "shoot" ? "#fff2b0" : colFor(s), life: 44 });
               catchSound(s.kind === "shoot" ? 6 : s.type.pts);
               if (!newBest && best > 0 && score > best) { newBest = true; say("★ NEW BEST! ★", 90); Ambient.blip(1046, 0.07, "triangle"); Ambient.blip(1568, 0.1, "triangle"); }
-              if (score >= levelTarget) levelUp();
               continue;
             }
             if (s.kind === "shoot") { if (s.x < -20 || s.x > W + 20 || s.y > H + 12) items.splice(i, 1); continue; }

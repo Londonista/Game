@@ -293,6 +293,15 @@
   .shop-card .bl { font-size: 10px; color: #9a7a52; line-height: 1.3; margin-top: 2px; min-height: 26px; font-style: italic; }
   /* the flower crown shows its real woven art in the shop, scaled up */
   .shop-card .ic-crown { display: inline-block; transform: scale(1.6); transform-origin: center; margin: 12px 0 8px; }
+  /* colour minibar: tap a multi-colour item and pick your shade */
+  .shop-card .vbar { display: none; flex-wrap: wrap; gap: 7px; justify-content: center;
+    margin-top: 7px; padding: 7px 5px; background: #f6ecd8; border-radius: 9px; }
+  .shop-card.open { border-color: var(--accent); }
+  .shop-card.open .vbar { display: flex; }
+  .shop-card .vdot { width: 21px; height: 21px; border-radius: 50%; cursor: pointer;
+    border: 2px solid rgba(0,0,0,.22); box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .08s; }
+  .shop-card .vdot:hover { transform: scale(1.15); }
+  .shop-card .vhint { font-size: 9.5px; color: #9a7a52; margin-top: 3px; }
   .shop-card .pr { font-size: 12px; color: #b07a2a; font-weight: 800; margin-top: 3px; }
   .shop-card.locked { opacity: .55; cursor: not-allowed; }
   .shop-card.cant { opacity: .7; }
@@ -1074,6 +1083,15 @@
   /* Round patterned rug — a purchasable, draggable item (any room) */
   .item.rug { font-size: 0; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.3)); }
   .rug-art { width: 300px; height: 50px; border-radius: 50%; opacity: .96; }
+  .rug-art.rect { width: 300px; height: 62px; border-radius: 9px; }
+  .rug-art.shag { width: 230px; height: 86px; border-radius: 50%; }
+  /* a squashy bean bag */
+  .bb-art { position: relative; width: 92px; height: 76px; filter: drop-shadow(0 6px 5px rgba(0,0,0,.35)); }
+  .bb-art .blob { position: absolute; inset: 0; border-radius: 48% 52% 46% 54% / 72% 68% 32% 28%; }
+  .bb-art .crease { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); width: 42px; height: 13px;
+    border-radius: 50%; opacity: .55; }
+  .bb-art .btn { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 9px; height: 9px;
+    border-radius: 50%; box-shadow: inset 0 -2px 2px rgba(0,0,0,.3); }
 
   /* Cosy sofa — a purchasable, draggable item */
   .item.sofa { font-size: 0; filter: drop-shadow(0 7px 6px rgba(0,0,0,0.4)); }
@@ -1726,12 +1744,32 @@
   // =====================================================================
   var CATALOGUE = [
     // --- Starter cosies (available from night 1) ---
-    { id: "rug",      name: "Cozy Rug",     ic: "🟫", price: 8,  unlockAt: 0, set: "Starter", bl: "For cold toes during film debates." },
+    { id: "rug",      name: "Cozy Rug",     ic: "🟫", price: 8,  unlockAt: 0, set: "Starter", hidden: true },   // legacy — kept so old saves still render
     { id: "plantpot", name: "Little Plant", ic: "🪴", price: 10, unlockAt: 0, set: "Starter", bl: "Adam swears he'll water it. He won't." },
     { id: "lamp",     name: "Warm Lamp",    ic: "💡", price: 12, unlockAt: 0, set: "Starter", bl: "The official glow of Monday nights." },
-    { id: "beanbag",  name: "Bean Bag",     ic: "🛋️", price: 14, unlockAt: 0, set: "Starter", bl: "First one in gets it. House rules." },
     { id: "books",    name: "Book Stack",   ic: "📚", price: 9,  unlockAt: 0, set: "Starter", bl: "Three bookmarks, zero finished." },
     { id: "candle",   name: "Candle",       ic: "🕯️", price: 7,  unlockAt: 0, set: "Starter", bl: "Smells like 'cosy autumn hug', allegedly." },
+    // a proper bean bag, in six colours (tap the card, pick a shade)
+    { id: "bb_rust",     name: "Rust Bean Bag",     ic: "", price: 14, unlockAt: 0, set: "Starter", render: "beanbag", tint: "rust",     vgroup: "bb", vname: "Bean Bag", vcol: "#b8704a", bl: "First one in gets it. House rules." },
+    { id: "bb_teal",     name: "Teal Bean Bag",     ic: "", price: 14, unlockAt: 0, set: "Starter", render: "beanbag", tint: "teal",     vgroup: "bb", vname: "Bean Bag", vcol: "#4f9187" },
+    { id: "bb_lilac",    name: "Lilac Bean Bag",    ic: "", price: 14, unlockAt: 0, set: "Starter", render: "beanbag", tint: "lilac",    vgroup: "bb", vname: "Bean Bag", vcol: "#b394d8" },
+    { id: "bb_charcoal", name: "Charcoal Bean Bag", ic: "", price: 14, unlockAt: 0, set: "Starter", render: "beanbag", tint: "charcoal", vgroup: "bb", vname: "Bean Bag", vcol: "#565b66" },
+    { id: "bb_mustard",  name: "Mustard Bean Bag",  ic: "", price: 14, unlockAt: 0, set: "Starter", render: "beanbag", tint: "mustard",  vgroup: "bb", vname: "Bean Bag", vcol: "#d9a441" },
+    { id: "bb_rose",     name: "Rose Bean Bag",     ic: "", price: 14, unlockAt: 0, set: "Starter", render: "beanbag", tint: "rose",     vgroup: "bb", vname: "Bean Bag", vcol: "#dc98b0" },
+    // the rug collection — sleek & modern, mid-century, traditional & cosy
+    { id: "rugb_charcoal", name: "Charcoal Block Rug", ic: "", price: 16, unlockAt: 0, set: "Starter", render: "rug", style: "block", tint: "charcoal", vgroup: "rug_block", vname: "Colour-Block Rug", vcol: "#3c3f47", bl: "Sleek, modern, gallery-floor energy." },
+    { id: "rugb_indigo",   name: "Indigo Block Rug",   ic: "", price: 16, unlockAt: 0, set: "Starter", render: "rug", style: "block", tint: "indigo",   vgroup: "rug_block", vname: "Colour-Block Rug", vcol: "#3a4a7a" },
+    { id: "rugb_blush",    name: "Blush Block Rug",    ic: "", price: 16, unlockAt: 0, set: "Starter", render: "rug", style: "block", tint: "blush",    vgroup: "rug_block", vname: "Colour-Block Rug", vcol: "#d8a89e" },
+    { id: "rugm_mustard", name: "Mustard Century Rug", ic: "", price: 16, unlockAt: 0, set: "Starter", render: "rug", style: "mcm", tint: "mustard", vgroup: "rug_mcm", vname: "Mid-Century Rug", vcol: "#d9a441", bl: "Warm wool & drifting atomic dots." },
+    { id: "rugm_teal",    name: "Teal Century Rug",    ic: "", price: 16, unlockAt: 0, set: "Starter", render: "rug", style: "mcm", tint: "teal",    vgroup: "rug_mcm", vname: "Mid-Century Rug", vcol: "#3f7a72" },
+    { id: "rugm_walnut",  name: "Walnut Century Rug",  ic: "", price: 16, unlockAt: 0, set: "Starter", render: "rug", style: "mcm", tint: "walnut",  vgroup: "rug_mcm", vname: "Mid-Century Rug", vcol: "#8a5f38" },
+    { id: "rugt_burgundy", name: "Burgundy Heirloom Rug", ic: "", price: 18, unlockAt: 0, set: "Starter", render: "rug", style: "trad", tint: "burgundy", vgroup: "rug_trad", vname: "Heirloom Rug", vcol: "#7a2338", bl: "Borders, medallion, grandma's approval." },
+    { id: "rugt_navy",     name: "Navy Heirloom Rug",     ic: "", price: 18, unlockAt: 0, set: "Starter", render: "rug", style: "trad", tint: "navy",     vgroup: "rug_trad", vname: "Heirloom Rug", vcol: "#2e3f66" },
+    { id: "rugs_cream", name: "Cream Snuggle Rug", ic: "", price: 15, unlockAt: 0, set: "Starter", render: "rug", style: "shag", tint: "cream", vgroup: "rug_shag", vname: "Snuggle Shag Rug", vcol: "#efe6d6", bl: "Soft enough to nap on. Tested." },
+    { id: "rugs_moss",  name: "Moss Snuggle Rug",  ic: "", price: 15, unlockAt: 0, set: "Starter", render: "rug", style: "shag", tint: "moss",  vgroup: "rug_shag", vname: "Snuggle Shag Rug", vcol: "#9aa97c" },
+
+    // --- Living Room ---
+    { id: "beanbag", name: "Couch & Lamp", ic: "🛋️", price: 14, unlockAt: 0, set: "Living Room", bl: "A settee under its own warm lamp." },
 
     // --- Lighting (all available from night 1) ---
     // String Lights renders as a garland that hangs across the room (see buildGarland).
@@ -1780,11 +1818,11 @@
     { id: "lamp_floor", name: "Floor Lamp", ic: "🪔", price: 18, unlockAt: 0, set: "Snug", render: "lamp", bl: "Reading-corner warmth, dialled in." },
     { id: "sideboard_green", name: "Sideboard", ic: "🟩", price: 32, unlockAt: 0, set: "Snug", render: "sideboard", bl: "What's in the drawers? Nobody knows." },
 
-    // --- Rugs (drag them under your furniture) ---
-    { id: "rug_lilac", name: "Lilac Rug", ic: "🟪", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "lilac", bl: "Jas's colour, obviously." },
-    { id: "rug_rust",  name: "Cosy Rug",  ic: "🟫", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "rust", bl: "Warm as a mug of Monday tea." },
-    { id: "rug_sage",  name: "Sage Rug",  ic: "🟩", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "sage", bl: "Calm floors, calm minds." },
-    { id: "rug_rose",  name: "Rose Rug",  ic: "🌹", price: 14, unlockAt: 0, set: "Rugs", render: "rug", tint: "rose", bl: "Soft enough to nap on. Tested." },
+    // --- classic oval rugs (now part of the Starter rug collection) ---
+    { id: "rug_lilac", name: "Lilac Rug", ic: "", price: 14, unlockAt: 0, set: "Starter", render: "rug", tint: "lilac", vgroup: "rug_classic", vname: "Classic Oval Rug", vcol: "#c9aee6", bl: "The timeless three-ring oval." },
+    { id: "rug_rust",  name: "Rust Rug",  ic: "", price: 14, unlockAt: 0, set: "Starter", render: "rug", tint: "rust", vgroup: "rug_classic", vname: "Classic Oval Rug", vcol: "#b8704a" },
+    { id: "rug_sage",  name: "Sage Rug",  ic: "", price: 14, unlockAt: 0, set: "Starter", render: "rug", tint: "sage", vgroup: "rug_classic", vname: "Classic Oval Rug", vcol: "#a8c49a" },
+    { id: "rug_rose",  name: "Rose Rug",  ic: "", price: 14, unlockAt: 0, set: "Starter", render: "rug", tint: "rose", vgroup: "rug_classic", vname: "Classic Oval Rug", vcol: "#e3a3b8" },
 
     // --- Outfits (worn by the friends via the ornate wardrobe) ---
     { id: "hat_tiara",   name: "Tiara",        ic: "👑", price: 10, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👑", art: "tiara" }, bl: "Whoever wins the mini-game wears it." },
@@ -1796,18 +1834,18 @@
     { id: "gl_reading",  name: "Reading Glasses", ic: "👓", price: 7, unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "👓", art: "reading" }, bl: "For looking wise during book club." },
 
     // --- Beds (different colours) ---
-    { id: "bed_pink",   name: "Pink Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "pink", bl: "Sunset-cheek pink, like Jas." },
-    { id: "bed_blue",   name: "Blue Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "blue", bl: "Adam-blue. Dreams guaranteed." },
-    { id: "bed_green",  name: "Green Bed",  ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "green", bl: "For dreaming of the garden." },
-    { id: "bed_yellow", name: "Yellow Bed", ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "yellow", bl: "Wake up on the sunny side." },
-    { id: "bed_lilac",  name: "Lilac Bed",  ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "lilac", bl: "Matches the famous lilac rug." },
-    { id: "bed_teal",   name: "Teal Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "teal", bl: "Aqsa-teal, cool and calm." },
-    { id: "dbed_pink",   name: "Pink Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "pink",   size: "double", bl: "Twice the pink, twice the nap." },
-    { id: "dbed_blue",   name: "Blue Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "blue",   size: "double", bl: "Starfish sleeping, fully unlocked." },
-    { id: "dbed_green",  name: "Green Double",  ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "green",  size: "double", bl: "A meadow's worth of mattress." },
-    { id: "dbed_yellow", name: "Yellow Double", ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "yellow", size: "double", bl: "Big, bright and blanket-ready." },
-    { id: "dbed_lilac",  name: "Lilac Double",  ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "lilac",  size: "double", bl: "Maximum lilac. Jas approves." },
-    { id: "dbed_teal",   name: "Teal Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "teal",   size: "double", bl: "Deep-sea calm, king-sized." },
+    { id: "bed_pink",   name: "Pink Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "pink", vgroup: "bed_s", vname: "Single Bed", vcol: "#f2a3bd", bl: "Six shades of sweet dreams." },
+    { id: "bed_blue",   name: "Blue Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "blue", vgroup: "bed_s", vname: "Single Bed", vcol: "#7fb4d6" },
+    { id: "bed_green",  name: "Green Bed",  ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "green", vgroup: "bed_s", vname: "Single Bed", vcol: "#8fd0a0" },
+    { id: "bed_yellow", name: "Yellow Bed", ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "yellow", vgroup: "bed_s", vname: "Single Bed", vcol: "#f2d06b" },
+    { id: "bed_lilac",  name: "Lilac Bed",  ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "lilac", vgroup: "bed_s", vname: "Single Bed", vcol: "#c9aee6" },
+    { id: "bed_teal",   name: "Teal Bed",   ic: "🛏️", price: 24, unlockAt: 0, set: "Beds", render: "bed", tint: "teal", vgroup: "bed_s", vname: "Single Bed", vcol: "#6fbcb4" },
+    { id: "dbed_pink",   name: "Pink Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "pink",   size: "double", vgroup: "bed_d", vname: "Double Bed", vcol: "#f2a3bd", bl: "Starfish sleeping, fully unlocked." },
+    { id: "dbed_blue",   name: "Blue Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "blue",   size: "double", vgroup: "bed_d", vname: "Double Bed", vcol: "#7fb4d6" },
+    { id: "dbed_green",  name: "Green Double",  ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "green",  size: "double", vgroup: "bed_d", vname: "Double Bed", vcol: "#8fd0a0" },
+    { id: "dbed_yellow", name: "Yellow Double", ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "yellow", size: "double", vgroup: "bed_d", vname: "Double Bed", vcol: "#f2d06b" },
+    { id: "dbed_lilac",  name: "Lilac Double",  ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "lilac",  size: "double", vgroup: "bed_d", vname: "Double Bed", vcol: "#c9aee6" },
+    { id: "dbed_teal",   name: "Teal Double",   ic: "🛏️", price: 32, unlockAt: 0, set: "Beds", render: "bed", tint: "teal",   size: "double", vgroup: "bed_d", vname: "Double Bed", vcol: "#6fbcb4" },
 
     // --- Unlocks at 3 Mondays ---
     { id: "lava",     name: "Lava Lamp",    ic: "🔮", price: 18, unlockAt: 3, set: "Glow Up", bl: "Hypnotic. Conversations improve 40%." },
@@ -2277,19 +2315,100 @@
     sage:  ["#a8c49a", "#8aa97c", "#6f8e62"],
     rose:  ["#e3a3b8", "#cf8298", "#b66178"]
   };
-  function buildRug(tint) {
-    var c = RUG_COLS[tint] || RUG_COLS.lilac;
+  // the stylish rug collection — [base, accent, trim] per colourway
+  var RUG2 = {
+    block: { charcoal: ["#3c3f47", "#e8e2d4", "#2b2e34"], indigo: ["#3a4a7a", "#ddd4c0", "#2a3658"], blush: ["#d8a89e", "#f0e7da", "#c08e84"] },
+    mcm:   { mustard: ["#d9a441", "#b0622f", "#3f7a72"], teal: ["#3f7a72", "#d9a441", "#efe6d0"], walnut: ["#8a5f38", "#e0b45a", "#b0622f"] },
+    trad:  { burgundy: ["#7a2338", "#e6cf9a", "#4e1624"], navy: ["#2e3f66", "#e6cf9a", "#1d2946"] },
+    shag:  { cream: ["#efe6d6", "#e0d2ba", "#cdbc9e"], moss: ["#9aa97c", "#87966b", "#6f7e56"] }
+  };
+  function buildRug(tint, style) {
     var wrap = document.createElement("div");
+    var c;
+    if (style && RUG2[style]) {
+      c = RUG2[style][tint] || RUG2[style][Object.keys(RUG2[style])[0]];
+      if (style === "block") {           // sleek & modern: bold colour-block, crisp edge
+        wrap.className = "rug-art rect";
+        wrap.style.background = "linear-gradient(90deg," + c[0] + " 0 60%," + c[1] + " 60% 100%)";
+        wrap.style.boxShadow = "inset 0 0 0 3px " + c[2];
+      } else if (style === "mcm") {      // mid-century: warm ground, drifting organic dots
+        wrap.className = "rug-art rect";
+        wrap.style.background =
+          "radial-gradient(circle at 16% 38%, " + c[1] + " 0 9%, transparent 10%)," +
+          "radial-gradient(circle at 34% 66%, " + c[2] + " 0 6%, transparent 7%)," +
+          "radial-gradient(circle at 52% 30%, " + c[2] + " 0 8%, transparent 9%)," +
+          "radial-gradient(circle at 70% 62%, " + c[1] + " 0 7%, transparent 8%)," +
+          "radial-gradient(circle at 86% 36%, " + c[2] + " 0 6%, transparent 7%)," + c[0];
+        wrap.style.boxShadow = "inset 0 0 0 2px rgba(0,0,0,.14)";
+      } else if (style === "trad") {     // traditional: nested borders & a centre medallion
+        wrap.className = "rug-art rect";
+        wrap.style.background =
+          "radial-gradient(ellipse at 50% 50%, " + c[1] + " 0 9%, transparent 10%)," +
+          "radial-gradient(circle at 30% 50%, " + c[1] + " 0 3.5%, transparent 4.5%)," +
+          "radial-gradient(circle at 70% 50%, " + c[1] + " 0 3.5%, transparent 4.5%)," + c[0];
+        wrap.style.boxShadow = "inset 0 0 0 3px " + c[1] + ", inset 0 0 0 7px " + c[2] + ", inset 0 0 0 9px " + c[1];
+      } else {                            // shag: a soft speckled snuggle-circle
+        wrap.className = "rug-art shag";
+        wrap.style.backgroundColor = c[0];
+        wrap.style.backgroundImage =
+          "radial-gradient(" + c[1] + " 1.5px, transparent 2.2px), radial-gradient(" + c[2] + " 1.3px, transparent 2px)";
+        wrap.style.backgroundSize = "14px 12px, 19px 16px";
+        wrap.style.boxShadow = "inset 0 0 16px rgba(0,0,0,.12)";
+      }
+      return wrap;
+    }
+    c = RUG_COLS[tint] || RUG_COLS.lilac;
     wrap.className = "rug-art";
     wrap.style.background = "radial-gradient(ellipse, " + c[0] + " 0 38%, " + c[1] + " 39% 58%, " + c[0] + " 59% 78%, " + c[2] + " 79%)";
     return wrap;
   }
-  function rugIcon(tint) {
-    var c = RUG_COLS[tint] || RUG_COLS.lilac;
+  function rugIcon(tint, style) {
+    var c;
+    if (style && RUG2[style]) {
+      c = RUG2[style][tint] || RUG2[style][Object.keys(RUG2[style])[0]];
+      if (style === "block") return '<svg width="42" height="24" viewBox="0 0 42 24">' +
+        '<rect x="1" y="3" width="40" height="18" rx="3" fill="' + c[0] + '" stroke="' + c[2] + '" stroke-width="1.6"/>' +
+        '<path d="M26 3 h12 a3 3 0 0 1 3 3 v12 a3 3 0 0 1 -3 3 h-12 Z" fill="' + c[1] + '"/></svg>';
+      if (style === "mcm") return '<svg width="42" height="24" viewBox="0 0 42 24">' +
+        '<rect x="1" y="3" width="40" height="18" rx="3" fill="' + c[0] + '"/>' +
+        '<circle cx="10" cy="10" r="3" fill="' + c[1] + '"/><circle cx="21" cy="15" r="2.4" fill="' + c[2] + '"/>' +
+        '<circle cx="31" cy="9" r="2.7" fill="' + c[2] + '"/><circle cx="36" cy="16" r="1.8" fill="' + c[1] + '"/></svg>';
+      if (style === "trad") return '<svg width="42" height="24" viewBox="0 0 42 24">' +
+        '<rect x="1" y="2" width="40" height="20" rx="2" fill="' + c[0] + '" stroke="' + c[1] + '" stroke-width="1.6"/>' +
+        '<rect x="5" y="5.5" width="32" height="13" fill="none" stroke="' + c[1] + '" stroke-width="1.2"/>' +
+        '<path d="M21 8 L26 12 L21 16 L16 12 Z" fill="' + c[1] + '"/></svg>';
+      return '<svg width="40" height="24" viewBox="0 0 40 24">' +
+        '<ellipse cx="20" cy="12" rx="18" ry="10" fill="' + c[0] + '"/>' +
+        '<circle cx="13" cy="10" r="1.2" fill="' + c[1] + '"/><circle cx="22" cy="15" r="1.2" fill="' + c[2] + '"/>' +
+        '<circle cx="27" cy="9" r="1.2" fill="' + c[1] + '"/><circle cx="17" cy="16" r="1" fill="' + c[1] + '"/></svg>';
+    }
+    c = RUG_COLS[tint] || RUG_COLS.lilac;
     return '<svg width="40" height="22" viewBox="0 0 40 22">' +
       '<ellipse cx="20" cy="11" rx="19" ry="10" fill="' + c[0] + '"/>' +
       '<ellipse cx="20" cy="11" rx="13" ry="6.5" fill="none" stroke="' + c[2] + '" stroke-width="2"/>' +
       '<ellipse cx="20" cy="11" rx="7" ry="3.5" fill="' + c[1] + '"/></svg>';
+  }
+  // a proper squashy bean bag — [highlight, base, shadow] per colour
+  var BB_COLS = {
+    rust: ["#d99268", "#b8704a", "#8f5536"], teal: ["#7ab8ad", "#4f9187", "#356b62"],
+    lilac: ["#d4bdec", "#b394d8", "#8f6fb8"], charcoal: ["#7d8390", "#565b66", "#3c4049"],
+    mustard: ["#ecc36a", "#d9a441", "#a97a28"], rose: ["#efc0d0", "#dc98b0", "#bb6f8c"]
+  };
+  function buildBeanbag(tint) {
+    var c = BB_COLS[tint] || BB_COLS.rust;
+    var w = document.createElement("div");
+    w.className = "bb-art";
+    w.innerHTML = '<span class="blob" style="background:radial-gradient(circle at 32% 26%,' + c[0] + ',' + c[1] + ' 58%,' + c[2] + ')"></span>' +
+      '<span class="crease" style="background:' + c[2] + '"></span>' +
+      '<span class="btn" style="background:' + c[2] + '"></span>';
+    return w;
+  }
+  function bbIcon(tint) {
+    var c = BB_COLS[tint] || BB_COLS.rust;
+    return '<svg width="36" height="30" viewBox="0 0 36 30">' +
+      '<path d="M18 2 C28 2 33 12 33 19 C33 26 26 29 18 29 C10 29 3 26 3 19 C3 12 8 2 18 2 Z" fill="' + c[1] + '"/>' +
+      '<path d="M18 2 C28 2 33 12 33 19 C33 22 31 25 28 26 C30 20 28 8 18 5 C12 6 7 10 6 16 C5 11 9 2 18 2 Z" fill="' + c[0] + '" opacity=".55"/>' +
+      '<ellipse cx="18" cy="6.5" rx="6" ry="2.4" fill="' + c[2] + '" opacity=".7"/></svg>';
   }
   function buildSideboard() {
     var w = document.createElement("div");
@@ -2379,7 +2498,8 @@
       else if (def.render === "wardrobe") { el.classList.add("wardrobeitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildWardrobe()); }
       else if (def.render === "sofa") { el.classList.add("sofa"); el.style.zIndex = depthZ(p.y); el.appendChild(buildSofa()); }
       else if (def.render === "lamp") { el.classList.add("lamp"); el.style.zIndex = depthZ(p.y); el.appendChild(buildLamp()); }
-      else if (def.render === "rug") { el.classList.add("rug"); el.style.zIndex = 2; el.appendChild(buildRug(def.tint)); }   // rugs lie under everything
+      else if (def.render === "rug") { el.classList.add("rug"); el.style.zIndex = 2; el.appendChild(buildRug(def.tint, def.style)); }   // rugs lie under everything
+      else if (def.render === "beanbag") { el.style.zIndex = depthZ(p.y); el.appendChild(buildBeanbag(def.tint)); }
       else if (def.render === "sideboard") { el.classList.add("sideboard"); el.style.zIndex = depthZ(p.y); el.appendChild(buildSideboard()); }
       else if (def.render === "vase") { el.classList.add("vase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVase()); }
       else if (def.render === "bed") { el.classList.add("beditem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBed(def.tint, def.size, p.orient)); }
@@ -2610,7 +2730,8 @@
          : it.render === "wardrobe" ? WARDROBE_ICON
          : it.render === "vase" ? VASE_SVG
          : it.render === "bed" ? bedIcon(it.tint, it.size)
-         : it.render === "rug" ? rugIcon(it.tint)
+         : it.render === "rug" ? rugIcon(it.tint, it.style)
+         : it.render === "beanbag" ? bbIcon(it.tint)
          : it.render === "sideboard" ? SIDEBOARD_ICON
          : it.wear && it.wear.art === "flower" ? '<span class="ic-crown">' + wearSVG("flower") + '</span>'
          : it.ic;
@@ -2619,6 +2740,7 @@
   function shopSets() {
     var sets = {}, order = [];
     CATALOGUE.forEach(function (it) {
+      if (it.hidden) return;
       if (!sets[it.set]) { sets[it.set] = []; order.push(it.set); }
       sets[it.set].push(it);
     });
@@ -2635,10 +2757,12 @@
     g.order.forEach(function (setName) {
       var items = g.sets[setName];
       var allLocked = items.every(function (it) { return state.sessions < it.unlockAt; });
+      var seen = {}, n = 0;   // colour variants collapse into one card each
+      items.forEach(function (it) { if (it.vgroup) { if (!seen[it.vgroup]) { seen[it.vgroup] = 1; n++; } } else n++; });
       html += '<div class="cat-card" data-cat="' + setName + '">' +
               '<div class="ic">' + shopIcon(items[0]) + '</div>' +
               '<div class="nm">' + setName + (allLocked ? " 🔒" : "") + '</div>' +
-              '<div class="ct">' + items.length + (items.length === 1 ? " item" : " items") + '</div>' +
+              '<div class="ct">' + n + (n === 1 ? " item" : " items") + '</div>' +
               '</div>';
     });
     html += '</div>';
@@ -2650,10 +2774,33 @@
 
   function renderShopCategory(setName) {
     shopCat = setName;
-    var items = CATALOGUE.filter(function (it) { return it.set === setName; });
+    var items = CATALOGUE.filter(function (it) { return it.set === setName && !it.hidden; });
+    // collapse colour variants (shared vgroup) into a single card with a swatch bar
+    var groups = {}, list = [];
+    items.forEach(function (it) {
+      if (!it.vgroup) { list.push(it); return; }
+      if (groups[it.vgroup]) { groups[it.vgroup].vars.push(it); return; }
+      var g = { group: true, rep: it, vars: [it] };
+      groups[it.vgroup] = g; list.push(g);
+    });
     var html = '<p class="muted">Tap an item to buy it. Décor drops into the room to drag about; clothes go to your 👗 wardrobe.</p>';
     html += '<div class="shop-grid">';
-    items.forEach(function (it) {
+    list.forEach(function (entry) {
+      if (entry.group) {
+        var rep = entry.rep, gUnlocked = state.sessions >= rep.unlockAt;
+        html += '<div class="shop-card' + (gUnlocked ? '' : ' locked') + '" data-vgroup="' + rep.vgroup + '">';
+        if (!gUnlocked) html += '<span class="lock">🔒</span>';
+        html += '<div class="ic">' + shopIcon(rep) + '</div><div class="nm">' + (rep.vname || rep.name) + '</div>';
+        if (rep.bl) html += '<div class="bl">' + rep.bl + '</div>';
+        html += gUnlocked ? '<div class="pr">🪙 ' + rep.price + '</div><div class="vhint">tap for ' + entry.vars.length + ' colours</div>'
+                          : '<div class="pr">Wk ' + (rep.unlockAt + 1) + '</div>';
+        html += '<div class="vbar">' + entry.vars.map(function (v) {
+          return '<span class="vdot" title="' + v.name + '" data-vbuy="' + v.id + '" style="background:' + (v.vcol || '#ccc') + '"></span>';
+        }).join('') + '</div>';
+        html += '</div>';
+        return;
+      }
+      var it = entry;
       var unlocked = state.sessions >= it.unlockAt;
       var owned = it.wear && (state.closet || []).indexOf(it.id) >= 0;
       var canAfford = state.coins >= it.price;
@@ -2684,6 +2831,27 @@
           return;
         }
         buyItem(card.dataset.buy);
+      });
+    });
+    // multi-colour cards: tap the card to open the swatch bar, tap a shade to buy
+    Array.prototype.slice.call($("gBody").querySelectorAll("[data-vgroup]")).forEach(function (card) {
+      card.addEventListener("click", function () {
+        if (card.classList.contains("locked")) {
+          var rep = CATALOGUE.filter(function (i) { return i.vgroup === card.dataset.vgroup; })[0];
+          toast("Unlocks on Week " + (rep.unlockAt + 1) + " 🔒");
+          return;
+        }
+        var wasOpen = card.classList.contains("open");
+        Array.prototype.slice.call($("gBody").querySelectorAll(".shop-card.open")).forEach(function (c) { c.classList.remove("open"); });
+        if (!wasOpen) card.classList.add("open");
+      });
+      Array.prototype.slice.call(card.querySelectorAll("[data-vbuy]")).forEach(function (dot) {
+        dot.addEventListener("click", function (e) {
+          e.stopPropagation();
+          var it = itemDef(dot.dataset.vbuy);
+          if (state.coins < it.price) { toast("Not enough coins yet 🪙"); return; }
+          buyItem(dot.dataset.vbuy);
+        });
       });
     });
   }
@@ -4257,7 +4425,7 @@
     // multiplied points, and enjoy the occasional star-shower bonus round.
     function StarCatcher(onOver) {
       var paddle, items, pops, score, lives, spawnT, over, awarded, keyDir, tick;
-      var level, levelTarget, msg, msgT, paused, downX, downMoved;
+      var level, levelT, msg, msgT, paused, downX, downMoved;
       var combo, best, newBest, shower, showerPend, junkT, metT, powerT, wideT, flashT;
       // star kinds: the plain gold star is the common one; smaller / faster /
       // rarer stars (and the rainbow) are worth more points.
@@ -4274,7 +4442,7 @@
       function reset() {
         paddle = { x: W / 2, w: 52, y: H - 18 }; items = []; pops = []; score = 0; lives = 3;
         spawnT = 0; over = false; awarded = false; keyDir = 0; tick = 0;
-        level = 1; levelTarget = 10; msg = ""; msgT = 0; paused = false; downMoved = false;
+        level = 1; levelT = 600; msg = ""; msgT = 0; paused = false; downMoved = false;
         combo = 0; newBest = false; shower = 0; showerPend = 0;
         junkT = 0; metT = 0; powerT = 0; wideT = 0; flashT = 0;
         best = (topScores("starcatcher")[0] || { score: 0 }).score;
@@ -4293,7 +4461,7 @@
       function transition(txt, sub) { inter = { t: 110, dur: 110, txt: txt, sub: sub || "" }; }
       // each level introduces something new, and sometimes a star shower follows
       function levelUp() {
-        level++; levelTarget += 10 + level * 4;
+        level++; levelT = 600;                              // each level lasts ~10 seconds
         transition("LEVEL " + level,
           level === 2 ? "space junk falls now — dodge it!" :
           level === 3 ? "stardust breeze — the stars drift!" :
@@ -4356,6 +4524,8 @@
           if (flashT > 0) flashT--;
           if (showerPend > 0 && --showerPend === 0) startShower();
           if (shower > 0) shower--;
+          // the level clock only runs during normal play (not bonus rounds)
+          else if (showerPend === 0 && --levelT <= 0) levelUp();
           paddle.x = Math.max(pw() / 2, Math.min(W - pw() / 2, paddle.x + keyDir * 5));
           // ---- stars (during a shower they rain thick and fast) ----
           if (--spawnT <= 0) {
@@ -4404,7 +4574,6 @@
               pops.push({ x: s.x, y: s.y - 6, txt: "+" + pts, col: s.kind === "shoot" ? "#fff2b0" : colFor(s), life: 44 });
               catchSound(s.kind === "shoot" ? 6 : s.type.pts);
               if (!newBest && best > 0 && score > best) { newBest = true; say("★ NEW BEST! ★", 90); Ambient.blip(1046, 0.07, "triangle"); Ambient.blip(1568, 0.1, "triangle"); }
-              if (score >= levelTarget) levelUp();
               continue;
             }
             if (s.kind === "shoot") { if (s.x < -20 || s.x > W + 20 || s.y > H + 12) items.splice(i, 1); continue; }

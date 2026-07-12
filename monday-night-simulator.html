@@ -4270,6 +4270,7 @@
       ];
       var TOTAL_W = 0; TYPES.forEach(function (t) { TOTAL_W += t.w; });
       function pickType() { var r = Math.random() * TOTAL_W; for (var i = 0; i < TYPES.length; i++) { r -= TYPES[i].w; if (r <= 0) return TYPES[i]; } return TYPES[0]; }
+      var inter = null;   // the dark "level card" between levels: {t, dur, txt, sub}
       function reset() {
         paddle = { x: W / 2, w: 52, y: H - 18 }; items = []; pops = []; score = 0; lives = 3;
         spawnT = 0; over = false; awarded = false; keyDir = 0; tick = 0;
@@ -4277,27 +4278,35 @@
         combo = 0; newBest = false; shower = 0; showerPend = 0;
         junkT = 0; metT = 0; powerT = 0; wideT = 0; flashT = 0;
         best = (topScores("starcatcher")[0] || { score: 0 }).score;
+        transition("LEVEL 1", "catch stars — don't let them drop!");
       }
       function coinsFor() { return Math.floor(score / 5); }
-      function fallSpeed() { return 1.3 + level * 0.42; }             // faster each level
-      function spawnGap() { return shower > 0 ? 7 : Math.max(14, 52 - level * 5); }
+      // gentle start, ramping up as the levels climb
+      function fallSpeed() { return 0.9 + level * 0.34; }
+      function spawnGap() { return shower > 0 ? 7 : Math.max(14, 60 - level * 4); }
       function mult() { return 1 + Math.min(3, Math.floor(combo / 5)); }  // x1 .. x4
       function pw() { return paddle.w + (wideT > 0 ? 26 : 0); }          // power star widens the net
       function colFor(s) { return s.type.col === "rainbow" ? "hsl(" + Math.floor((tick * 5 + s.x * 2) % 360) + ",90%,66%)" : s.type.col; }
       function say(txt, frames) { msg = txt; msgT = frames || 90; }
+      // darken the screen and show only the announcement — a calm breather
+      // between levels (a tap skips it early)
+      function transition(txt, sub) { inter = { t: 110, dur: 110, txt: txt, sub: sub || "" }; }
       // each level introduces something new, and sometimes a star shower follows
       function levelUp() {
         level++; levelTarget += 10 + level * 4;
-        say(level === 2 ? "LEVEL 2 · SPACE JUNK!" :
-            level === 3 ? "LEVEL 3 · STARDUST BREEZE!" :
-            level === 4 ? "LEVEL 4 · METEORS!" :
-            level === 5 ? "LEVEL 5 · POWER STAR!" : "LEVEL " + level + "!", 96);
+        transition("LEVEL " + level,
+          level === 2 ? "space junk falls now — dodge it!" :
+          level === 3 ? "stardust breeze — the stars drift!" :
+          level === 4 ? "meteors incoming — don't catch them!" :
+          level === 5 ? "silver star = a wider paddle!" : "faster and brighter…");
+        if (level === 2) junkT = 140;                       // a moment's grace before the first one
+        if (level === 4) metT = 170;
         Ambient.blip(740, 0.07, "triangle"); Ambient.blip(990, 0.09, "triangle");
         if (level === 3 || (level > 3 && Math.random() < 0.4)) showerPend = 120;   // bonus round incoming
       }
       function startShower() {
         shower = 420;                                       // ~7 seconds of pure stars
-        say("★ STAR SHOWER! ★", 80);
+        transition("★ STAR SHOWER ★", "bonus round — nothing can hurt you!");
         Ambient.blip(660, 0.06, "triangle"); Ambient.blip(880, 0.06, "triangle"); Ambient.blip(1174, 0.09, "triangle");
       }
       function ouch(s, word) {
@@ -4341,6 +4350,7 @@
         init: reset,
         update: function () {
           if (over || paused) return;
+          if (inter) { if (--inter.t <= 0) inter = null; return; }   // the world holds its breath
           tick++;
           if (wideT > 0) wideT--;
           if (flashT > 0) flashT--;
@@ -4450,6 +4460,17 @@
           if (best > 0) { ctx.font = "bold 10px monospace"; ctx.fillStyle = newBest ? "#ffd86b" : "#8fb0a0"; ctx.fillText("BEST " + Math.max(best, score), W - 8, 31); }
           if (flashT > 0) { ctx.fillStyle = "rgba(255,80,60," + (flashT / 40) + ")"; ctx.fillRect(0, 0, W, H); }
           if (msgT > 0) { ctx.textAlign = "center"; ctx.fillStyle = "#ffd86b"; ctx.font = "bold 17px monospace"; ctx.fillText(msg, W / 2, H / 2 - 6); }
+          if (inter && !over) {          // the dark level card: fade in, hold, fade out
+            var pr = 1 - inter.t / inter.dur;
+            var a = pr < 0.16 ? pr / 0.16 : pr > 0.86 ? (1 - pr) / 0.14 : 1;
+            ctx.fillStyle = "rgba(3,9,7," + (0.88 * a).toFixed(3) + ")"; ctx.fillRect(0, 0, W, H);
+            if (a > 0.35) {
+              ctx.globalAlpha = a; ctx.textAlign = "center";
+              ctx.fillStyle = "#ffd86b"; ctx.font = "bold 24px monospace"; ctx.fillText(inter.txt, W / 2, H / 2 - 8);
+              if (inter.sub) { ctx.fillStyle = "#9be36b"; ctx.font = "12px monospace"; ctx.fillText(inter.sub, W / 2, H / 2 + 16); }
+              ctx.globalAlpha = 1;
+            }
+          }
           if (paused && !over) {
             ctx.fillStyle = "rgba(0,0,0,.55)"; ctx.fillRect(0, 0, W, H);
             ctx.textAlign = "center"; ctx.fillStyle = "#ffd86b"; ctx.font = "bold 22px monospace"; ctx.fillText("PAUSED", W / 2, H / 2 - 4);
@@ -4460,13 +4481,21 @@
         pointer: function (x, y, type) {
           if (type === "down") { downX = x; downMoved = false; if (!paused && !over) paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, x)); }
           else if (type === "move") { if (Math.abs(x - downX) > 4) downMoved = true; if (!paused && !over) paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, x)); }
-          else if (type === "up") { if (over) reset(); else if (!downMoved) paused = !paused; }   // a clean tap toggles pause
+          else if (type === "up") {
+            if (over) reset();
+            else if (!downMoved) { if (inter) inter.t = Math.min(inter.t, 14); else paused = !paused; }   // tap: skip the level card, otherwise pause
+          }
         },
         key: function (e) {
           if (e.key === "ArrowLeft") { keyDir = -1; e.preventDefault(); }
           else if (e.key === "ArrowRight") { keyDir = 1; e.preventDefault(); }
-          else if (e.key === "p" || e.key === "P") { if (!over) paused = !paused; e.preventDefault(); }
-          else if (e.key === " " || e.code === "Space") { if (over) reset(); else paused = !paused; e.preventDefault(); }
+          else if (e.key === "p" || e.key === "P") { if (!over && !inter) paused = !paused; e.preventDefault(); }
+          else if (e.key === " " || e.code === "Space") {
+            if (over) reset();
+            else if (inter) inter.t = Math.min(inter.t, 14);
+            else paused = !paused;
+            e.preventDefault();
+          }
         },
         keyUp: function (e) { if (e.key === "ArrowLeft" && keyDir < 0) keyDir = 0; if (e.key === "ArrowRight" && keyDir > 0) keyDir = 0; }
       };

@@ -307,6 +307,18 @@
   .shop-card.cant { opacity: .7; }
   .shop-card .lock { position:absolute; top:6px; right:8px; font-size:13px; }
   .shop-card .tag { position:absolute; top:6px; left:8px; font-size:10px; background:#f3e3c6; padding:1px 5px; border-radius:6px; color:#7a5a2a; font-weight:700; }
+  /* the Star Cookbook spread — parchment recipe pages to pick from */
+  .recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .rpage { background: linear-gradient(180deg,#fdf6e3,#f1e3c2); border: 2px solid #d8c49a; border-radius: 6px 16px 16px 6px;
+    padding: 12px 13px; position: relative; cursor: pointer; min-height: 158px;
+    box-shadow: 2px 3px 7px rgba(0,0,0,.15), inset 4px 0 0 rgba(180,150,100,.35); }
+  .rpage:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .rpage.faded { opacity: .62; cursor: default; filter: grayscale(.35); }
+  .rpage.faded:hover { transform: none; border-color: #d8c49a; }
+  .rpage .rp-ic { font-size: 26px; }
+  .rpage h4 { margin: 4px 0 6px; font-size: 14px; color: #4a3418; }
+  .rpage .rt { font-size: 11.5px; color: #7a5a2a; line-height: 1.45; font-style: italic; }
+  .rpage .rc { margin-top: 9px; font-weight: 800; font-size: 12px; color: #7a3aa0; }
   .section-title { font-size: 13px; font-weight: 800; color: #9a7a52; text-transform: uppercase; letter-spacing: .5px; margin: 14px 0 8px; }
   .section-title:first-child { margin-top: 0; }
 
@@ -578,6 +590,7 @@
 
   /* Beige vintage map — a purchasable, removable item */
   .item.mapitem { font-size: 0; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.35)); }
+  .item.ufoitem { font-size: 0; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.4)); }
   .item.mapitem .map-svg { display: block; }
 
   /* Empty clear glass vase */
@@ -729,7 +742,30 @@
     background: linear-gradient(180deg,#3a3a40,#26262b); display: flex; flex-wrap: wrap; gap: 3px; padding: 3px; box-sizing: border-box; }
   .kitchen .k-stove i { width: 10px; height: 3px; border-radius: 50%; background: #6a6a72; }
   /* a cosy farm cookbook standing on the counter against the wall */
-  .kitchen .k-book { position: absolute; top: -30px; left: 196px; width: 24px; height: 32px; }
+  .kitchen .k-book { position: absolute; top: -30px; left: 196px; width: 24px; height: 32px; cursor: pointer; pointer-events: auto; }
+  .kitchen .k-book:hover { filter: brightness(1.15); }
+  /* Aqsa's Moonlit Elixir — a little cauldron on the hob, purple smoke & sparkles */
+  .kitchen .k-pot { position: absolute; top: -27px; right: 34px; width: 42px; height: 30px; display: none; cursor: pointer; pointer-events: auto; }
+  .k-pot .pbody { position: absolute; bottom: 0; left: 0; right: 0; height: 24px; border-radius: 7px 7px 15px 15px;
+    background: radial-gradient(circle at 34% 30%, #5a4a72, #3a2f4e 62%, #241c32);
+    box-shadow: inset 0 -4px 6px rgba(0,0,0,.35), 0 2px 3px rgba(0,0,0,.3); }
+  .k-pot .rim { position: absolute; top: 3px; left: -2px; right: -2px; height: 7px; border-radius: 4px;
+    background: linear-gradient(180deg,#7a6499,#4a3a63); }
+  .k-pot .hl, .k-pot .hr { position: absolute; top: 9px; width: 7px; height: 10px;
+    border: 3px solid #4a3a63; border-radius: 50%; }
+  .k-pot .hl { left: -9px; } .k-pot .hr { right: -9px; }
+  .k-pot .puff { position: absolute; bottom: 27px; left: 50%; width: 13px; height: 13px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, rgba(206,158,255,.9), rgba(140,80,200,.4));
+    animation: kpuff 2.8s ease-in infinite; opacity: 0; }
+  .k-pot .puff.p2 { animation-delay: .9s; width: 10px; height: 10px; }
+  .k-pot .puff.p3 { animation-delay: 1.8s; width: 16px; height: 16px; }
+  @keyframes kpuff { 0% { transform: translate(-50%,0) scale(.6); opacity: 0; } 15% { opacity: .85; }
+    100% { transform: translate(-10%,-48px) scale(1.5); opacity: 0; } }
+  .k-pot .spark { position: absolute; font-size: 9px; color: #e8c8ff; text-shadow: 0 0 6px #b070ff;
+    animation: kspark 1.9s ease-in-out infinite; }
+  .k-pot .s1 { left: -7px; top: -12px; } .k-pot .s2 { right: -5px; top: -18px; animation-delay: .6s; }
+  .k-pot .s3 { left: 15px; top: -24px; animation-delay: 1.2s; }
+  @keyframes kspark { 0%,100% { opacity: .15; transform: scale(.7); } 50% { opacity: 1; transform: scale(1.15); } }
   .kitchen .k-book .cover { position: absolute; inset: 0; border-radius: 2px 4px 4px 2px;
     background: linear-gradient(90deg,#2f6a48 0 5px,#3f8a5a 5px); box-shadow: 0 3px 4px rgba(0,0,0,.35), inset -2px 0 0 rgba(0,0,0,.14); }
   .kitchen .k-book .pages { position: absolute; right: -2px; top: 3px; bottom: 3px; width: 3px; border-radius: 0 2px 2px 0;
@@ -1156,7 +1192,7 @@
   #room[data-room="hall"] .floor, #room[data-room="landing"] .floor { background:
     repeating-linear-gradient(90deg, transparent 0 46px, rgba(0,0,0,.18) 46px 48px),
     linear-gradient(180deg,#6e4a2c,#4e3419); }
-  #room[data-room="landing"] { background: linear-gradient(180deg,#7d6a50,#5c4c36 64%); }
+  #room[data-room="landing"] { background: linear-gradient(180deg,#ead8b2,#d3b98c 64%); }
   .hall-only, .landing-only { display: none; }
   #room[data-room="hall"] .hall-only, #room[data-room="landing"] .landing-only { display: block; }
   /* a long burgundy runner with brass border lines along the corridor floor */
@@ -1235,6 +1271,16 @@
     border-radius: 3px; background: linear-gradient(180deg,#7a5230,#4e3419); transform-origin: top center; }
   .h-lamp .tleg.a { transform: rotate(13deg); }
   .h-lamp .tleg.c { transform: rotate(-13deg); }
+  /* warm wall sconces on the landing */
+  .l-sconce { position: absolute; top: 118px; width: 26px; height: 36px; z-index: 2; pointer-events: none; }
+  .l-sconce::before { content: ""; position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+    width: 70px; height: 56px; border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(255,206,110,.42), transparent 70%); }
+  .l-sconce .cup { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 26px; height: 15px;
+    border-radius: 0 0 13px 13px; background: linear-gradient(180deg,#e8c887,#c79436);
+    box-shadow: inset 0 3px 4px rgba(255,244,214,.8), 0 2px 3px rgba(0,0,0,.25); }
+  .l-sconce .stem { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); width: 5px; height: 12px;
+    border-radius: 0 0 3px 3px; background: linear-gradient(180deg,#c79436,#a9761f); }
   /* brass sunburst mirror */
   .h-sun { position: absolute; width: 88px; height: 88px; border-radius: 50%; z-index: 2;
     background: repeating-conic-gradient(#c79436 0deg 6deg, rgba(199,148,54,0) 6deg 15deg); }
@@ -1266,7 +1312,7 @@
     radial-gradient(circle at 30% 72%, #35507a 0 18%, transparent 19%),
     linear-gradient(30deg,#efe0bd 55%,#e0c99c 55%); }
   /* named doors along the landing wall */
-  .hdoor { position: absolute; top: 196px; width: 74px; height: 166px; z-index: 3; cursor: pointer; }
+  .hdoor { position: absolute; top: 196px; width: 84px; height: 170px; z-index: 3; cursor: pointer; }
   .hdoor .leaf { position: absolute; inset: 0; background: linear-gradient(180deg,#fbf7ef,#e6e0d1);
     border: 4px solid #c6bfae; border-radius: 8px 8px 0 0; box-shadow: inset 0 0 0 3px rgba(0,0,0,.05), 0 4px 12px rgba(0,0,0,.3); }
   .hdoor .dpnl { position: absolute; left: 10px; right: 10px; top: 14px; bottom: 30px; border-radius: 5px;
@@ -1276,18 +1322,18 @@
   .hdoor .plate { position: absolute; top: -34px; left: 50%; transform: translateX(-50%); white-space: nowrap;
     font-size: 11px; font-weight: 800; color: #3a2a18; background: #e6c887; border: 1px solid #c79436;
     padding: 2px 9px; border-radius: 4px; box-shadow: 0 2px 3px rgba(0,0,0,.3); z-index: 2; }
-  /* a leafy garland swagged over each landing door */
-  .hdoor .garl { position: absolute; top: -12px; left: -10px; right: -10px; height: 30px; pointer-events: none; }
-  .hdoor .garl::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
-    border: 5px solid transparent; border-bottom-color: #3f7a48; }
-  .hdoor .garl::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 7px; height: 7px;
-    margin-left: -3.5px; border-radius: 50%; background: #2f5f3a;
+  /* a festive wreath hung on each landing door */
+  .hdoor .wreath { position: absolute; top: 26px; left: 50%; width: 38px; height: 38px;
+    transform: translateX(-50%); pointer-events: none; }
+  .hdoor .wreath::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
+    border: 7px solid #3f7a48;
+    box-shadow: inset 0 0 0 2px #2f5f3a, 0 2px 3px rgba(0,0,0,.22); }
+  .hdoor .wreath::after { content: ""; position: absolute; left: 50%; top: -1px; width: 5px; height: 5px;
+    margin-left: -2.5px; border-radius: 50%; background: #c05a5a;
     box-shadow:
-      -13px -2px 0 -1px #4e8a56, 13px -2px 0 -1px #4e8a56,
-      -25px -7px 0 -1px #2f5f3a, 25px -7px 0 -1px #2f5f3a,
-      -35px -15px 0 -1px #4e8a56, 35px -15px 0 -1px #4e8a56,
-      0 3px 0 -1px #c05a5a, -19px -4px 0 -2px #c05a5a, 19px -4px 0 -2px #c05a5a,
-      -30px -11px 0 -2px #e0a83a, 30px -11px 0 -2px #e0a83a; }
+      12px 4px 0 -1px #e0a83a, 17px 15px 0 -1px #c05a5a, 12px 27px 0 -1px #e0a83a,
+      -12px 4px 0 -1px #c05a5a, -17px 15px 0 -1px #e0a83a, -12px 27px 0 -1px #c05a5a,
+      0 32px 0 1px #b23a3a; }
   .hdoor:hover .leaf { filter: brightness(1.12); }
 
   .label2 { position: absolute; bottom: 4px; font-size: 11px; font-weight: 700; color: rgba(90,55,30,.85);
@@ -1574,21 +1620,27 @@
 
       <!-- ===== LANDING (upstairs) — stairs down + four named doors ===== -->
       <div class="label2 landing-only" style="left:50%; transform:translateX(-50%)">🛗 Upstairs Landing</div>
+      <div class="h-dado landing-only"></div>
       <div class="hallrunner landing-only"></div>
+      <div class="l-sconce landing-only" style="left:288px"><span class="cup"></span><span class="stem"></span></div>
+      <div class="l-sconce landing-only" style="left:534px"><span class="cup"></span><span class="stem"></span></div>
       <div class="ss landing-only" id="stairsDown" style="left:20px" title="Downstairs to the hallway">
         <div class="hint">↓ downstairs</div>
       </div>
-      <div class="hdoor landing-only" id="doorAqsa" style="left:222px" title="Aqsa's Room">
-        <div class="plate">Aqsa</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="garl"></div>
+      <div class="hdoor landing-only" id="doorAqsa" style="left:192px" title="Aqsa's Room">
+        <div class="plate">Aqsa</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="wreath"></div>
       </div>
-      <div class="hdoor landing-only" id="doorJas" style="left:348px" title="Jas's Room">
-        <div class="plate">Jas</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="garl"></div>
+      <div class="hdoor landing-only" id="doorJas" style="left:314px" title="Jas's Room">
+        <div class="plate">Jas</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="wreath"></div>
       </div>
-      <div class="hdoor landing-only" id="doorAdam" style="left:474px" title="Adam's Room">
-        <div class="plate">Adam</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="garl"></div>
+      <div class="hdoor landing-only" id="doorAdam" style="left:436px" title="Adam's Room">
+        <div class="plate">Adam</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="wreath"></div>
       </div>
-      <div class="hdoor landing-only" id="doorBath" style="left:612px" title="The bathroom">
-        <div class="plate">🛁 Bath</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="garl"></div>
+      <div class="hdoor landing-only" id="doorRobes" style="left:558px" title="The Wardrobe">
+        <div class="plate">👗 Robes</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="wreath"></div>
+      </div>
+      <div class="hdoor landing-only" id="doorBath" style="left:680px" title="The bathroom">
+        <div class="plate">🛁 Bath</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="wreath"></div>
       </div>
 
       <!-- ===== THE SNUG — between the wardrobe and the hallway ===== -->
@@ -1596,10 +1648,6 @@
         <div class="s-window"><div class="s-moon"></div><div class="s-cross"></div></div>
       </div>
       <div class="label2 snug-only" style="left:50%; transform:translateX(-50%)">🛋️ The Snug</div>
-      <div class="door-back snug-only" id="doorSnugBack" title="Go to the Wardrobe">
-        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">← wardrobe</div>
-      </div>
       <div class="door-wardback snug-only" id="doorSnugNext" title="Go to the hallway">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
         <div class="sign">hallway →</div>
@@ -1615,7 +1663,12 @@
           <div class="k-cab"></div>
           <div class="k-sink"></div>
           <div class="k-stove"><i></i><i></i><i></i><i></i></div>
-          <div class="k-book" title="Star Cookbook"><span class="cover"></span><span class="pages"></span><span class="label"></span><span class="band"></span></div>
+          <div class="k-pot" id="aqsaPot" title="Aqsa's Moonlit Elixir">
+            <span class="puff p1"></span><span class="puff p2"></span><span class="puff p3"></span>
+            <span class="spark s1">✦</span><span class="spark s2">✧</span><span class="spark s3">✦</span>
+            <span class="hl"></span><span class="hr"></span><span class="pbody"></span><span class="rim"></span>
+          </div>
+          <div class="k-book" id="kBook" title="Star Cookbook — tap to open"><span class="cover"></span><span class="pages"></span><span class="label"></span><span class="band"></span></div>
         </div>
         <div class="k-fridge">
           <div class="k-fdoor top"></div>
@@ -1671,9 +1724,9 @@
 
       <!-- ===== WARDROBE ROOM — shown only when you're in it ===== -->
       <div class="label2 ward-only" style="left:50%; transform:translateX(-50%)">👗 Wardrobe</div>
-      <div class="door-wardback ward-only" id="doorWardBack" title="Go to the Snug">
+      <div class="door-wardback ward-only" id="doorWardBack" title="Out to the landing">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">snug →</div>
+        <div class="sign">landing →</div>
       </div>
 
       <!-- Placed items get injected here -->
@@ -1797,6 +1850,7 @@
     { id: "filmposter",name: "Film Poster",        ic: "🎭", price: 13, unlockAt: 0, set: "Wall Art", bl: "From THAT film. You know the one." },
     { id: "framedpic", name: "Framed Photo",       ic: "🖼️", price: 12, unlockAt: 0, set: "Wall Art", bl: "The three of you, mid-laugh." },
     { id: "tapestry",  name: "Tapestry",           ic: "🧵", price: 15, unlockAt: 0, set: "Wall Art", bl: "Instant 'we have taste' energy." },
+    { id: "ufoposter", name: "UFO Poster",          ic: "", price: 15, unlockAt: 0, set: "Wall Art", render: "ufop", bl: "Adam says the beam is coming for him specifically." },
 
     // --- Study: an empty ornate bookcase + things to fill it ---
     { id: "bookcase",  name: "Bookcase",      ic: "📚", price: 28, unlockAt: 0, set: "Study", render: "bookcase", bl: "Waiting to hold everyone's favourites." },
@@ -1921,6 +1975,7 @@
       { id: "adam", x: 79,   y: 88 }
     ],
     currentRoom: "main",   // which room is on screen ("main" bedroom or "two" kitchen)
+    cauldron: false,       // Aqsa's Moonlit Elixir simmering on the kitchen stove
     gardenDoorX: 68,       // x/y % position of the kitchen's garden door (draggable in 2D)
     gardenDoorY: 59,
     closet: [],            // clothing item ids you've bought
@@ -2134,6 +2189,21 @@
 
   // A beige vintage map — parchment, faint landmasses, a dotted route, an X
   // and a little compass rose. Used for the placed item and the shop card.
+  // A black poster: grey alien saucer with a green beam shooting down.
+  function ufoSVG(w, h) {
+    return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 44 58">' +
+      '<rect x="1" y="1" width="42" height="56" rx="3" fill="#0b0d13" stroke="#3a3f4a" stroke-width="2"/>' +
+      '<circle cx="8" cy="8" r="0.9" fill="#cfd8e6"/><circle cx="36" cy="11" r="0.7" fill="#cfd8e6"/>' +
+      '<circle cx="12" cy="30" r="0.7" fill="#8a93a6"/><circle cx="38" cy="26" r="0.9" fill="#cfd8e6"/>' +
+      '<circle cx="6" cy="44" r="0.7" fill="#8a93a6"/><circle cx="33" cy="49" r="0.7" fill="#8a93a6"/>' +
+      '<polygon points="17,19 27,19 33,52 11,52" fill="#58e07a" opacity="0.3"/>' +
+      '<polygon points="19,19 25,19 29,52 15,52" fill="#7dffa0" opacity="0.35"/>' +
+      '<ellipse cx="22" cy="52" rx="11" ry="2.6" fill="#58e07a" opacity="0.4"/>' +
+      '<ellipse cx="22" cy="17" rx="13" ry="5" fill="#9aa2ac"/>' +
+      '<path d="M14 14 A 8 6 0 0 1 30 14 L 28 15.5 L 16 15.5 Z" fill="#c8d0d8"/>' +
+      '<circle cx="13" cy="17.5" r="1.1" fill="#7dffa0"/><circle cx="22" cy="19" r="1.1" fill="#7dffa0"/><circle cx="31" cy="17.5" r="1.1" fill="#7dffa0"/>' +
+      '</svg>';
+  }
   var MAP_SVG =
     '<svg class="map-svg" width="66" height="50" viewBox="0 0 66 50">' +
     '<rect x="2" y="2" width="62" height="46" rx="3" fill="#e7d8ba" stroke="#5e3f24" stroke-width="2.4"/>' +
@@ -2469,6 +2539,7 @@
 
   function applyRoomClass() {
     room.dataset.room = state.currentRoom || "main";
+    var ap = $("aqsaPot"); if (ap) ap.style.display = state.cauldron ? "block" : "none";
   }
 
   function renderRoom() {
@@ -2494,6 +2565,7 @@
       if (isGarland) { el.classList.add("garland"); el.style.zIndex = 6; el.appendChild(buildGarland()); }
       else if (def.render === "bookcase") { el.classList.add("bookcase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBookcase()); }
       else if (def.render === "map") { el.classList.add("mapitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildMap()); }
+      else if (def.render === "ufop") { el.classList.add("ufoitem"); el.style.zIndex = depthZ(p.y); var uw = document.createElement("div"); uw.innerHTML = ufoSVG(88, 116); el.appendChild(uw); }
       else if (def.render === "vanity") { el.classList.add("vanity"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVanity()); }
       else if (def.render === "wardrobe") { el.classList.add("wardrobeitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildWardrobe()); }
       else if (def.render === "sofa") { el.classList.add("sofa"); el.style.zIndex = depthZ(p.y); el.appendChild(buildSofa()); }
@@ -2726,6 +2798,7 @@
     return it.render === "garland" ? GARLAND_ICON
          : it.render === "bookcase" ? BOOKCASE_ICON
          : it.render === "map" ? MAP_SVG
+         : it.render === "ufop" ? ufoSVG(40, 52)
          : it.render === "vanity" ? VANITY_ICON
          : it.render === "wardrobe" ? WARDROBE_ICON
          : it.render === "vase" ? VASE_SVG
@@ -4054,11 +4127,11 @@
     bed3: "💙 Adam's Room — tap → for the landing.",
     main: "🛏️ Jas's Room — tap ← for the landing.",
     hall: "🪜 The hallway — take the stairs up, or ← snug · kitchen →",
-    landing: "🛗 Upstairs landing — pick a room, or ↓ take the stairs down.",
-    snug: "🛋️ The snug — get cosy & decorate it! ← wardrobe · hallway →",
+    landing: "🛗 Upstairs landing — pick a room (👗 too!), or ↓ stairs down.",
+    snug: "🛋️ The snug — get cosy & decorate it! hallway →",
     two: "🍳 The kitchen — decorate it too! ← hallway · garden →",
     garden: "🌷 The garden — drag to explore · ‹ › or ← for the kitchen.",
-    wardrobe: "👗 The Wardrobe — make it yours! Tap → for the snug."
+    wardrobe: "👗 The Wardrobe — make it yours! Tap → for the landing."
   };
   function goToRoom(name) {
     if (state.currentRoom === name) return;
@@ -4358,8 +4431,8 @@
     { id: "bed2",     name: "🌸 Aqsa's Room", wall: "linear-gradient(180deg,#7d5570,#563a54)", floor: "linear-gradient(180deg,#8a6a4f,#6f5340)" },
     { id: "main",     name: "🛏️ Jas's Room",  wall: "linear-gradient(180deg,#4a3a63,#6b5184)", floor: "linear-gradient(180deg,#8a6a4f,#74573f)" },
     { id: "bed3",     name: "💙 Adam's Room", wall: "linear-gradient(180deg,#3f4f7a,#2b3556)", floor: "linear-gradient(180deg,#7a6a52,#5f4e3a)" },
-    // downstairs
     { id: "wardrobe", name: "👗 Wardrobe", wall: "linear-gradient(180deg,#4a3a52,#6f5570)", floor: "linear-gradient(180deg,#dccbef,#c6b2e6)" },
+    // downstairs
     { id: "snug",     name: "🛋️ The Snug", wall: "linear-gradient(180deg,#2e514a,#427563)", floor: "linear-gradient(180deg,#9a7445,#7c5a32)" },
     { id: "hall",     name: "🪜 Hallway", wall: "linear-gradient(180deg,#6b5a44,#4a3d2e)", floor: "linear-gradient(180deg,#8a6a4f,#6f5340)" },
     { id: "two",      name: "🍳 Kitchen", wall: "linear-gradient(180deg,#6a5594,#48366e)", floor: "linear-gradient(180deg,#7a5638,#5f4029)" },
@@ -4961,9 +5034,42 @@
   $("doorHallL").addEventListener("click", function () { goToRoom("snug"); });
   $("doorHallR").addEventListener("click", function () { goToRoom("two"); });
   $("doorBack").addEventListener("click", function () { goToRoom("hall"); });        // kitchen → hallway
-  $("doorSnugBack").addEventListener("click", function () { goToRoom("wardrobe"); });
   $("doorSnugNext").addEventListener("click", function () { goToRoom("hall"); });
-  $("doorWardBack").addEventListener("click", function () { goToRoom("snug"); });
+  $("doorWardBack").addEventListener("click", function () { goToRoom("landing"); });
+  $("doorRobes").addEventListener("click", function () { goToRoom("wardrobe"); });
+  // ----- The Star Cookbook: tap it and pick a recipe page -----
+  function openRecipeBook() {
+    var simmering = !!state.cauldron;
+    var html = '<p class="muted">The Star Cookbook falls open. Choose a recipe…</p>' +
+      '<div class="recipe-grid">' +
+      '<div class="rpage" id="rpElixir">' +
+        '<div class="rp-ic">🔮</div><h4>Aqsa\'s Moonlit Elixir</h4>' +
+        '<div class="rt">Seven moonpetals, a spoon of starlight sugar, one whispered secret. Stir counter-clockwise and serve beneath a crescent moon.</div>' +
+        '<div class="rc">' + (simmering ? "already simmering 💜" : "Cook it 🍲") + '</div>' +
+      '</div>' +
+      '<div class="rpage faded">' +
+        '<div class="rp-ic">🌶️</div><h4>Jas\'s ...?</h4>' +
+        '<div class="rt">The ink on this page is still drying…</div>' +
+      '</div>' +
+      '<div class="rpage faded">' +
+        '<div class="rp-ic">🍪</div><h4>Adam\'s ...?</h4>' +
+        '<div class="rt">Smudged with what appears to be cocoa fingerprints…</div>' +
+      '</div>' +
+      '</div>';
+    openPanel("📖 Star Cookbook", html, [{ label: "Close", cls: "primary", onClick: closePanel }]);
+    $("gBody").querySelector("#rpElixir").addEventListener("click", function () {
+      if (state.cauldron) { toast("💜 The elixir is already simmering on the stove."); return; }
+      state.cauldron = true;
+      save(); renderRoom(); closePanel();
+      toast("🔮 Aqsa's Moonlit Elixir simmers on the stove… 💜✨");
+      Ambient.chaching && Ambient.blip(880, 0.06, "triangle"); Ambient.blip(1174, 0.09, "triangle");
+    });
+  }
+  $("kBook").addEventListener("click", function (e) { e.stopPropagation(); openRecipeBook(); });
+  $("aqsaPot").addEventListener("click", function (e) {
+    e.stopPropagation();
+    toast("💜 The elixir bubbles softly. It smells of moonlight and secrets.");
+  });
   $("doorGardenBack").addEventListener("click", function () { goToRoom("two"); });
   // The garden door can be dragged along the kitchen wall; a tap (no drag) opens the garden.
   function initGardenDoorDrag() {

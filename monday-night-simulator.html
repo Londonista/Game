@@ -1578,16 +1578,19 @@
       <div class="ss landing-only" id="stairsDown" style="left:20px" title="Downstairs to the hallway">
         <div class="hint">↓ downstairs</div>
       </div>
-      <div class="hdoor landing-only" id="doorAqsa" style="left:222px" title="Aqsa's Room">
+      <div class="hdoor landing-only" id="doorAqsa" style="left:200px" title="Aqsa's Room">
         <div class="plate">Aqsa</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="garl"></div>
       </div>
-      <div class="hdoor landing-only" id="doorJas" style="left:348px" title="Jas's Room">
+      <div class="hdoor landing-only" id="doorJas" style="left:320px" title="Jas's Room">
         <div class="plate">Jas</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="garl"></div>
       </div>
-      <div class="hdoor landing-only" id="doorAdam" style="left:474px" title="Adam's Room">
+      <div class="hdoor landing-only" id="doorAdam" style="left:440px" title="Adam's Room">
         <div class="plate">Adam</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="garl"></div>
       </div>
-      <div class="hdoor landing-only" id="doorBath" style="left:612px" title="The bathroom">
+      <div class="hdoor landing-only" id="doorRobes" style="left:560px" title="The Wardrobe">
+        <div class="plate">👗 Robes</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="garl"></div>
+      </div>
+      <div class="hdoor landing-only" id="doorBath" style="left:680px" title="The bathroom">
         <div class="plate">🛁 Bath</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="garl"></div>
       </div>
 
@@ -1596,10 +1599,6 @@
         <div class="s-window"><div class="s-moon"></div><div class="s-cross"></div></div>
       </div>
       <div class="label2 snug-only" style="left:50%; transform:translateX(-50%)">🛋️ The Snug</div>
-      <div class="door-back snug-only" id="doorSnugBack" title="Go to the Wardrobe">
-        <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">← wardrobe</div>
-      </div>
       <div class="door-wardback snug-only" id="doorSnugNext" title="Go to the hallway">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
         <div class="sign">hallway →</div>
@@ -1671,9 +1670,9 @@
 
       <!-- ===== WARDROBE ROOM — shown only when you're in it ===== -->
       <div class="label2 ward-only" style="left:50%; transform:translateX(-50%)">👗 Wardrobe</div>
-      <div class="door-wardback ward-only" id="doorWardBack" title="Go to the Snug">
+      <div class="door-wardback ward-only" id="doorWardBack" title="Out to the landing">
         <div class="leaf"><div class="dpanel"></div><div class="knob"></div></div>
-        <div class="sign">snug →</div>
+        <div class="sign">landing →</div>
       </div>
 
       <!-- Placed items get injected here -->
@@ -4054,11 +4053,11 @@
     bed3: "💙 Adam's Room — tap → for the landing.",
     main: "🛏️ Jas's Room — tap ← for the landing.",
     hall: "🪜 The hallway — take the stairs up, or ← snug · kitchen →",
-    landing: "🛗 Upstairs landing — pick a room, or ↓ take the stairs down.",
-    snug: "🛋️ The snug — get cosy & decorate it! ← wardrobe · hallway →",
+    landing: "🛗 Upstairs landing — pick a room (👗 too!), or ↓ stairs down.",
+    snug: "🛋️ The snug — get cosy & decorate it! hallway →",
     two: "🍳 The kitchen — decorate it too! ← hallway · garden →",
     garden: "🌷 The garden — drag to explore · ‹ › or ← for the kitchen.",
-    wardrobe: "👗 The Wardrobe — make it yours! Tap → for the snug."
+    wardrobe: "👗 The Wardrobe — make it yours! Tap → for the landing."
   };
   function goToRoom(name) {
     if (state.currentRoom === name) return;
@@ -4358,8 +4357,8 @@
     { id: "bed2",     name: "🌸 Aqsa's Room", wall: "linear-gradient(180deg,#7d5570,#563a54)", floor: "linear-gradient(180deg,#8a6a4f,#6f5340)" },
     { id: "main",     name: "🛏️ Jas's Room",  wall: "linear-gradient(180deg,#4a3a63,#6b5184)", floor: "linear-gradient(180deg,#8a6a4f,#74573f)" },
     { id: "bed3",     name: "💙 Adam's Room", wall: "linear-gradient(180deg,#3f4f7a,#2b3556)", floor: "linear-gradient(180deg,#7a6a52,#5f4e3a)" },
-    // downstairs
     { id: "wardrobe", name: "👗 Wardrobe", wall: "linear-gradient(180deg,#4a3a52,#6f5570)", floor: "linear-gradient(180deg,#dccbef,#c6b2e6)" },
+    // downstairs
     { id: "snug",     name: "🛋️ The Snug", wall: "linear-gradient(180deg,#2e514a,#427563)", floor: "linear-gradient(180deg,#9a7445,#7c5a32)" },
     { id: "hall",     name: "🪜 Hallway", wall: "linear-gradient(180deg,#6b5a44,#4a3d2e)", floor: "linear-gradient(180deg,#8a6a4f,#6f5340)" },
     { id: "two",      name: "🍳 Kitchen", wall: "linear-gradient(180deg,#6a5594,#48366e)", floor: "linear-gradient(180deg,#7a5638,#5f4029)" },
@@ -4961,9 +4960,9 @@
   $("doorHallL").addEventListener("click", function () { goToRoom("snug"); });
   $("doorHallR").addEventListener("click", function () { goToRoom("two"); });
   $("doorBack").addEventListener("click", function () { goToRoom("hall"); });        // kitchen → hallway
-  $("doorSnugBack").addEventListener("click", function () { goToRoom("wardrobe"); });
   $("doorSnugNext").addEventListener("click", function () { goToRoom("hall"); });
-  $("doorWardBack").addEventListener("click", function () { goToRoom("snug"); });
+  $("doorWardBack").addEventListener("click", function () { goToRoom("landing"); });
+  $("doorRobes").addEventListener("click", function () { goToRoom("wardrobe"); });
   $("doorGardenBack").addEventListener("click", function () { goToRoom("two"); });
   // The garden door can be dragged along the kitchen wall; a tap (no drag) opens the garden.
   function initGardenDoorDrag() {

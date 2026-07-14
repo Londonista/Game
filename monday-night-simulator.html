@@ -1851,6 +1851,7 @@
     { id: "framedpic", name: "Framed Photo",       ic: "🖼️", price: 12, unlockAt: 0, set: "Wall Art", bl: "The three of you, mid-laugh." },
     { id: "tapestry",  name: "Tapestry",           ic: "🧵", price: 15, unlockAt: 0, set: "Wall Art", bl: "Instant 'we have taste' energy." },
     { id: "ufoposter", name: "UFO Poster",          ic: "", price: 15, unlockAt: 0, set: "Wall Art", render: "ufop", bl: "Adam says the beam is coming for him specifically." },
+    { id: "pdposter",  name: "Perfect Days Poster", ic: "", price: 15, unlockAt: 0, set: "Wall Art", render: "pdp", bl: "Komorebi — light through leaves. Now is now." },
 
     // --- Study: an empty ornate bookcase + things to fill it ---
     { id: "bookcase",  name: "Bookcase",      ic: "📚", price: 28, unlockAt: 0, set: "Study", render: "bookcase", bl: "Waiting to hold everyone's favourites." },
@@ -2189,6 +2190,32 @@
 
   // A beige vintage map — parchment, faint landmasses, a dotted route, an X
   // and a little compass rose. Used for the placed item and the shop card.
+  // A quiet poster inspired by Perfect Days: komorebi light through leaves,
+  // a small figure in workwear looking up. Original art, homage only.
+  function pdSVG(w, h) {
+    return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 44 58">' +
+      '<rect x="1" y="1" width="42" height="56" rx="3" fill="#e9f0e4" stroke="#2c3a30" stroke-width="2"/>' +
+      '<rect x="3" y="3" width="38" height="38" fill="#d6e7ea"/>' +
+      '<rect x="3" y="26" width="38" height="15" fill="#efe6c8" opacity="0.75"/>' +
+      '<ellipse cx="7" cy="7" rx="13" ry="8" fill="#2f5a40"/>' +
+      '<ellipse cx="24" cy="4" rx="12" ry="6.5" fill="#3a6b4a"/>' +
+      '<ellipse cx="40" cy="8" rx="12" ry="8" fill="#2f5a40"/>' +
+      '<ellipse cx="15" cy="11" rx="7" ry="4" fill="#48805c" opacity="0.9"/>' +
+      '<ellipse cx="33" cy="12" rx="6" ry="3.5" fill="#48805c" opacity="0.85"/>' +
+      '<polygon points="12,10 18,8 14,41 6,41" fill="#fff2c8" opacity="0.4"/>' +
+      '<polygon points="27,9 32,10 38,41 28,41" fill="#fff2c8" opacity="0.32"/>' +
+      '<polygon points="20,12 23,12 24,41 19,41" fill="#fff8dc" opacity="0.45"/>' +
+      '<rect x="3" y="41" width="38" height="8" fill="#cfc4a4"/>' +
+      '<ellipse cx="12" cy="44" rx="4" ry="1.2" fill="#fff2c8" opacity="0.55"/>' +
+      '<ellipse cx="25" cy="46" rx="5" ry="1.4" fill="#fff2c8" opacity="0.5"/>' +
+      '<ellipse cx="36" cy="43.5" rx="3" ry="1" fill="#fff2c8" opacity="0.55"/>' +
+      '<circle cx="21.5" cy="30" r="2.1" fill="#e8c49c"/>' +
+      '<path d="M18.8 41 L18.8 34.5 Q18.8 32.6 21.5 32.6 Q24.2 32.6 24.2 34.5 L24.2 41 Z" fill="#3a6aa8"/>' +
+      '<rect x="19.6" y="35" width="3.8" height="1.4" rx="0.7" fill="#2c5183"/>' +
+      '<rect x="3" y="49" width="38" height="6" fill="#20261f"/>' +
+      '<text x="22" y="53.4" text-anchor="middle" font-size="3.4" fill="#e8e2cf" font-family="monospace" letter-spacing="1.1">PERFECT DAYS</text>' +
+      '</svg>';
+  }
   // A black poster: grey alien saucer with a green beam shooting down.
   function ufoSVG(w, h) {
     return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 44 58">' +
@@ -2566,6 +2593,7 @@
       else if (def.render === "bookcase") { el.classList.add("bookcase"); el.style.zIndex = depthZ(p.y); el.appendChild(buildBookcase()); }
       else if (def.render === "map") { el.classList.add("mapitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildMap()); }
       else if (def.render === "ufop") { el.classList.add("ufoitem"); el.style.zIndex = depthZ(p.y); var uw = document.createElement("div"); uw.innerHTML = ufoSVG(88, 116); el.appendChild(uw); }
+      else if (def.render === "pdp") { el.classList.add("ufoitem"); el.style.zIndex = depthZ(p.y); var pdw = document.createElement("div"); pdw.innerHTML = pdSVG(88, 116); el.appendChild(pdw); }
       else if (def.render === "vanity") { el.classList.add("vanity"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVanity()); }
       else if (def.render === "wardrobe") { el.classList.add("wardrobeitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildWardrobe()); }
       else if (def.render === "sofa") { el.classList.add("sofa"); el.style.zIndex = depthZ(p.y); el.appendChild(buildSofa()); }
@@ -2799,6 +2827,7 @@
          : it.render === "bookcase" ? BOOKCASE_ICON
          : it.render === "map" ? MAP_SVG
          : it.render === "ufop" ? ufoSVG(40, 52)
+         : it.render === "pdp" ? pdSVG(40, 52)
          : it.render === "vanity" ? VANITY_ICON
          : it.render === "wardrobe" ? WARDROBE_ICON
          : it.render === "vase" ? VASE_SVG

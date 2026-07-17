@@ -777,6 +777,31 @@
   @keyframes chrattle { from { transform: rotate(-16deg); } to { transform: rotate(14deg); } }
   @keyframes fiestapulse { from { opacity: .7; } to { opacity: 1; } }
   @keyframes fiestafade { 0% { opacity: 0; } 8% { opacity: 1; } 86% { opacity: 1; } 100% { opacity: 0; } }
+  /* Adam's Mystery Cookie — floats up through the air, then poofs to glitter */
+  .cookieshow { position: absolute; inset: 0; z-index: 90; pointer-events: none; }
+  .cookieshow .cookie { position: absolute; left: 50%; bottom: 90px; width: 66px; height: 66px; border-radius: 50%;
+    margin-left: -33px; background: radial-gradient(circle at 36% 30%, #c78a4e, #a06636 62%, #7a4a22);
+    box-shadow: inset 0 -6px 8px rgba(0,0,0,.28), 0 6px 10px rgba(0,0,0,.3);
+    animation: cookiefloat 3.6s ease-in forwards; }
+  /* multi-coloured chips scattered on the cookie */
+  .cookieshow .cookie::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background:
+    radial-gradient(5px 5px at 30% 34%, #e8484f 0 48%, transparent 52%),
+    radial-gradient(5px 5px at 62% 26%, #4f8ad9 0 48%, transparent 52%),
+    radial-gradient(5px 5px at 74% 56%, #59b46a 0 48%, transparent 52%),
+    radial-gradient(5px 5px at 40% 62%, #d9a441 0 48%, transparent 52%),
+    radial-gradient(5px 5px at 54% 78%, #b06ad0 0 48%, transparent 52%),
+    radial-gradient(4px 4px at 22% 56%, #e07ab0 0 48%, transparent 52%); }
+  @keyframes cookiefloat {
+    0% { transform: translateY(0) rotate(-8deg) scale(.5); opacity: 0; }
+    14% { opacity: 1; }
+    70% { transform: translateY(-190px) rotate(12deg) scale(1); opacity: 1; }
+    88% { transform: translateY(-232px) rotate(20deg) scale(1.06); opacity: 1; }
+    100% { transform: translateY(-250px) rotate(24deg) scale(.6); opacity: 0; }
+  }
+  .cookieshow .glt { position: absolute; width: 8px; height: 8px; border-radius: 50%;
+    box-shadow: 0 0 6px 1px currentColor; animation: gltburst .9s ease-out forwards; }
+  @keyframes gltburst { 0% { transform: translate(0,0) scale(.4); opacity: 0; }
+    20% { opacity: 1; } 100% { transform: translate(var(--gx), var(--gy)) scale(1); opacity: 0; } }
   /* Jas's Deep Fried Chilli Object — golden, mysterious, garnished */
   .kitchen .k-fry { position: absolute; top: -19px; right: 104px; width: 40px; height: 24px;
     display: none; cursor: pointer; pointer-events: auto; }
@@ -5157,6 +5182,34 @@
     setTimeout(function () { if (ov.parentNode) ov.remove(); }, 5300);
     Ambient.samba();
   }
+  // Adam's Mystery Cookie floats up through the room, then bursts to glitter.
+  function mysteryCookie() {
+    var ov = document.createElement("div");
+    ov.className = "cookieshow";
+    ov.style.left = (30 + Math.random() * 40) + "%";   // drift up from a random-ish spot
+    ov.innerHTML = '<div class="cookie"></div>';
+    room.appendChild(ov);
+    Ambient.blip(523, 0.08, "triangle"); Ambient.blip(659, 0.08, "triangle"); Ambient.blip(880, 0.12, "triangle");
+    // when the cookie reaches the top, poof a haze of glitter where it vanished
+    setTimeout(function () {
+      var cols = ["#e8484f", "#4f8ad9", "#59b46a", "#d9a441", "#b06ad0", "#e07ab0", "#fff2b0"];
+      var burst = document.createElement("div");
+      burst.style.cssText = "position:absolute;left:50%;top:44px;";
+      for (var i = 0; i < 22; i++) {
+        var a = Math.random() * 6.28, d = 26 + Math.random() * 60;
+        var g = document.createElement("span");
+        g.className = "glt";
+        g.style.color = cols[i % cols.length];
+        g.style.setProperty("--gx", (Math.cos(a) * d).toFixed(0) + "px");
+        g.style.setProperty("--gy", (Math.sin(a) * d).toFixed(0) + "px");
+        g.style.animationDelay = (Math.random() * 0.12).toFixed(2) + "s";
+        burst.appendChild(g);
+      }
+      ov.appendChild(burst);
+      Ambient.blip(1318, 0.06, "triangle"); Ambient.blip(1760, 0.1, "triangle");
+    }, 3050);
+    setTimeout(function () { if (ov.parentNode) ov.remove(); }, 4300);
+  }
   // ----- The Star Cookbook: tap it and pick a recipe page -----
   function openRecipeBook() {
     var simmering = !!state.cauldron;
@@ -5172,9 +5225,10 @@
         '<div class="rt">Take one object — any object. Batter it. Add chillies until the smoke alarm shows interest. Deep fry until golden and unrecognisable. Serve with total confidence.</div>' +
         '<div class="rc">' + (state.fryer ? "already sizzling 🌶️" : "Fry it 🍟") + '</div>' +
       '</div>' +
-      '<div class="rpage faded">' +
-        '<div class="rp-ic">🍪</div><h4>Adam\'s ...?</h4>' +
-        '<div class="rt">Smudged with what appears to be cocoa fingerprints…</div>' +
+      '<div class="rpage" id="rpCookie">' +
+        '<div class="rp-ic">🍪</div><h4>Adam\'s Mystery Cookie</h4>' +
+        '<div class="rt">Cocoa, butter, and a fistful of chips in every colour there is. The mystery is what kind — nobody knows until it\'s gone. Bake, and let it go.</div>' +
+        '<div class="rc">Bake it ✨</div>' +
       '</div>' +
       '</div>';
     openPanel("📖 Star Cookbook", html, [{ label: "Close", cls: "primary", onClick: closePanel }]);
@@ -5185,6 +5239,11 @@
       chilliFiesta();
       toast(again ? "🌶️ ANOTHER round! The Object approves. 💃"
                   : "🌶️ Jas's Deep Fried Chilli Object sizzles by the stove… what IS it? 🍟");
+    });
+    $("gBody").querySelector("#rpCookie").addEventListener("click", function () {
+      closePanel();
+      mysteryCookie();
+      toast("🍪 Adam's Mystery Cookie drifts up… and vanishes in a haze of glitter. ✨");
     });
     $("gBody").querySelector("#rpElixir").addEventListener("click", function () {
       if (state.cauldron) { toast("💜 The elixir is already simmering on the stove."); return; }

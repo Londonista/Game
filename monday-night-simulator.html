@@ -777,12 +777,14 @@
   @keyframes chrattle { from { transform: rotate(-16deg); } to { transform: rotate(14deg); } }
   @keyframes fiestapulse { from { opacity: .7; } to { opacity: 1; } }
   @keyframes fiestafade { 0% { opacity: 0; } 8% { opacity: 1; } 86% { opacity: 1; } 100% { opacity: 0; } }
-  /* Adam's Mystery Cookie — floats up through the air, then poofs to glitter */
+  /* Adam's Mystery Cookie — floats up, hangs while unseen bites vanish it */
   .cookieshow { position: absolute; inset: 0; z-index: 90; pointer-events: none; }
-  .cookieshow .cookie { position: absolute; left: 50%; bottom: 90px; width: 66px; height: 66px; border-radius: 50%;
-    margin-left: -33px; background: radial-gradient(circle at 36% 30%, #c78a4e, #a06636 62%, #7a4a22);
+  .cookieshow .cookie { position: absolute; left: 50%; bottom: 90px; width: 72px; height: 72px; border-radius: 50%;
+    margin-left: -36px; background: radial-gradient(circle at 36% 30%, #c78a4e, #a06636 62%, #7a4a22);
     box-shadow: inset 0 -6px 8px rgba(0,0,0,.28), 0 6px 10px rgba(0,0,0,.3);
-    animation: cookiefloat 3.6s ease-in forwards; }
+    animation: cookierise 1.4s ease-out forwards; }
+  .cookieshow .cookie.hang { animation: cookiebob 2.6s ease-in-out infinite; }
+  .cookieshow .cookie.poof { transition: transform .4s ease, opacity .4s ease; transform: translateY(-186px) scale(1.35); opacity: 0; }
   /* multi-coloured chips scattered on the cookie */
   .cookieshow .cookie::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background:
     radial-gradient(5px 5px at 30% 34%, #e8484f 0 48%, transparent 52%),
@@ -791,15 +793,17 @@
     radial-gradient(5px 5px at 40% 62%, #d9a441 0 48%, transparent 52%),
     radial-gradient(5px 5px at 54% 78%, #b06ad0 0 48%, transparent 52%),
     radial-gradient(4px 4px at 22% 56%, #e07ab0 0 48%, transparent 52%); }
-  @keyframes cookiefloat {
+  @keyframes cookierise {
     0% { transform: translateY(0) rotate(-8deg) scale(.5); opacity: 0; }
-    14% { opacity: 1; }
-    70% { transform: translateY(-190px) rotate(12deg) scale(1); opacity: 1; }
-    88% { transform: translateY(-232px) rotate(20deg) scale(1.06); opacity: 1; }
-    100% { transform: translateY(-250px) rotate(24deg) scale(.6); opacity: 0; }
+    30% { opacity: 1; }
+    100% { transform: translateY(-180px) rotate(5deg) scale(1); opacity: 1; }
+  }
+  @keyframes cookiebob {
+    0%,100% { transform: translateY(-180px) rotate(5deg); }
+    50% { transform: translateY(-192px) rotate(-4deg); }
   }
   .cookieshow .glt { position: absolute; width: 8px; height: 8px; border-radius: 50%;
-    box-shadow: 0 0 6px 1px currentColor; animation: gltburst .9s ease-out forwards; }
+    box-shadow: 0 0 6px 1px currentColor; animation: gltburst 1s ease-out forwards; }
   @keyframes gltburst { 0% { transform: translate(0,0) scale(.4); opacity: 0; }
     20% { opacity: 1; } 100% { transform: translate(var(--gx), var(--gy)) scale(1); opacity: 0; } }
   /* Jas's Deep Fried Chilli Object — golden, mysterious, garnished */
@@ -2135,11 +2139,11 @@
   var coinChip = $("coinChip"), weekChip = $("weekChip"), seasonChip = $("seasonChip");
   var toastEl = $("toast"), toastTimer = null;
 
-  function toast(msg) {
+  function toast(msg, ms) {
     toastEl.textContent = msg;
     toastEl.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 1900);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, ms || 1900);
   }
 
   function setCoins(n) { state.coins = Math.max(0, Math.round(n)); coinChip.textContent = "🪙 " + state.coins; }
@@ -4043,8 +4047,43 @@
       });
     }
 
+    // A short crunchy bite — filtered noise with a fast, chompy decay.
+    function crunch() {
+      var c = getCtx(); if (!c) return;
+      if (c.state === "suspended") c.resume();
+      var t = c.currentTime;
+      var nb = c.createBuffer(1, (c.sampleRate * 0.13) | 0, c.sampleRate), d = nb.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 1.7);
+      var src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      src.buffer = nb; f.type = "bandpass"; f.frequency.value = 1100 + Math.random() * 700; f.Q.value = 0.7;
+      g.gain.setValueAtTime(0.17, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      src.connect(f); f.connect(g); g.connect(c.destination); src.start(t); src.stop(t + 0.14);
+    }
+    // Mystical UFO music — a wavering theremin lead over a low drone.
+    function ufoTune() {
+      var c = getCtx(); if (!c) return;
+      if (c.state === "suspended") c.resume();
+      var t = c.currentTime, dur = 3.4;
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = "sine";
+      var N = 96, curve = new Float32Array(N);
+      for (var i = 0; i < N; i++) curve[i] = 430 * Math.pow(2, (Math.sin(i / N * Math.PI * 2 * 3) * 8 + (i / N) * 6) / 12);
+      o.frequency.setValueCurveAtTime(curve, t, dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.055, t + 0.35);
+      g.gain.setValueAtTime(0.055, t + dur - 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.05);
+      var lfo = c.createOscillator(), lg = c.createGain();   // theremin wobble
+      lfo.type = "sine"; lfo.frequency.value = 6.5; lg.gain.value = 0.022;
+      lfo.connect(lg); lg.connect(g.gain); lfo.start(t); lfo.stop(t + dur + 0.05);
+      var dr = c.createOscillator(), dg = c.createGain();    // low drone
+      dr.type = "triangle"; dr.frequency.value = 98;
+      dg.gain.setValueAtTime(0.0001, t); dg.gain.exponentialRampToValueAtTime(0.045, t + 0.5);
+      dg.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      dr.connect(dg); dg.connect(c.destination); dr.start(t); dr.stop(t + dur + 0.05);
+    }
+
     return { start: start, toggle: toggle, squeak: squeak, charSqueak: charSqueak, blip: blip,
-             chaching: chaching, howl: howl, samba: samba, startTune: startTune, stopTune: stopTune, flourish: flourish,
+             chaching: chaching, howl: howl, samba: samba, crunch: crunch, ufoTune: ufoTune, startTune: startTune, stopTune: stopTune, flourish: flourish,
              updateBtn: updateBtn, level: level, isMuted: function () { return muted; },
              ctxState: function () { return ctx ? ctx.state : "none"; } };
   })();
@@ -5182,33 +5221,62 @@
     setTimeout(function () { if (ov.parentNode) ov.remove(); }, 5300);
     Ambient.samba();
   }
-  // Adam's Mystery Cookie floats up through the room, then bursts to glitter.
+  // Adam's Mystery Cookie floats up, hangs in the air while unseen bites are
+  // chomped out of it (with crunches & mystical UFO music), then it vanishes
+  // in a haze of glitter.
   function mysteryCookie() {
     var ov = document.createElement("div");
     ov.className = "cookieshow";
-    ov.style.left = (30 + Math.random() * 40) + "%";   // drift up from a random-ish spot
-    ov.innerHTML = '<div class="cookie"></div>';
+    var leftPct = 34 + Math.random() * 32;              // where it drifts up
+    ov.innerHTML = '<div class="cookie" style="left:' + leftPct.toFixed(1) + '%"></div>';
     room.appendChild(ov);
+    var cookie = ov.querySelector(".cookie");
     Ambient.blip(523, 0.08, "triangle"); Ambient.blip(659, 0.08, "triangle"); Ambient.blip(880, 0.12, "triangle");
-    // when the cookie reaches the top, poof a haze of glitter where it vanished
+
+    // bites are chewed out of the cookie via a compositing mask (each bite is a
+    // transparent circle at the rim; intersect keeps everything except the holes)
+    var bites = [], W = 72;
+    var spots = [[0.86, 0.30], [0.14, 0.44], [0.72, 0.82], [0.30, 0.16], [0.20, 0.78], [0.80, 0.60]];
+    function takeBite(n) {
+      var s = spots[n], cx = (s[0] * W).toFixed(0), cy = (s[1] * W).toFixed(0);
+      bites.push("radial-gradient(circle at " + cx + "px " + cy + "px, transparent 0 17px, #000 18px)");
+      var img = bites.join(","), comp = bites.map(function () { return "intersect"; }).join(",");
+      cookie.style.webkitMaskImage = img; cookie.style.maskImage = img;
+      cookie.style.webkitMaskComposite = bites.map(function () { return "source-in"; }).join(",");
+      cookie.style.maskComposite = comp;
+      Ambient.crunch();
+    }
+
+    var HANG = 1400, BITE_GAP = 560, NBITES = 5;
+    setTimeout(function () {                              // reached the top — start hovering & the music
+      cookie.classList.add("hang");
+      Ambient.ufoTune();
+    }, HANG);
+    for (var i = 0; i < NBITES; i++) (function (n) {
+      setTimeout(function () { if (cookie.isConnected) takeBite(n); }, HANG + 300 + n * BITE_GAP);
+    })(i);
+
+    var VANISH = HANG + 300 + NBITES * BITE_GAP + 200;
     setTimeout(function () {
+      // glitter burst centred on the hovering cookie's spot
+      var cx = leftPct / 100 * 800, cy = (520 - 90 - W / 2) - 186;
       var cols = ["#e8484f", "#4f8ad9", "#59b46a", "#d9a441", "#b06ad0", "#e07ab0", "#fff2b0"];
       var burst = document.createElement("div");
-      burst.style.cssText = "position:absolute;left:50%;top:44px;";
-      for (var i = 0; i < 22; i++) {
-        var a = Math.random() * 6.28, d = 26 + Math.random() * 60;
+      burst.style.cssText = "position:absolute;left:" + cx.toFixed(0) + "px;top:" + cy.toFixed(0) + "px;";
+      for (var k = 0; k < 26; k++) {
+        var a = Math.random() * 6.28, d = 24 + Math.random() * 66;
         var g = document.createElement("span");
-        g.className = "glt";
-        g.style.color = cols[i % cols.length];
+        g.className = "glt"; g.style.color = cols[k % cols.length];
         g.style.setProperty("--gx", (Math.cos(a) * d).toFixed(0) + "px");
         g.style.setProperty("--gy", (Math.sin(a) * d).toFixed(0) + "px");
-        g.style.animationDelay = (Math.random() * 0.12).toFixed(2) + "s";
+        g.style.animationDelay = (Math.random() * 0.14).toFixed(2) + "s";
         burst.appendChild(g);
       }
       ov.appendChild(burst);
-      Ambient.blip(1318, 0.06, "triangle"); Ambient.blip(1760, 0.1, "triangle");
-    }, 3050);
-    setTimeout(function () { if (ov.parentNode) ov.remove(); }, 4300);
+      cookie.classList.remove("hang"); cookie.classList.add("poof");
+      Ambient.blip(1318, 0.06, "triangle"); Ambient.blip(1760, 0.1, "triangle"); Ambient.blip(2093, 0.12, "triangle");
+    }, VANISH);
+    setTimeout(function () { if (ov.parentNode) ov.remove(); }, VANISH + 1200);
   }
   // ----- The Star Cookbook: tap it and pick a recipe page -----
   function openRecipeBook() {
@@ -5238,18 +5306,18 @@
       save(); renderRoom(); closePanel();
       chilliFiesta();
       toast(again ? "🌶️ ANOTHER round! The Object approves. 💃"
-                  : "🌶️ Jas's Deep Fried Chilli Object sizzles by the stove… what IS it? 🍟");
+                  : "🌶️ Jas's Deep Fried Chilli Object sizzles by the stove… what IS it? 🍟", 5000);
     });
     $("gBody").querySelector("#rpCookie").addEventListener("click", function () {
       closePanel();
       mysteryCookie();
-      toast("🍪 Adam's Mystery Cookie drifts up… and vanishes in a haze of glitter. ✨");
+      toast("🍪 Adam's Mystery Cookie drifts up… unseen bites vanish it into glitter. ✨", 5000);
     });
     $("gBody").querySelector("#rpElixir").addEventListener("click", function () {
       if (state.cauldron) { toast("💜 The elixir is already simmering on the stove."); return; }
       state.cauldron = true;
       save(); renderRoom(); closePanel();
-      toast("🔮 Aqsa's Moonlit Elixir simmers on the stove… 💜✨");
+      toast("🔮 Aqsa's Moonlit Elixir simmers on the stove… 💜✨", 5000);
       Ambient.chaching && Ambient.blip(880, 0.06, "triangle"); Ambient.blip(1174, 0.09, "triangle");
     });
   }

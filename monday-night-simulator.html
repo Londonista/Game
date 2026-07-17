@@ -766,6 +766,17 @@
   .k-pot .s1 { left: -7px; top: -12px; } .k-pot .s2 { right: -5px; top: -18px; animation-delay: .6s; }
   .k-pot .s3 { left: 15px; top: -24px; animation-delay: 1.2s; }
   @keyframes kspark { 0%,100% { opacity: .15; transform: scale(.7); } 50% { opacity: 1; transform: scale(1.15); } }
+  /* chilli fiesta! red glow at the edges & rattling chillies everywhere */
+  .fiesta { position: absolute; inset: 0; z-index: 90; pointer-events: none;
+    animation: fiestafade 5.2s ease forwards; }
+  .fiesta .vig { position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(215,40,28,.5) 0, transparent 16%, transparent 84%, rgba(215,40,28,.5) 100%);
+    animation: fiestapulse .5s ease-in-out infinite alternate; }
+  .fiesta .ch { position: absolute; animation: chrattle .13s linear infinite alternate;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); }
+  @keyframes chrattle { from { transform: rotate(-16deg); } to { transform: rotate(14deg); } }
+  @keyframes fiestapulse { from { opacity: .7; } to { opacity: 1; } }
+  @keyframes fiestafade { 0% { opacity: 0; } 8% { opacity: 1; } 86% { opacity: 1; } 100% { opacity: 0; } }
   /* Jas's Deep Fried Chilli Object — golden, mysterious, garnished */
   .kitchen .k-fry { position: absolute; top: -19px; right: 104px; width: 40px; height: 24px;
     display: none; cursor: pointer; pointer-events: auto; }
@@ -3861,6 +3872,43 @@
       voice(t + 0.14, 330, 660, 1.1, 0.03);
     }
 
+    // A short, joyful samba burst: surdo thumps, agogo bells and a shaker.
+    function samba() {
+      var c = getCtx(); if (!c) return;
+      if (c.state === "suspended") c.resume();
+      var t0 = c.currentTime + 0.05, spb = 0.14;   // sixteenth notes, ~107bpm
+      var nb = c.createBuffer(1, (c.sampleRate * 0.06) | 0, c.sampleRate);
+      var nd = nb.getChannelData(0);
+      for (var i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+      function shk(t, vol) {
+        var src = c.createBufferSource(), g = c.createGain(), f = c.createBiquadFilter();
+        src.buffer = nb; f.type = "highpass"; f.frequency.value = 5200;
+        g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+        src.connect(f); f.connect(g); g.connect(c.destination); src.start(t); src.stop(t + 0.06);
+      }
+      function surdo(t, f0, vol) {
+        var o = c.createOscillator(), g = c.createGain();
+        o.type = "sine"; o.frequency.setValueAtTime(f0, t);
+        o.frequency.exponentialRampToValueAtTime(f0 * 0.7, t + 0.18);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+        o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.26);
+      }
+      function bell(t, f0, vol) {
+        var o = c.createOscillator(), g = c.createGain();
+        o.type = "square"; o.frequency.value = f0;
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.008);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+        o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.1);
+      }
+      for (var b = 0; b < 8; b++) {                 // ~4.5 seconds of carnival
+        var bt = t0 + b * 8 * spb;
+        for (var x = 0; x < 8; x++) shk(bt + x * spb, x % 4 === 0 ? 0.05 : 0.022);
+        surdo(bt, 120, 0.07); surdo(bt + 4 * spb, 92, 0.16); surdo(bt + 7 * spb, 92, 0.08);
+        [[0, 1150], [3, 780], [5, 1150], [6, 780]].forEach(function (n) { bell(bt + n[0] * spb, n[1], b % 2 ? 0.05 : 0.062); });
+      }
+    }
+
     // A bright "cha-ching!" for a laundromat sale (two ascending bell notes).
     function chaching() {
       var c = getCtx(); if (!c) return;
@@ -3971,7 +4019,7 @@
     }
 
     return { start: start, toggle: toggle, squeak: squeak, charSqueak: charSqueak, blip: blip,
-             chaching: chaching, howl: howl, startTune: startTune, stopTune: stopTune, flourish: flourish,
+             chaching: chaching, howl: howl, samba: samba, startTune: startTune, stopTune: stopTune, flourish: flourish,
              updateBtn: updateBtn, level: level, isMuted: function () { return muted; },
              ctxState: function () { return ctx ? ctx.state : "none"; } };
   })();
@@ -5095,6 +5143,20 @@
   $("doorSnugNext").addEventListener("click", function () { goToRoom("hall"); });
   $("doorWardBack").addEventListener("click", function () { goToRoom("landing"); });
   $("doorRobes").addEventListener("click", function () { goToRoom("wardrobe"); });
+  // A five-second chilli carnival: red edges, rattling chillies, samba.
+  function chilliFiesta() {
+    var ov = document.createElement("div");
+    ov.className = "fiesta";
+    var html = '<div class="vig"></div>';
+    for (var i = 0; i < 14; i++) {
+      html += '<span class="ch" style="left:' + (4 + Math.random() * 88).toFixed(1) + '%;top:' + (6 + Math.random() * 80).toFixed(1) +
+        '%;font-size:' + (20 + Math.random() * 16 | 0) + 'px;animation-delay:-' + (Math.random() * 0.13).toFixed(2) + 's">🌶️</span>';
+    }
+    ov.innerHTML = html;
+    room.appendChild(ov);
+    setTimeout(function () { if (ov.parentNode) ov.remove(); }, 5300);
+    Ambient.samba();
+  }
   // ----- The Star Cookbook: tap it and pick a recipe page -----
   function openRecipeBook() {
     var simmering = !!state.cauldron;
@@ -5117,11 +5179,12 @@
       '</div>';
     openPanel("📖 Star Cookbook", html, [{ label: "Close", cls: "primary", onClick: closePanel }]);
     $("gBody").querySelector("#rpFry").addEventListener("click", function () {
-      if (state.fryer) { toast("🌶️ The Object is already sizzling. It needs nothing from anyone."); return; }
+      var again = state.fryer;
       state.fryer = true;
       save(); renderRoom(); closePanel();
-      toast("🌶️ Jas's Deep Fried Chilli Object sizzles by the stove… what IS it? 🍟");
-      Ambient.blip(620, 0.06, "square"); Ambient.blip(880, 0.08, "triangle");
+      chilliFiesta();
+      toast(again ? "🌶️ ANOTHER round! The Object approves. 💃"
+                  : "🌶️ Jas's Deep Fried Chilli Object sizzles by the stove… what IS it? 🍟");
     });
     $("gBody").querySelector("#rpElixir").addEventListener("click", function () {
       if (state.cauldron) { toast("💜 The elixir is already simmering on the stove."); return; }

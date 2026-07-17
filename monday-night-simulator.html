@@ -5355,7 +5355,15 @@
     $("gBody").querySelector("#rpCookie").addEventListener("click", function () {
       closePanel();
       mysteryCookie();
-      toast("🍪 Adam's Mystery Cookie drifts up… unseen bites vanish it into glitter. ✨", 5000);
+      var lines = [
+        "🍪 The cookie ascends. An unseen mouth says 'mmm'. Adam denies everything. ✨",
+        "🍪 Behold: a cookie too holy to eat, being eaten. The Lord giveth chips, the void taketh away. 😇",
+        "🍪 Adam baked a cookie so mysterious even the cookie doesn't know the flavour. 👼",
+        "🍪 Nobody is eating this cookie. It is simply becoming glitter. As we all do, eventually. ✨",
+        "🍪 The angels have descended. They are, respectfully, hungry. 😇🍪",
+        "🍪 It floats. It glows. It gets absolutely demolished by invisible teeth. 🌟"
+      ];
+      toast(lines[(Math.random() * lines.length) | 0], 5000);
     });
     $("gBody").querySelector("#rpElixir").addEventListener("click", function () {
       if (state.cauldron) { toast("💜 The elixir is already simmering on the stove."); return; }

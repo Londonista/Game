@@ -777,22 +777,44 @@
   @keyframes chrattle { from { transform: rotate(-16deg); } to { transform: rotate(14deg); } }
   @keyframes fiestapulse { from { opacity: .7; } to { opacity: 1; } }
   @keyframes fiestafade { 0% { opacity: 0; } 8% { opacity: 1; } 86% { opacity: 1; } 100% { opacity: 0; } }
-  /* Adam's Mystery Cookie — floats up, hangs while unseen bites vanish it */
+  /* Adam's Mystery Cookie — floats up, hangs haloed in holy light while
+     unseen bites vanish it */
   .cookieshow { position: absolute; inset: 0; z-index: 90; pointer-events: none; }
+  /* a shaft of holy light radiating from the hovering cookie (centred on it) */
+  .cookieshow .halo { position: absolute; left: 50%; top: 78px; width: 260px; height: 260px;
+    margin-left: -130px; border-radius: 50%; opacity: 0;
+    background: radial-gradient(circle, rgba(255,246,200,.85), rgba(255,236,150,.35) 34%, transparent 68%);
+    animation: halofade 3.6s ease-in-out forwards; }
+  .cookieshow .rays { position: absolute; left: 50%; top: 48px; width: 320px; height: 320px;
+    margin-left: -160px; border-radius: 50%; opacity: 0;
+    background: repeating-conic-gradient(rgba(255,246,205,.5) 0 4deg, transparent 4deg 12deg);
+    -webkit-mask: radial-gradient(circle, #000 8%, rgba(0,0,0,.5) 30%, transparent 62%);
+    mask: radial-gradient(circle, #000 8%, rgba(0,0,0,.5) 30%, transparent 62%);
+    animation: halofade 3.6s ease-in-out forwards, rayspin 9s linear infinite; }
+  @keyframes halofade { 0% { opacity: 0; } 22% { opacity: 1; } 82% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes rayspin { to { transform: rotate(360deg); } }
   .cookieshow .cookie { position: absolute; left: 50%; bottom: 90px; width: 72px; height: 72px; border-radius: 50%;
     margin-left: -36px; background: radial-gradient(circle at 36% 30%, #c78a4e, #a06636 62%, #7a4a22);
-    box-shadow: inset 0 -6px 8px rgba(0,0,0,.28), 0 6px 10px rgba(0,0,0,.3);
+    border: 3px solid #1c1206;
+    box-shadow: inset 0 -6px 8px rgba(0,0,0,.28), 0 0 20px 6px rgba(255,244,190,.75);
     animation: cookierise 1.4s ease-out forwards; }
   .cookieshow .cookie.hang { animation: cookiebob 2.6s ease-in-out infinite; }
   .cookieshow .cookie.poof { transition: transform .4s ease, opacity .4s ease; transform: translateY(-186px) scale(1.35); opacity: 0; }
-  /* multi-coloured chips scattered on the cookie */
+  /* multi-coloured chips scattered on the cookie, each ringed in black */
   .cookieshow .cookie::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background:
-    radial-gradient(5px 5px at 30% 34%, #e8484f 0 48%, transparent 52%),
-    radial-gradient(5px 5px at 62% 26%, #4f8ad9 0 48%, transparent 52%),
-    radial-gradient(5px 5px at 74% 56%, #59b46a 0 48%, transparent 52%),
-    radial-gradient(5px 5px at 40% 62%, #d9a441 0 48%, transparent 52%),
-    radial-gradient(5px 5px at 54% 78%, #b06ad0 0 48%, transparent 52%),
-    radial-gradient(4px 4px at 22% 56%, #e07ab0 0 48%, transparent 52%); }
+    radial-gradient(6px 6px at 30% 34%, #1c1206 0 60%, transparent 64%),
+    radial-gradient(6px 6px at 62% 26%, #1c1206 0 60%, transparent 64%),
+    radial-gradient(6px 6px at 74% 56%, #1c1206 0 60%, transparent 64%),
+    radial-gradient(6px 6px at 40% 62%, #1c1206 0 60%, transparent 64%),
+    radial-gradient(6px 6px at 54% 78%, #1c1206 0 60%, transparent 64%),
+    radial-gradient(5px 5px at 22% 56%, #1c1206 0 60%, transparent 64%); }
+  .cookieshow .cookie::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background:
+    radial-gradient(4px 4px at 30% 34%, #e8484f 0 60%, transparent 64%),
+    radial-gradient(4px 4px at 62% 26%, #4f8ad9 0 60%, transparent 64%),
+    radial-gradient(4px 4px at 74% 56%, #59b46a 0 60%, transparent 64%),
+    radial-gradient(4px 4px at 40% 62%, #d9a441 0 60%, transparent 64%),
+    radial-gradient(4px 4px at 54% 78%, #b06ad0 0 60%, transparent 64%),
+    radial-gradient(3px 3px at 22% 56%, #e07ab0 0 60%, transparent 64%); }
   @keyframes cookierise {
     0% { transform: translateY(0) rotate(-8deg) scale(.5); opacity: 0; }
     30% { opacity: 1; }
@@ -4047,43 +4069,60 @@
       });
     }
 
-    // A short crunchy bite — filtered noise with a fast, chompy decay.
+    // A juicy chomp — a soft low "thmp" (pitch dropping like jaws closing)
+    // with just a touch of noise for the bite.
     function crunch() {
       var c = getCtx(); if (!c) return;
       if (c.state === "suspended") c.resume();
       var t = c.currentTime;
-      var nb = c.createBuffer(1, (c.sampleRate * 0.13) | 0, c.sampleRate), d = nb.getChannelData(0);
-      for (var i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 1.7);
-      var src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
-      src.buffer = nb; f.type = "bandpass"; f.frequency.value = 1100 + Math.random() * 700; f.Q.value = 0.7;
-      g.gain.setValueAtTime(0.17, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
-      src.connect(f); f.connect(g); g.connect(c.destination); src.start(t); src.stop(t + 0.14);
+      // the "thmp" body
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = "sine"; o.frequency.setValueAtTime(300 + Math.random() * 60, t);
+      o.frequency.exponentialRampToValueAtTime(70, t + 0.11);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.18);
+      // a short wet-bite noise transient
+      var nb = c.createBuffer(1, (c.sampleRate * 0.07) | 0, c.sampleRate), d = nb.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2.4);
+      var src = c.createBufferSource(), f = c.createBiquadFilter(), ng = c.createGain();
+      src.buffer = nb; f.type = "lowpass"; f.frequency.value = 900;
+      ng.gain.setValueAtTime(0.09, t); ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+      src.connect(f); f.connect(ng); ng.connect(c.destination); src.start(t); src.stop(t + 0.08);
     }
-    // Mystical UFO music — a wavering theremin lead over a low drone.
-    function ufoTune() {
+    // A heavenly choir — voices sustaining an "aaah" major chord that swells.
+    function choir() {
       var c = getCtx(); if (!c) return;
       if (c.state === "suspended") c.resume();
-      var t = c.currentTime, dur = 3.4;
-      var o = c.createOscillator(), g = c.createGain();
-      o.type = "sine";
-      var N = 96, curve = new Float32Array(N);
-      for (var i = 0; i < N; i++) curve[i] = 430 * Math.pow(2, (Math.sin(i / N * Math.PI * 2 * 3) * 8 + (i / N) * 6) / 12);
-      o.frequency.setValueCurveAtTime(curve, t, dur);
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.055, t + 0.35);
-      g.gain.setValueAtTime(0.055, t + dur - 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.05);
-      var lfo = c.createOscillator(), lg = c.createGain();   // theremin wobble
-      lfo.type = "sine"; lfo.frequency.value = 6.5; lg.gain.value = 0.022;
-      lfo.connect(lg); lg.connect(g.gain); lfo.start(t); lfo.stop(t + dur + 0.05);
-      var dr = c.createOscillator(), dg = c.createGain();    // low drone
-      dr.type = "triangle"; dr.frequency.value = 98;
-      dg.gain.setValueAtTime(0.0001, t); dg.gain.exponentialRampToValueAtTime(0.045, t + 0.5);
-      dg.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      dr.connect(dg); dg.connect(c.destination); dr.start(t); dr.stop(t + dur + 0.05);
+      var t = c.currentTime, dur = 3.6;
+      // a warm root-position major triad, doubled an octave up (C major-ish)
+      var chord = [261.63, 329.63, 392.0, 523.25, 659.25];
+      var bus = c.createGain();
+      bus.gain.setValueAtTime(0.0001, t);
+      bus.gain.exponentialRampToValueAtTime(0.09, t + 0.9);       // gentle heavenly swell
+      bus.gain.setValueAtTime(0.09, t + dur - 0.8);
+      bus.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      // a vowel-ish formant so it reads as "aaah"
+      var fmt = c.createBiquadFilter(); fmt.type = "bandpass"; fmt.frequency.value = 850; fmt.Q.value = 0.9;
+      bus.connect(fmt); fmt.connect(c.destination);
+      var bus2 = c.createGain(); bus2.gain.value = 0.5; bus.connect(bus2); bus2.connect(c.destination);
+      chord.forEach(function (f0, idx) {
+        // two slightly detuned voices per note for a choral shimmer
+        [-3, 3].forEach(function (cents) {
+          var o = c.createOscillator(), g = c.createGain();
+          o.type = idx > 2 ? "sine" : "sawtooth";
+          o.frequency.value = f0 * Math.pow(2, cents / 1200);
+          g.gain.value = (idx > 2 ? 0.5 : 1) / chord.length;
+          var vib = c.createOscillator(), vg = c.createGain();  // human vibrato
+          vib.frequency.value = 4.6 + Math.random(); vg.gain.value = f0 * 0.006;
+          vib.connect(vg); vg.connect(o.frequency); vib.start(t); vib.stop(t + dur + 0.1);
+          o.connect(g); g.connect(bus); o.start(t); o.stop(t + dur + 0.1);
+        });
+      });
     }
 
     return { start: start, toggle: toggle, squeak: squeak, charSqueak: charSqueak, blip: blip,
-             chaching: chaching, howl: howl, samba: samba, crunch: crunch, ufoTune: ufoTune, startTune: startTune, stopTune: stopTune, flourish: flourish,
+             chaching: chaching, howl: howl, samba: samba, crunch: crunch, choir: choir, startTune: startTune, stopTune: stopTune, flourish: flourish,
              updateBtn: updateBtn, level: level, isMuted: function () { return muted; },
              ctxState: function () { return ctx ? ctx.state : "none"; } };
   })();
@@ -5248,9 +5287,14 @@
     }
 
     var HANG = 1400, BITE_GAP = 560, NBITES = 5;
-    setTimeout(function () {                              // reached the top — start hovering & the music
+    setTimeout(function () {                              // reached the top — hover, bathe in holy light, choir sings
       cookie.classList.add("hang");
-      Ambient.ufoTune();
+      var rays = document.createElement("div"); rays.className = "rays";
+      rays.style.left = leftPct + "%"; rays.style.marginLeft = "-160px";
+      var halo = document.createElement("div"); halo.className = "halo";
+      halo.style.left = leftPct + "%"; halo.style.marginLeft = "-130px";
+      ov.insertBefore(rays, cookie); ov.insertBefore(halo, cookie);
+      Ambient.choir();
     }, HANG);
     for (var i = 0; i < NBITES; i++) (function (n) {
       setTimeout(function () { if (cookie.isConnected) takeBite(n); }, HANG + 300 + n * BITE_GAP);

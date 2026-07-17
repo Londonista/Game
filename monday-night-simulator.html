@@ -5374,13 +5374,24 @@
     });
   }
   $("kBook").addEventListener("click", function (e) { e.stopPropagation(); openRecipeBook(); });
+  // Tapping a cooked dish offers to clear it away (with a little flavour).
+  function dishMenu(title, flavour, clear) {
+    openPanel(title, '<p class="muted">' + flavour + '</p>', [
+      { label: "Clear it away 🧹", onClick: function () { clear(); closePanel(); toast("🧼 Cleared it from the kitchen."); } },
+      { label: "Leave it", cls: "primary", onClick: closePanel }
+    ]);
+  }
   $("jasFry").addEventListener("click", function (e) {
     e.stopPropagation();
-    toast("🌶️ It crunches audibly when you look at it. Jas is very proud.");
+    dishMenu("🌶️ Jas's Deep Fried Chilli Object",
+      "It crunches audibly when you look at it. Jas is very proud.",
+      function () { state.fryer = false; save(); renderRoom(); });
   });
   $("aqsaPot").addEventListener("click", function (e) {
     e.stopPropagation();
-    toast("💜 The elixir bubbles softly. It smells of moonlight and secrets.");
+    dishMenu("🔮 Aqsa's Moonlit Elixir",
+      "The elixir bubbles softly. It smells of moonlight and secrets.",
+      function () { state.cauldron = false; save(); renderRoom(); });
   });
   $("doorGardenBack").addEventListener("click", function () { goToRoom("two"); });
   // The garden door can be dragged along the kitchen wall; a tap (no drag) opens the garden.

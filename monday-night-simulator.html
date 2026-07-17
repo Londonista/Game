@@ -766,6 +766,26 @@
   .k-pot .s1 { left: -7px; top: -12px; } .k-pot .s2 { right: -5px; top: -18px; animation-delay: .6s; }
   .k-pot .s3 { left: 15px; top: -24px; animation-delay: 1.2s; }
   @keyframes kspark { 0%,100% { opacity: .15; transform: scale(.7); } 50% { opacity: 1; transform: scale(1.15); } }
+  /* Jas's Deep Fried Chilli Object — golden, mysterious, garnished */
+  .kitchen .k-fry { position: absolute; top: -19px; right: 104px; width: 40px; height: 24px;
+    display: none; cursor: pointer; pointer-events: auto; }
+  .k-fry .plate { position: absolute; bottom: 0; left: -3px; right: -3px; height: 9px; border-radius: 50%;
+    background: radial-gradient(ellipse at 45% 30%, #f4efe6, #cfc8ba); box-shadow: 0 2px 2px rgba(0,0,0,.25); }
+  .k-fry .blob { position: absolute; bottom: 4px; left: 4px; width: 32px; height: 19px;
+    border-radius: 46% 58% 52% 44% / 62% 55% 45% 58%;
+    background: radial-gradient(circle at 35% 30%, #e8b45c, #c78a2e 62%, #9c6a1e);
+    box-shadow: inset 0 -3px 4px rgba(0,0,0,.25); }
+  .k-fry .crumb { position: absolute; bottom: 9px; left: 10px; width: 3px; height: 3px; border-radius: 50%;
+    background: #8a5a16; box-shadow: 9px -2px 0 -0.5px #8a5a16, 16px 2px 0 -1px #8a5a16, 4px 4px 0 -1px #a9741f; }
+  .k-fry .chilli { position: absolute; top: -4px; left: 15px; width: 13px; height: 6px;
+    border-radius: 3px 6px 6px 5px; background: linear-gradient(180deg,#e0463a,#b22a22); transform: rotate(-18deg); }
+  .k-fry .stemm { position: absolute; top: -6px; left: 13px; width: 5px; height: 4px; border-radius: 2px;
+    background: #3f7a48; transform: rotate(-30deg); }
+  .k-fry .steam { position: absolute; bottom: 22px; left: 50%; width: 10px; height: 10px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, rgba(255,255,255,.75), rgba(230,225,215,.3));
+    animation: kpuff 2.4s ease-in infinite; opacity: 0; }
+  .k-fry .steam.t2 { animation-delay: .8s; width: 8px; height: 8px; }
+  .k-fry .steam.t3 { animation-delay: 1.6s; width: 12px; height: 12px; }
   .kitchen .k-book .cover { position: absolute; inset: 0; border-radius: 2px 4px 4px 2px;
     background: linear-gradient(90deg,#2f6a48 0 5px,#3f8a5a 5px); box-shadow: 0 3px 4px rgba(0,0,0,.35), inset -2px 0 0 rgba(0,0,0,.14); }
   .kitchen .k-book .pages { position: absolute; right: -2px; top: 3px; bottom: 3px; width: 3px; border-radius: 0 2px 2px 0;
@@ -1663,6 +1683,11 @@
           <div class="k-cab"></div>
           <div class="k-sink"></div>
           <div class="k-stove"><i></i><i></i><i></i><i></i></div>
+          <div class="k-fry" id="jasFry" title="Jas's Deep Fried Chilli Object">
+            <span class="steam t1"></span><span class="steam t2"></span><span class="steam t3"></span>
+            <span class="plate"></span><span class="blob"></span><span class="crumb"></span>
+            <span class="chilli"></span><span class="stemm"></span>
+          </div>
           <div class="k-pot" id="aqsaPot" title="Aqsa's Moonlit Elixir">
             <span class="puff p1"></span><span class="puff p2"></span><span class="puff p3"></span>
             <span class="spark s1">✦</span><span class="spark s2">✧</span><span class="spark s3">✦</span>
@@ -1977,6 +2002,7 @@
     ],
     currentRoom: "main",   // which room is on screen ("main" bedroom or "two" kitchen)
     cauldron: false,       // Aqsa's Moonlit Elixir simmering on the kitchen stove
+    fryer: false,          // Jas's Deep Fried Chilli Object, sizzling with confidence
     gardenDoorX: 68,       // x/y % position of the kitchen's garden door (draggable in 2D)
     gardenDoorY: 59,
     closet: [],            // clothing item ids you've bought
@@ -2569,6 +2595,7 @@
   function applyRoomClass() {
     room.dataset.room = state.currentRoom || "main";
     var ap = $("aqsaPot"); if (ap) ap.style.display = state.cauldron ? "block" : "none";
+    var jf = $("jasFry"); if (jf) jf.style.display = state.fryer ? "block" : "none";
   }
 
   function renderRoom() {
@@ -5078,9 +5105,10 @@
         '<div class="rt">Seven moonpetals, a spoon of starlight sugar, one whispered secret. Stir counter-clockwise and serve beneath a crescent moon.</div>' +
         '<div class="rc">' + (simmering ? "already simmering 💜" : "Cook it 🍲") + '</div>' +
       '</div>' +
-      '<div class="rpage faded">' +
-        '<div class="rp-ic">🌶️</div><h4>Jas\'s ...?</h4>' +
-        '<div class="rt">The ink on this page is still drying…</div>' +
+      '<div class="rpage" id="rpFry">' +
+        '<div class="rp-ic">🌶️</div><h4>Jas\'s Deep Fried Chilli Object</h4>' +
+        '<div class="rt">Take one object — any object. Batter it. Add chillies until the smoke alarm shows interest. Deep fry until golden and unrecognisable. Serve with total confidence.</div>' +
+        '<div class="rc">' + (state.fryer ? "already sizzling 🌶️" : "Fry it 🍟") + '</div>' +
       '</div>' +
       '<div class="rpage faded">' +
         '<div class="rp-ic">🍪</div><h4>Adam\'s ...?</h4>' +
@@ -5088,6 +5116,13 @@
       '</div>' +
       '</div>';
     openPanel("📖 Star Cookbook", html, [{ label: "Close", cls: "primary", onClick: closePanel }]);
+    $("gBody").querySelector("#rpFry").addEventListener("click", function () {
+      if (state.fryer) { toast("🌶️ The Object is already sizzling. It needs nothing from anyone."); return; }
+      state.fryer = true;
+      save(); renderRoom(); closePanel();
+      toast("🌶️ Jas's Deep Fried Chilli Object sizzles by the stove… what IS it? 🍟");
+      Ambient.blip(620, 0.06, "square"); Ambient.blip(880, 0.08, "triangle");
+    });
     $("gBody").querySelector("#rpElixir").addEventListener("click", function () {
       if (state.cauldron) { toast("💜 The elixir is already simmering on the stove."); return; }
       state.cauldron = true;
@@ -5097,6 +5132,10 @@
     });
   }
   $("kBook").addEventListener("click", function (e) { e.stopPropagation(); openRecipeBook(); });
+  $("jasFry").addEventListener("click", function (e) {
+    e.stopPropagation();
+    toast("🌶️ It crunches audibly when you look at it. Jas is very proud.");
+  });
   $("aqsaPot").addEventListener("click", function (e) {
     e.stopPropagation();
     toast("💜 The elixir bubbles softly. It smells of moonlight and secrets.");

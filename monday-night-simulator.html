@@ -1277,6 +1277,67 @@
   #room[data-room="landing"] { background: linear-gradient(180deg,#ead8b2,#d3b98c 64%); }
   .hall-only, .landing-only { display: none; }
   #room[data-room="hall"] .hall-only, #room[data-room="landing"] .landing-only { display: block; }
+
+  /* ==== THE BACKROOMS — a secret liminal space behind a painting ==== */
+  #room[data-room="backrooms"] { background: #b9a44e; }
+  #room[data-room="backrooms"] .floor { display: none; }
+  .back-only { display: none; }
+  #room[data-room="backrooms"] .back-only { display: block; }
+  /* the backrooms are empty — no friends, no pet, no clutter here */
+  #room[data-room="backrooms"] .avatar, #room[data-room="backrooms"] .pet { display: none; }
+  /* endless damp yellow wallpaper */
+  .br-wall { position: absolute; inset: 0; z-index: 0;
+    background:
+      repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 1px, transparent 1px 26px),
+      repeating-linear-gradient(0deg, rgba(120,100,30,.10) 0 1px, transparent 1px 34px),
+      linear-gradient(180deg, #c7b256 0%, #b8a049 62%, #9c8636 62%, #8f7a30 100%); }
+  /* damp stains that drift very slowly */
+  .br-wall::before { content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(60px 40px at 22% 30%, rgba(90,70,20,.22), transparent 70%),
+      radial-gradient(80px 50px at 74% 22%, rgba(90,70,20,.18), transparent 70%),
+      radial-gradient(50px 34px at 55% 46%, rgba(70,55,15,.2), transparent 70%);
+    animation: brdrift 26s ease-in-out infinite alternate; }
+  @keyframes brdrift { from { transform: translate(0,0);} to { transform: translate(-14px,6px);} }
+  /* the damp low-pile carpet */
+  .br-floor { position: absolute; left: 0; right: 0; bottom: 0; height: 30%; z-index: 1;
+    background:
+      radial-gradient(2px 2px at 20% 30%, rgba(0,0,0,.10), transparent),
+      radial-gradient(2px 2px at 60% 60%, rgba(0,0,0,.12), transparent),
+      repeating-linear-gradient(90deg, #7c6a2c 0 3px, #6f5f27 3px 6px);
+    box-shadow: inset 0 8px 16px rgba(0,0,0,.28); }
+  .br-floor::after { content: ""; position: absolute; inset: 0;
+    background: radial-gradient(90px 30px at 46% 40%, rgba(40,32,8,.4), transparent 72%); }
+  /* the humming fluorescent ceiling lights */
+  .br-ceil { position: absolute; left: 0; right: 0; top: 0; height: 16%; z-index: 1;
+    background: linear-gradient(180deg,#a8933f,#b9a44e); box-shadow: inset 0 -6px 10px rgba(0,0,0,.2); }
+  .br-tube { position: absolute; top: 6px; width: 96px; height: 12px; border-radius: 3px; z-index: 2;
+    background: linear-gradient(180deg,#fffde4,#efe6a0); box-shadow: 0 0 22px 6px rgba(255,250,190,.55);
+    animation: brflick 5s steps(1) infinite; }
+  .br-tube.b { animation-delay: 1.7s; } .br-tube.c { animation-delay: 3.3s; }
+  @keyframes brflick { 0%,7%,9%,53%,55%,100% { opacity: 1; } 8%,54% { opacity: .35; } 8.5% { opacity: .7; } }
+  /* receding doorways/pillars for endless depth */
+  .br-pil { position: absolute; bottom: 30%; width: 40px; z-index: 1;
+    background: linear-gradient(90deg, rgba(0,0,0,.16), transparent 40%, rgba(0,0,0,.16));
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .br-open { position: absolute; z-index: 1; background: linear-gradient(180deg,#5c4f1e,#463c16);
+    box-shadow: inset 0 0 12px rgba(0,0,0,.5); border-radius: 1px; }
+  /* a faint vignette so the corners fall into gloom */
+  .br-vig { position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    background: radial-gradient(120% 90% at 50% 46%, transparent 52%, rgba(20,16,4,.5)); }
+  /* the way out — a plain door back to the hallway */
+  .br-exit { position: absolute; bottom: 30%; left: 6%; width: 62px; height: 150px; z-index: 3; cursor: pointer; }
+  .br-exit .leaf { position: absolute; inset: 0; background: linear-gradient(180deg,#7a6a2e,#5c4f1e);
+    border: 3px solid #463c16; border-radius: 4px; box-shadow: inset 0 0 0 2px rgba(0,0,0,.15), 0 4px 12px rgba(0,0,0,.4); }
+  .br-exit .knob { position: absolute; top: 52%; right: 8px; width: 7px; height: 7px; border-radius: 50%; background: #cdbf7a; }
+  .br-exit .sign { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+    font-size: 11px; font-weight: 800; color: #efe6a0; text-shadow: 0 1px 2px rgba(0,0,0,.7);
+    background: rgba(0,0,0,.5); padding: 2px 9px; border-radius: 999px; animation: doorhint 2.2s ease-in-out infinite; }
+  .br-label { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); z-index: 4;
+    font-size: 11px; font-weight: 700; color: rgba(255,250,210,.5); letter-spacing: 2px; pointer-events: none; }
+  /* the hallway painting you can slip through */
+  .h-art.secret { cursor: pointer; pointer-events: auto; }
+  .h-art.secret:hover { box-shadow: 0 0 12px 3px rgba(90,60,120,.5), 0 4px 9px rgba(0,0,0,.28), inset 0 0 0 2px #c79436; }
   /* a long burgundy runner with brass border lines along the corridor floor */
   .hallrunner { position: absolute; left: 9%; right: 9%; bottom: 10px; height: 40px; border-radius: 5px;
     background: linear-gradient(180deg,#7a2338,#5c1a2a);
@@ -1681,7 +1742,7 @@
         <div class="hint">↑ upstairs</div>
       </div>
       <!-- mid-century furnishings -->
-      <div class="h-art a1 hall-only" style="left:268px; top:158px"></div>
+      <div class="h-art a1 secret hall-only" id="secretArt" style="left:268px; top:158px" title="A rather ordinary painting…"></div>
       <div class="h-sun hall-only" style="left:387px; top:148px"></div>
       <div class="h-art a2 hall-only" style="left:546px; top:154px"></div>
       <div class="h-lamp hall-only" style="left:258px"><div class="shade"></div><div class="tleg a"></div><div class="tleg b"></div><div class="tleg c"></div></div>
@@ -1724,6 +1785,23 @@
       <div class="hdoor landing-only" id="doorBath" style="left:680px" title="The bathroom">
         <div class="plate">🛁 Bath</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="wreath"></div>
       </div>
+
+      <!-- ===== THE BACKROOMS — a secret liminal space behind a painting ===== -->
+      <div class="br-wall back-only"></div>
+      <div class="br-ceil back-only"></div>
+      <div class="br-tube back-only" style="left:120px"></div>
+      <div class="br-tube b back-only" style="left:360px"></div>
+      <div class="br-tube c back-only" style="left:600px"></div>
+      <div class="br-pil back-only" style="left:250px; height:200px"></div>
+      <div class="br-pil back-only" style="left:470px; height:200px"></div>
+      <div class="br-open back-only" style="left:360px; bottom:30%; width:52px; height:150px"></div>
+      <div class="br-open back-only" style="left:690px; bottom:30%; width:44px; height:130px"></div>
+      <div class="br-floor back-only"></div>
+      <div class="br-exit back-only" id="brExit" title="A way out?">
+        <div class="sign">← leave</div><div class="leaf"></div><div class="knob"></div>
+      </div>
+      <div class="br-label back-only">L E V E L &nbsp; 0</div>
+      <div class="br-vig back-only"></div>
 
       <!-- ===== THE SNUG — between the wardrobe and the hallway ===== -->
       <div class="snug snug-only">
@@ -4155,6 +4233,28 @@
       ng.gain.setValueAtTime(0.09, t); ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
       src.connect(f); f.connect(ng); ng.connect(c.destination); src.start(t); src.stop(t + 0.08);
     }
+    // The backrooms fluorescent hum — a low mains buzz that fades in & loops.
+    var humNodes = null;
+    function humStart() {
+      var c = getCtx(); if (!c || humNodes) return;
+      if (c.state === "suspended") c.resume();
+      var t = c.currentTime, g = c.createGain();
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.03, t + 1.2);
+      var o1 = c.createOscillator(); o1.type = "sawtooth"; o1.frequency.value = 60;    // 60Hz mains buzz
+      var o2 = c.createOscillator(); o2.type = "square"; o2.frequency.value = 120;
+      var f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 340;
+      var g2 = c.createGain(); g2.gain.value = 0.35;
+      o1.connect(f); o2.connect(g2); g2.connect(f); f.connect(g); g.connect(c.destination);
+      o1.start(t); o2.start(t);
+      humNodes = { g: g, o1: o1, o2: o2 };
+    }
+    function humStop() {
+      if (!humNodes) return;
+      var c = getCtx(), t = c.currentTime;
+      humNodes.g.gain.setTargetAtTime(0.0001, t, 0.3);
+      var n = humNodes; humNodes = null;
+      setTimeout(function () { try { n.o1.stop(); n.o2.stop(); } catch (e) {} }, 900);
+    }
     // A heavenly choir — voices sustaining an "aaah" major chord that swells.
     function choir() {
       var c = getCtx(); if (!c) return;
@@ -4187,7 +4287,7 @@
     }
 
     return { start: start, toggle: toggle, squeak: squeak, charSqueak: charSqueak, blip: blip,
-             chaching: chaching, howl: howl, samba: samba, crunch: crunch, choir: choir, startTune: startTune, stopTune: stopTune, flourish: flourish,
+             chaching: chaching, howl: howl, samba: samba, crunch: crunch, choir: choir, humStart: humStart, humStop: humStop, startTune: startTune, stopTune: stopTune, flourish: flourish,
              updateBtn: updateBtn, level: level, isMuted: function () { return muted; },
              ctxState: function () { return ctx ? ctx.state : "none"; } };
   })();
@@ -4388,7 +4488,7 @@
     room.addEventListener("click", function (e) {
       if (!selectedCharId) return;
       if (e.target.closest("#gardenWorld")) return;
-      if (e.target.closest('.avatar,.pet,.item,.furn,.hdoor,.ss,.h-front,.g-arrow,.gdoor,[id^="door"],[id^="stairs"]')) return;
+      if (e.target.closest('.avatar,.pet,.item,.furn,.hdoor,.ss,.h-front,.h-art,.br-exit,.g-arrow,.gdoor,[id^="door"],[id^="stairs"]')) return;
       roomTapWalk(e.clientX, e.clientY);
     });
   }
@@ -4405,7 +4505,8 @@
     snug: "🛋️ The snug — get cosy & decorate it! hallway →",
     two: "🍳 The kitchen — decorate it too! ← hallway · garden →",
     garden: "🌷 The garden — drag to explore · ‹ › or ← for the kitchen.",
-    wardrobe: "👗 The Wardrobe — make it yours! Tap → for the landing."
+    wardrobe: "👗 The Wardrobe — make it yours! Tap → for the landing.",
+    backrooms: "…you're somewhere else now. The lights hum. Tap ← to leave."
   };
   function goToRoom(name) {
     if (state.currentRoom === name) return;
@@ -4416,8 +4517,10 @@
       renderRoom();              // also applies the room's theme (data-room)
       room.style.opacity = "1";
       save();
-      toast(ROOM_TOASTS[name] || "🚪 A new room to decorate!");
+      var longToast = name === "backrooms" ? 5200 : 1900;
+      toast(ROOM_TOASTS[name] || "🚪 A new room to decorate!", longToast);
       if (name === "garden") { panGarden(0); gardenFlourish(); }
+      if (name === "backrooms") Ambient.humStart(); else Ambient.humStop();   // the lights hum only here
     }, 160);
   }
 
@@ -5303,6 +5406,13 @@
   $("doorAdam").addEventListener("click", function () { goToRoom("bed3"); });
   $("doorBath").addEventListener("click", function () { toast("🛁 The bathroom's occupied — try again later!"); });
   $("doorFront").addEventListener("click", function () { toast("🚪 The front door — but it's Monday night, we're staying in! 💛"); });
+  // the secret: slip behind a hallway painting into the backrooms
+  $("secretArt").addEventListener("click", function (e) {
+    e.stopPropagation();
+    toast("…the wall behind the painting isn't a wall. 👁️");
+    setTimeout(function () { goToRoom("backrooms"); }, 700);
+  });
+  $("brExit").addEventListener("click", function () { goToRoom("hall"); });
   $("stairsUp").addEventListener("click", function () { goToRoom("landing"); });
   $("stairsDown").addEventListener("click", function () { goToRoom("hall"); });
   $("doorHallL").addEventListener("click", function () { goToRoom("snug"); });

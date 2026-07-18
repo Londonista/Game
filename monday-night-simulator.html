@@ -1277,6 +1277,67 @@
   #room[data-room="landing"] { background: linear-gradient(180deg,#ead8b2,#d3b98c 64%); }
   .hall-only, .landing-only { display: none; }
   #room[data-room="hall"] .hall-only, #room[data-room="landing"] .landing-only { display: block; }
+
+  /* ==== THE BACKROOMS — a secret liminal space behind a painting ==== */
+  #room[data-room="backrooms"] { background: #b9a44e; }
+  #room[data-room="backrooms"] .floor { display: none; }
+  .back-only { display: none; }
+  #room[data-room="backrooms"] .back-only { display: block; }
+  /* the backrooms are empty — no friends, no pet, no clutter here */
+  #room[data-room="backrooms"] .avatar, #room[data-room="backrooms"] .pet { display: none; }
+  /* endless damp yellow wallpaper */
+  .br-wall { position: absolute; inset: 0; z-index: 0;
+    background:
+      repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 1px, transparent 1px 26px),
+      repeating-linear-gradient(0deg, rgba(120,100,30,.10) 0 1px, transparent 1px 34px),
+      linear-gradient(180deg, #c7b256 0%, #b8a049 62%, #9c8636 62%, #8f7a30 100%); }
+  /* damp stains that drift very slowly */
+  .br-wall::before { content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(60px 40px at 22% 30%, rgba(90,70,20,.22), transparent 70%),
+      radial-gradient(80px 50px at 74% 22%, rgba(90,70,20,.18), transparent 70%),
+      radial-gradient(50px 34px at 55% 46%, rgba(70,55,15,.2), transparent 70%);
+    animation: brdrift 26s ease-in-out infinite alternate; }
+  @keyframes brdrift { from { transform: translate(0,0);} to { transform: translate(-14px,6px);} }
+  /* the damp low-pile carpet */
+  .br-floor { position: absolute; left: 0; right: 0; bottom: 0; height: 30%; z-index: 1;
+    background:
+      radial-gradient(2px 2px at 20% 30%, rgba(0,0,0,.10), transparent),
+      radial-gradient(2px 2px at 60% 60%, rgba(0,0,0,.12), transparent),
+      repeating-linear-gradient(90deg, #7c6a2c 0 3px, #6f5f27 3px 6px);
+    box-shadow: inset 0 8px 16px rgba(0,0,0,.28); }
+  .br-floor::after { content: ""; position: absolute; inset: 0;
+    background: radial-gradient(90px 30px at 46% 40%, rgba(40,32,8,.4), transparent 72%); }
+  /* the humming fluorescent ceiling lights */
+  .br-ceil { position: absolute; left: 0; right: 0; top: 0; height: 16%; z-index: 1;
+    background: linear-gradient(180deg,#a8933f,#b9a44e); box-shadow: inset 0 -6px 10px rgba(0,0,0,.2); }
+  .br-tube { position: absolute; top: 6px; width: 96px; height: 12px; border-radius: 3px; z-index: 2;
+    background: linear-gradient(180deg,#fffde4,#efe6a0); box-shadow: 0 0 22px 6px rgba(255,250,190,.55);
+    animation: brflick 5s steps(1) infinite; }
+  .br-tube.b { animation-delay: 1.7s; } .br-tube.c { animation-delay: 3.3s; }
+  @keyframes brflick { 0%,7%,9%,53%,55%,100% { opacity: 1; } 8%,54% { opacity: .35; } 8.5% { opacity: .7; } }
+  /* receding doorways/pillars for endless depth */
+  .br-pil { position: absolute; bottom: 30%; width: 40px; z-index: 1;
+    background: linear-gradient(90deg, rgba(0,0,0,.16), transparent 40%, rgba(0,0,0,.16));
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .br-open { position: absolute; z-index: 1; background: linear-gradient(180deg,#5c4f1e,#463c16);
+    box-shadow: inset 0 0 12px rgba(0,0,0,.5); border-radius: 1px; }
+  /* a faint vignette so the corners fall into gloom */
+  .br-vig { position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    background: radial-gradient(120% 90% at 50% 46%, transparent 52%, rgba(20,16,4,.5)); }
+  /* the way out — a plain door back to the hallway */
+  .br-exit { position: absolute; bottom: 30%; left: 6%; width: 62px; height: 150px; z-index: 3; cursor: pointer; }
+  .br-exit .leaf { position: absolute; inset: 0; background: linear-gradient(180deg,#7a6a2e,#5c4f1e);
+    border: 3px solid #463c16; border-radius: 4px; box-shadow: inset 0 0 0 2px rgba(0,0,0,.15), 0 4px 12px rgba(0,0,0,.4); }
+  .br-exit .knob { position: absolute; top: 52%; right: 8px; width: 7px; height: 7px; border-radius: 50%; background: #cdbf7a; }
+  .br-exit .sign { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+    font-size: 11px; font-weight: 800; color: #efe6a0; text-shadow: 0 1px 2px rgba(0,0,0,.7);
+    background: rgba(0,0,0,.5); padding: 2px 9px; border-radius: 999px; animation: doorhint 2.2s ease-in-out infinite; }
+  .br-label { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); z-index: 4;
+    font-size: 11px; font-weight: 700; color: rgba(255,250,210,.5); letter-spacing: 2px; pointer-events: none; }
+  /* the hallway painting you can slip through */
+  .h-art.secret { cursor: pointer; pointer-events: auto; }
+  .h-art.secret:hover { box-shadow: 0 0 12px 3px rgba(90,60,120,.5), 0 4px 9px rgba(0,0,0,.28), inset 0 0 0 2px #c79436; }
   /* a long burgundy runner with brass border lines along the corridor floor */
   .hallrunner { position: absolute; left: 9%; right: 9%; bottom: 10px; height: 40px; border-radius: 5px;
     background: linear-gradient(180deg,#7a2338,#5c1a2a);
@@ -1681,7 +1742,7 @@
         <div class="hint">↑ upstairs</div>
       </div>
       <!-- mid-century furnishings -->
-      <div class="h-art a1 hall-only" style="left:268px; top:158px"></div>
+      <div class="h-art a1 secret hall-only" id="secretArt" style="left:268px; top:158px" title="A rather ordinary painting…"></div>
       <div class="h-sun hall-only" style="left:387px; top:148px"></div>
       <div class="h-art a2 hall-only" style="left:546px; top:154px"></div>
       <div class="h-lamp hall-only" style="left:258px"><div class="shade"></div><div class="tleg a"></div><div class="tleg b"></div><div class="tleg c"></div></div>
@@ -1724,6 +1785,23 @@
       <div class="hdoor landing-only" id="doorBath" style="left:680px" title="The bathroom">
         <div class="plate">🛁 Bath</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="wreath"></div>
       </div>
+
+      <!-- ===== THE BACKROOMS — a secret liminal space behind a painting ===== -->
+      <div class="br-wall back-only"></div>
+      <div class="br-ceil back-only"></div>
+      <div class="br-tube back-only" style="left:120px"></div>
+      <div class="br-tube b back-only" style="left:360px"></div>
+      <div class="br-tube c back-only" style="left:600px"></div>
+      <div class="br-pil back-only" style="left:250px; height:200px"></div>
+      <div class="br-pil back-only" style="left:470px; height:200px"></div>
+      <div class="br-open back-only" style="left:360px; bottom:30%; width:52px; height:150px"></div>
+      <div class="br-open back-only" style="left:690px; bottom:30%; width:44px; height:130px"></div>
+      <div class="br-floor back-only"></div>
+      <div class="br-exit back-only" id="brExit" title="A way out?">
+        <div class="sign">← leave</div><div class="leaf"></div><div class="knob"></div>
+      </div>
+      <div class="br-label back-only">L E V E L &nbsp; 0</div>
+      <div class="br-vig back-only"></div>
 
       <!-- ===== THE SNUG — between the wardrobe and the hallway ===== -->
       <div class="snug snug-only">
@@ -1939,6 +2017,7 @@
     { id: "tapestry",  name: "Tapestry",           ic: "🧵", price: 15, unlockAt: 0, set: "Wall Art", bl: "Instant 'we have taste' energy." },
     { id: "ufoposter", name: "UFO Poster",          ic: "", price: 15, unlockAt: 0, set: "Wall Art", render: "ufop", bl: "Adam says the beam is coming for him specifically." },
     { id: "pdposter",  name: "Perfect Days Poster", ic: "", price: 15, unlockAt: 0, set: "Wall Art", render: "pdp", bl: "Komorebi — light through leaves. Now is now." },
+    { id: "romposter", name: "Half-Elf Heart Poster", ic: "", price: 15, unlockAt: 0, set: "Wall Art", render: "romp", bl: "He's looking… somewhere to his right. Swoon." },
 
     // --- Study: an empty ornate bookcase + things to fill it ---
     { id: "bookcase",  name: "Bookcase",      ic: "📚", price: 28, unlockAt: 0, set: "Study", render: "bookcase", bl: "Waiting to hold everyone's favourites." },
@@ -2280,6 +2359,68 @@
   // and a little compass rose. Used for the placed item and the shop card.
   // A quiet poster inspired by Perfect Days: komorebi light through leaves,
   // a small figure in workwear looking up. Original art, homage only.
+  // A cozy fan-card poster: a regal blonde half-elf in an ornate high-collared
+  // jacket, framed by a beaded heart, kawaii stars & music notes. Original art
+  // inspired by the collected-photocard vibe — not a real character/likeness.
+  var romN = 0;
+  function romSVG(w, h) {
+    var u = "rm" + (romN++);
+    return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 44 58">' +
+      '<defs>' +
+        '<linearGradient id="' + u + 'bg" x1="0" y1="0" x2="0.3" y2="1">' +
+          '<stop offset="0" stop-color="#6e1218"/><stop offset="0.55" stop-color="#440a10"/><stop offset="1" stop-color="#230406"/></linearGradient>' +
+        '<radialGradient id="' + u + 'glow" cx="40%" cy="34%" r="62%">' +
+          '<stop offset="0" stop-color="#c23a2e" stop-opacity="0.85"/><stop offset="0.5" stop-color="#8a1c1e" stop-opacity="0.45"/><stop offset="1" stop-color="#8a1c1e" stop-opacity="0"/></radialGradient>' +
+        '<linearGradient id="' + u + 'rim" x1="0" y1="0" x2="1" y2="1">' +
+          '<stop offset="0" stop-color="#ffe0b0"/><stop offset="0.55" stop-color="#ff9ec2"/><stop offset="1" stop-color="#e0637f"/></linearGradient>' +
+        '<linearGradient id="' + u + 'skin" x1="0" y1="0" x2="1" y2="0">' +
+          '<stop offset="0" stop-color="#7a2528"/><stop offset="1" stop-color="#2a0a0e"/></linearGradient>' +
+      '</defs>' +
+      // dark-red poster, no border frame
+      '<rect x="1" y="1" width="42" height="56" rx="3" fill="url(#' + u + 'bg)" stroke="#1c0406" stroke-width="2"/>' +
+      '<ellipse cx="19" cy="22" rx="19" ry="21" fill="url(#' + u + 'glow)"/>' +
+      // ---- the figure: a bold rim-lit silhouette ----
+      // torso (broad, muscular)
+      '<path d="M7 55 C7 42 9.5 36 15 33.6 Q22 30.6 29 33.6 C34.5 36 37 42 37 55 Z" fill="#1a0508"/>' +
+      // warm lit plane on his right side (viewer-left)
+      '<path d="M7 55 C7 42 9.5 36 15 33.6 Q18 32.4 20 32.8 L20 55 Z" fill="url(#' + u + 'skin)" opacity="0.55"/>' +
+      // neck
+      '<path d="M19.4 34.5 L19.4 29.5 Q22 31.2 24.6 29.5 L24.6 34.5 Z" fill="#180407"/>' +
+      // head + hair mass (turned, chin down to his lower-left)
+      '<g transform="rotate(-8 22 21)">' +
+        '<path d="M15.6 22 C14.4 12.6 20 9.4 23 10 C27 10.8 29.2 14.6 28.6 20 C28.3 23 27.2 25.6 24.8 27.2 C22.8 28.4 21 28 19.4 26.6 C17.4 24.9 16 23.6 15.6 22 Z" fill="#170407"/>' +
+        // pointed elf ear (near side)
+        '<path d="M28.2 19.4 L31.4 16.6 L28.6 21.4 Z" fill="#170407"/>' +
+        // swept-back hair volume
+        '<path d="M15 22 C13.4 12 20.4 8.6 24 9.6 C21 10.6 18 12.8 16.8 16.8 C16 19 15.4 20.6 15 22 Z" fill="#120306"/>' +
+        // lit cheek/jaw plane (warm)
+        '<path d="M16.4 20.5 C16.8 23 18 25.2 19.8 26.6 C19.2 24 18.4 21.6 18 19 Z" fill="#7a2528" opacity="0.5"/>' +
+        // --- rim light along the lit edge (his right / viewer-left) ---
+        '<path d="M15 22 C13.6 13 19.6 9 24 9.6" fill="none" stroke="url(#' + u + 'rim)" stroke-width="0.7" stroke-linecap="round"/>' +
+        '<path d="M15.5 22.4 C16 24.6 17.2 26.6 19.2 27.6" fill="none" stroke="url(#' + u + 'rim)" stroke-width="0.9" stroke-linecap="round"/>' +
+        // downcast eye + brow hint catching the light
+        '<path d="M18.2 19.2 Q19.6 18.5 21 19.1" fill="none" stroke="#e8a06a" stroke-width="0.5" stroke-linecap="round" opacity="0.85"/>' +
+        '<circle cx="19.5" cy="20.1" r="0.5" fill="#f0c090" opacity="0.8"/>' +
+        '<path d="M23.4 18.9 Q24.7 18.3 25.9 19" fill="none" stroke="#b56a4a" stroke-width="0.45" stroke-linecap="round" opacity="0.7"/>' +
+        // nose & lips, softly lit
+        '<path d="M20.4 19.6 Q19.9 21.6 19.3 22.8" fill="none" stroke="#c98a5a" stroke-width="0.4" stroke-linecap="round" opacity="0.6"/>' +
+        '<path d="M19.6 24.4 Q21 25 22.4 24.4" fill="none" stroke="#c76a6a" stroke-width="0.6" stroke-linecap="round" opacity="0.7"/>' +
+      '</g>' +
+      // shoulder & arm rim light (his right / viewer-left)
+      '<path d="M7.6 55 C7.6 42.6 10 36.7 15 34.2" fill="none" stroke="url(#' + u + 'rim)" stroke-width="1.1" stroke-linecap="round"/>' +
+      // muscular definition (subtle warm strokes)
+      '<path d="M15 36.5 Q22 38.6 29 36.5" fill="none" stroke="#5a1418" stroke-width="0.7" opacity="0.8"/>' +   // collarbones
+      '<path d="M22 39 L22 49" fill="none" stroke="#0f0305" stroke-width="0.8" opacity="0.7"/>' +               // sternum
+      '<path d="M14.5 41 Q22 46.5 29.5 41" fill="none" stroke="#0f0305" stroke-width="0.8" opacity="0.6"/>' +   // pec line
+      '<path d="M18 45 h8 M18 48.5 h8" stroke="#0f0305" stroke-width="0.6" opacity="0.5"/>' +                   // abs
+      '<path d="M20 40 Q22 41 24 40" fill="none" stroke="#e8a06a" stroke-width="0.5" opacity="0.4"/>' +          // chest sheen
+      // soft corner vignette for drama
+      '<path d="M1 1 L14 1 Q4 8 1 20 Z" fill="#12060a" opacity="0.5"/>' +
+      '<path d="M43 57 L30 57 Q40 50 43 38 Z" fill="#12060a" opacity="0.5"/>' +
+      // small elegant title
+      '<text x="22" y="54" text-anchor="middle" font-size="3.4" fill="#e8b56a" font-family="Georgia, serif" letter-spacing="1.5" font-style="italic" opacity="0.9">Half-Elf Heart</text>' +
+      '</svg>';
+  }
   function pdSVG(w, h) {
     return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 44 58">' +
       '<rect x="1" y="1" width="42" height="56" rx="3" fill="#e9f0e4" stroke="#2c3a30" stroke-width="2"/>' +
@@ -2685,6 +2826,7 @@
       else if (def.render === "map") { el.classList.add("mapitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildMap()); }
       else if (def.render === "ufop") { el.classList.add("ufoitem"); el.style.zIndex = depthZ(p.y); var uw = document.createElement("div"); uw.innerHTML = ufoSVG(88, 116); el.appendChild(uw); }
       else if (def.render === "pdp") { el.classList.add("ufoitem"); el.style.zIndex = depthZ(p.y); var pdw = document.createElement("div"); pdw.innerHTML = pdSVG(88, 116); el.appendChild(pdw); }
+      else if (def.render === "romp") { el.classList.add("ufoitem"); el.style.zIndex = depthZ(p.y); var rmw = document.createElement("div"); rmw.innerHTML = romSVG(88, 116); el.appendChild(rmw); }
       else if (def.render === "vanity") { el.classList.add("vanity"); el.style.zIndex = depthZ(p.y); el.appendChild(buildVanity()); }
       else if (def.render === "wardrobe") { el.classList.add("wardrobeitem"); el.style.zIndex = depthZ(p.y); el.appendChild(buildWardrobe()); }
       else if (def.render === "sofa") { el.classList.add("sofa"); el.style.zIndex = depthZ(p.y); el.appendChild(buildSofa()); }
@@ -2919,6 +3061,7 @@
          : it.render === "map" ? MAP_SVG
          : it.render === "ufop" ? ufoSVG(40, 52)
          : it.render === "pdp" ? pdSVG(40, 52)
+         : it.render === "romp" ? romSVG(40, 52)
          : it.render === "vanity" ? VANITY_ICON
          : it.render === "wardrobe" ? WARDROBE_ICON
          : it.render === "vase" ? VASE_SVG
@@ -4090,6 +4233,28 @@
       ng.gain.setValueAtTime(0.09, t); ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
       src.connect(f); f.connect(ng); ng.connect(c.destination); src.start(t); src.stop(t + 0.08);
     }
+    // The backrooms fluorescent hum — a low mains buzz that fades in & loops.
+    var humNodes = null;
+    function humStart() {
+      var c = getCtx(); if (!c || humNodes) return;
+      if (c.state === "suspended") c.resume();
+      var t = c.currentTime, g = c.createGain();
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.03, t + 1.2);
+      var o1 = c.createOscillator(); o1.type = "sawtooth"; o1.frequency.value = 60;    // 60Hz mains buzz
+      var o2 = c.createOscillator(); o2.type = "square"; o2.frequency.value = 120;
+      var f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 340;
+      var g2 = c.createGain(); g2.gain.value = 0.35;
+      o1.connect(f); o2.connect(g2); g2.connect(f); f.connect(g); g.connect(c.destination);
+      o1.start(t); o2.start(t);
+      humNodes = { g: g, o1: o1, o2: o2 };
+    }
+    function humStop() {
+      if (!humNodes) return;
+      var c = getCtx(), t = c.currentTime;
+      humNodes.g.gain.setTargetAtTime(0.0001, t, 0.3);
+      var n = humNodes; humNodes = null;
+      setTimeout(function () { try { n.o1.stop(); n.o2.stop(); } catch (e) {} }, 900);
+    }
     // A heavenly choir — voices sustaining an "aaah" major chord that swells.
     function choir() {
       var c = getCtx(); if (!c) return;
@@ -4122,7 +4287,7 @@
     }
 
     return { start: start, toggle: toggle, squeak: squeak, charSqueak: charSqueak, blip: blip,
-             chaching: chaching, howl: howl, samba: samba, crunch: crunch, choir: choir, startTune: startTune, stopTune: stopTune, flourish: flourish,
+             chaching: chaching, howl: howl, samba: samba, crunch: crunch, choir: choir, humStart: humStart, humStop: humStop, startTune: startTune, stopTune: stopTune, flourish: flourish,
              updateBtn: updateBtn, level: level, isMuted: function () { return muted; },
              ctxState: function () { return ctx ? ctx.state : "none"; } };
   })();
@@ -4323,7 +4488,7 @@
     room.addEventListener("click", function (e) {
       if (!selectedCharId) return;
       if (e.target.closest("#gardenWorld")) return;
-      if (e.target.closest('.avatar,.pet,.item,.furn,.hdoor,.ss,.h-front,.g-arrow,.gdoor,[id^="door"],[id^="stairs"]')) return;
+      if (e.target.closest('.avatar,.pet,.item,.furn,.hdoor,.ss,.h-front,.h-art,.br-exit,.g-arrow,.gdoor,[id^="door"],[id^="stairs"]')) return;
       roomTapWalk(e.clientX, e.clientY);
     });
   }
@@ -4340,7 +4505,8 @@
     snug: "🛋️ The snug — get cosy & decorate it! hallway →",
     two: "🍳 The kitchen — decorate it too! ← hallway · garden →",
     garden: "🌷 The garden — drag to explore · ‹ › or ← for the kitchen.",
-    wardrobe: "👗 The Wardrobe — make it yours! Tap → for the landing."
+    wardrobe: "👗 The Wardrobe — make it yours! Tap → for the landing.",
+    backrooms: "…you're somewhere else now. The lights hum. Tap ← to leave."
   };
   function goToRoom(name) {
     if (state.currentRoom === name) return;
@@ -4351,8 +4517,10 @@
       renderRoom();              // also applies the room's theme (data-room)
       room.style.opacity = "1";
       save();
-      toast(ROOM_TOASTS[name] || "🚪 A new room to decorate!");
+      var longToast = name === "backrooms" ? 5200 : 1900;
+      toast(ROOM_TOASTS[name] || "🚪 A new room to decorate!", longToast);
       if (name === "garden") { panGarden(0); gardenFlourish(); }
+      if (name === "backrooms") Ambient.humStart(); else Ambient.humStop();   // the lights hum only here
     }, 160);
   }
 
@@ -5238,6 +5406,13 @@
   $("doorAdam").addEventListener("click", function () { goToRoom("bed3"); });
   $("doorBath").addEventListener("click", function () { toast("🛁 The bathroom's occupied — try again later!"); });
   $("doorFront").addEventListener("click", function () { toast("🚪 The front door — but it's Monday night, we're staying in! 💛"); });
+  // the secret: slip behind a hallway painting into the backrooms
+  $("secretArt").addEventListener("click", function (e) {
+    e.stopPropagation();
+    toast("…the wall behind the painting isn't a wall. 👁️");
+    setTimeout(function () { goToRoom("backrooms"); }, 700);
+  });
+  $("brExit").addEventListener("click", function () { goToRoom("hall"); });
   $("stairsUp").addEventListener("click", function () { goToRoom("landing"); });
   $("stairsDown").addEventListener("click", function () { goToRoom("hall"); });
   $("doorHallL").addEventListener("click", function () { goToRoom("snug"); });

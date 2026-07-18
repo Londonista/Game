@@ -2287,129 +2287,60 @@
   var romN = 0;
   function romSVG(w, h) {
     var u = "rm" + (romN++);
-    var kstar = function (cx, cy, r) {   // a little smiling kawaii star
-      var pts = "";
-      for (var i = 0; i < 5; i++) {
-        var a = -Math.PI / 2 + i * 2 * Math.PI / 5, a2 = a + Math.PI / 5;
-        pts += (cx + Math.cos(a) * r).toFixed(1) + "," + (cy + Math.sin(a) * r).toFixed(1) + " ";
-        pts += (cx + Math.cos(a2) * r * 0.46).toFixed(1) + "," + (cy + Math.sin(a2) * r * 0.46).toFixed(1) + " ";
-      }
-      return '<polygon points="' + pts + '" fill="#ffd86b" stroke="#e0a83a" stroke-width="0.5"/>' +
-        '<circle cx="' + (cx - r * 0.32).toFixed(1) + '" cy="' + (cy - r * 0.05).toFixed(1) + '" r="0.5" fill="#7a4a1a"/>' +
-        '<circle cx="' + (cx + r * 0.32).toFixed(1) + '" cy="' + (cy - r * 0.05).toFixed(1) + '" r="0.5" fill="#7a4a1a"/>' +
-        '<path d="M' + (cx - r * 0.28).toFixed(1) + ' ' + (cy + r * 0.28).toFixed(1) + ' Q' + cx + ' ' + (cy + r * 0.62).toFixed(1) + ' ' + (cx + r * 0.28).toFixed(1) + ' ' + (cy + r * 0.28).toFixed(1) + '" fill="none" stroke="#7a4a1a" stroke-width="0.5" stroke-linecap="round"/>' +
-        '<circle cx="' + (cx - r * 0.6).toFixed(1) + '" cy="' + (cy + r * 0.2).toFixed(1) + '" r="0.6" fill="#ff9ec2" opacity="0.8"/>' +
-        '<circle cx="' + (cx + r * 0.6).toFixed(1) + '" cy="' + (cy + r * 0.2).toFixed(1) + '" r="0.6" fill="#ff9ec2" opacity="0.8"/>';
-    };
-    var note = function (x, y) {   // a small pink music note
-      return '<g fill="#d8637f"><ellipse cx="' + x + '" cy="' + (y + 3).toFixed(1) + '" rx="1.5" ry="1.1" transform="rotate(-18 ' + x + ' ' + (y + 3).toFixed(1) + ')"/>' +
-        '<rect x="' + (x + 1.1).toFixed(1) + '" y="' + (y - 2.4).toFixed(1) + '" width="0.7" height="5.4"/>' +
-        '<path d="M' + (x + 1.1).toFixed(1) + ' ' + (y - 2.4).toFixed(1) + ' q2.2 0.4 1.8 2.6 q-0.6 -1.4 -1.8 -1.2Z"/></g>';
-    };
     return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 44 58">' +
       '<defs>' +
-        '<linearGradient id="' + u + 'sky" x1="0" y1="0" x2="0" y2="1">' +
-          '<stop offset="0" stop-color="#9fb8c8"/><stop offset="1" stop-color="#4a4368"/></linearGradient>' +
-        '<linearGradient id="' + u + 'skin" x1="0" y1="0" x2="1" y2="1">' +
-          '<stop offset="0" stop-color="#f0c49a"/><stop offset="1" stop-color="#d6a074"/></linearGradient>' +
-        '<pattern id="' + u + 'dot" width="5" height="5" patternUnits="userSpaceOnUse">' +
-          '<rect width="5" height="5" fill="#e8895a"/><circle cx="1.5" cy="1.5" r="1" fill="#f4b98a"/><circle cx="4" cy="4" r="1" fill="#f4b98a"/></pattern>' +
-        '<clipPath id="' + u + 'port"><rect x="10" y="12" width="24" height="33" rx="1.5"/></clipPath>' +
+        '<linearGradient id="' + u + 'bg" x1="0" y1="0" x2="0.3" y2="1">' +
+          '<stop offset="0" stop-color="#6e1218"/><stop offset="0.55" stop-color="#440a10"/><stop offset="1" stop-color="#230406"/></linearGradient>' +
+        '<radialGradient id="' + u + 'glow" cx="40%" cy="34%" r="62%">' +
+          '<stop offset="0" stop-color="#c23a2e" stop-opacity="0.85"/><stop offset="0.5" stop-color="#8a1c1e" stop-opacity="0.45"/><stop offset="1" stop-color="#8a1c1e" stop-opacity="0"/></radialGradient>' +
+        '<linearGradient id="' + u + 'rim" x1="0" y1="0" x2="1" y2="1">' +
+          '<stop offset="0" stop-color="#ffe0b0"/><stop offset="0.55" stop-color="#ff9ec2"/><stop offset="1" stop-color="#e0637f"/></linearGradient>' +
+        '<linearGradient id="' + u + 'skin" x1="0" y1="0" x2="1" y2="0">' +
+          '<stop offset="0" stop-color="#7a2528"/><stop offset="1" stop-color="#2a0a0e"/></linearGradient>' +
       '</defs>' +
-      // coral polka-dot frame
-      '<rect x="1" y="1" width="42" height="56" rx="3" fill="url(#' + u + 'dot)" stroke="#b0532c" stroke-width="2"/>' +
-      // ---- the portrait, clipped to its rectangle ----
-      '<g clip-path="url(#' + u + 'port)">' +
-        '<rect x="10" y="12" width="24" height="33" fill="url(#' + u + 'sky)"/>' +
-        '<ellipse cx="22" cy="18" rx="12" ry="11" fill="#c9b8d0" opacity="0.5"/>' +
-        // shoulders / ornate jacket
-        '<path d="M6 45 L6 33 Q7 28.5 12.5 28.5 Q17.5 29.5 22 32 Q26.5 29.5 31.5 28.5 Q37 28.5 38 33 L38 45 Z" fill="#2b2733"/>' +
-        '<path d="M12.5 28.5 Q17.5 29.5 22 32 L22 45 L10.5 45 L10.5 31 Z" fill="#342f3e"/>' +
-        '<path d="M31.5 28.5 Q26.5 29.5 22 32 L22 45 L33.5 45 L33.5 31 Z" fill="#211c28"/>' +
-        // trapezius seam + broad-shoulder sheen (reads as muscular)
-        '<path d="M12.8 29.5 Q17.6 27.6 22 28 Q26.4 27.6 31.2 29.5" fill="none" stroke="#4c4658" stroke-width="0.5" opacity="0.8"/>' +
-        '<path d="M8 33 Q7.4 39 8.6 44" fill="none" stroke="#413c4c" stroke-width="0.9" opacity="0.7"/>' +
-        '<path d="M36 33 Q36.6 39 35.4 44" fill="none" stroke="#1b1723" stroke-width="0.9" opacity="0.7"/>' +
-        // gold filigree down the chest
-        '<g fill="none" stroke="#d9a441" stroke-width="0.7">' +
-          '<path d="M22 33 L22 45"/>' +
-          '<path d="M22 35 C18 36 18 39 21 40 M22 35 C26 36 26 39 23 40"/>' +
-          '<path d="M22 40 C19 41 19 44 22 44 M22 40 C25 41 25 44 22 44"/>' +
-          '<path d="M15 33 C17 35 17 38 15 41 M29 33 C27 35 27 38 29 41"/>' +
-        '</g>' +
-        '<circle cx="22" cy="38" r="1.1" fill="#f0c94a"/>' +
-        // thick, muscular neck with sinew shading
-        '<path d="M18.6 30 L18.6 23.6 Q22 25.8 25.4 23.6 L25.4 30 Z" fill="url(#' + u + 'skin)"/>' +
-        '<path d="M19.1 24.2 Q20.1 27 20.9 29.8" fill="none" stroke="#a9714a" stroke-width="0.55" opacity="0.5"/>' +
-        '<path d="M24.9 24.2 Q23.9 27 23.1 29.8" fill="none" stroke="#8a5a3c" stroke-width="0.55" opacity="0.5"/>' +
-        '<path d="M19 24.4 Q22 27.4 25 24.4 Q22 26 19 24.4 Z" fill="#6e442c" opacity="0.38"/>' +
-        // high mandarin collar with gold trim
-        '<path d="M16.8 33 L19.3 25.6 L22 28.2 L24.7 25.6 L27.2 33 Z" fill="#1e1a26"/>' +
-        '<path d="M19.3 25.6 L22 28.2 L24.7 25.6" fill="none" stroke="#d9a441" stroke-width="0.6"/>' +
-        '<path d="M17.3 32.4 L19.3 26.2 M26.7 32.4 L24.7 26.2" stroke="#d9a441" stroke-width="0.4" opacity="0.75"/>' +
-        // head — turned slightly, gazing off to his right (viewer left)
-        // head — turned & tilted down to his bottom-left (3/4 toward viewer-right)
-        '<g transform="rotate(-9 22 19)">' +
-          // chiselled skull + strong square jaw (near/right side fuller)
-          '<path d="M18 17.6 C17.7 13.9 19.9 11.5 22.6 11.5 C25.4 11.5 27.6 14 27.3 17.7 C27.2 19.8 27 21.4 26.4 22.8 L25.4 24.6 C24.6 25.7 23.3 26.5 22 26.6 C20.9 26.5 19.6 25.6 19 24.1 L18.4 22.4 C18.1 20.7 18 19.3 18 17.6 Z" fill="url(#' + u + 'skin)"/>' +
-          // pointed elf ears — near (viewer-right) prominent, far smaller
-          '<path d="M27.2 18.3 L30.5 15.7 L27.5 20.6 Z" fill="#e9b487" stroke="#b07f52" stroke-width="0.3"/>' +
-          '<path d="M27.5 18.5 L28.9 17.3 L27.5 19.7 Z" fill="#bd865b" opacity="0.6"/>' +
-          '<path d="M17.9 18.4 L15.5 16.8 L17.9 20 Z" fill="#e0aa7d" stroke="#b07f52" stroke-width="0.3"/>' +
-          // --- form shadows (light from upper-right; his left plane darker) ---
-          '<path d="M18 17.6 C18.1 20 18.5 22 19 24 C19.6 21.8 19.3 19 18.8 16.6 Z" fill="#9c6642" opacity="0.16"/>' +
-          '<ellipse cx="19.7" cy="21.6" rx="1.2" ry="1.5" fill="#a06a45" opacity="0.1" transform="rotate(16 19.7 21.6)"/>' + '<ellipse cx="24.4" cy="20.8" rx="2.1" ry="2.4" fill="#ffdfc2" opacity="0.3" transform="rotate(-16 24.4 20.8)"/>' +
-          // masseter / strong jaw shadow (chiselled)
-          '<path d="M25.6 21.8 Q26.2 24 24.7 25.6 Q25.6 23.6 25 21.9 Z" fill="#8a5a3c" opacity="0.3"/>' +
-          '<path d="M19.2 24 Q21 26 23 24.4 Q21 25.4 19.2 24 Z" fill="#7a4a30" opacity="0.28"/>' +
-          '<path d="M20.8 21.9 Q22 22.4 23.2 21.9 Q22 22.4 20.8 21.9 Z" fill="#8a5a3c" opacity="0.3"/>' +
-          '<path d="M20.7 24.6 Q22.1 25.2 23.5 24.6 Q22.1 25.1 20.7 24.6 Z" fill="#8a5a3c" opacity="0.26"/>' +
-          // --- highlights ---
-          '<path d="M25 13.4 Q26.4 15.6 26.2 18.2 Q25.2 16 24.6 14 Z" fill="#ffe9cf" opacity="0.45"/>' +
-          '<path d="M22.8 16.6 L23.1 21.2 L22.4 21.4 L22.2 16.8 Z" fill="#ffe9cf" opacity="0.5"/>' +
-          '<ellipse cx="25" cy="19.8" rx="1.5" ry="1.1" fill="#ffe9cf" opacity="0.4" transform="rotate(-22 25 19.8)"/>' +
-          // jawline glint (chiselled edge)
-          '<path d="M26.1 22.6 L25.2 24.4" fill="none" stroke="#ffe9cf" stroke-width="0.4" opacity="0.5"/>' +
-          '<ellipse cx="22.2" cy="25.7" rx="1.1" ry="0.7" fill="#ffe9cf" opacity="0.4"/>' +
-          // --- brows (strong, confident) ---
-          '<path d="M18.6 16.4 Q20 15.7 21.5 16.3 L21.3 16.9 Q20 16.3 18.8 17 Z" fill="#b0863a"/>' +
-          '<path d="M23.3 16.2 Q24.9 15.5 26.3 16.3 L26.1 16.9 Q24.9 16.2 23.5 16.8 Z" fill="#a67d34"/>' +
-          // --- eyes, cast down to his lower-left ---
-          '<path d="M19.1 18.05 Q20.15 17.35 21.4 17.95 Q20.2 18.7 19.1 18.05 Z" fill="#fbf8f0"/>' +
-          '<circle cx="20.1" cy="18.35" r="0.78" fill="#6f9a6a"/><circle cx="20.15" cy="18.5" r="0.4" fill="#2a2018"/><circle cx="19.95" cy="18.28" r="0.18" fill="#fff"/>' +
-          '<path d="M19.1 17.95 Q20.15 17.2 21.4 17.85" fill="none" stroke="#4a3320" stroke-width="0.45" stroke-linecap="round"/>' +
-          '<path d="M23.4 17.8 Q24.9 17 26.3 18 Q24.9 18.9 23.4 17.8 Z" fill="#fbf8f0"/>' +
-          '<circle cx="24.9" cy="18.28" r="0.9" fill="#6f9a6a"/><circle cx="24.95" cy="18.46" r="0.45" fill="#2a2018"/><circle cx="24.75" cy="18.22" r="0.2" fill="#fff"/>' +
-          '<path d="M23.4 17.9 Q24.9 16.9 26.3 17.9" fill="none" stroke="#4a3320" stroke-width="0.48" stroke-linecap="round"/>' +
-          // --- nose (shaded bridge + tip, toward viewer-right) ---
-          '<path d="M22.9 16.8 Q22.5 19.4 21.9 21 Q22.7 21.8 23.6 21.5" fill="none" stroke="#a9714a" stroke-width="0.4" stroke-linecap="round" opacity="0.7"/>' +
-          '<path d="M22 21 Q22.5 21.6 23.2 21.3" fill="none" stroke="#8a5a3c" stroke-width="0.45" stroke-linecap="round"/>' +
-          '<circle cx="22.1" cy="21.1" r="0.28" fill="#7a4a30" opacity="0.6"/>' +
-          // --- lips (confident, slightly turned) ---
-          '<path d="M20.4 23.5 Q21.4 23 22.3 23.4 Q23.2 23 24.1 23.5 Q23.2 23.9 22.3 23.7 Q21.4 23.9 20.4 23.5 Z" fill="#a85a52"/>' +
-          '<path d="M20.6 23.7 Q22.3 24.6 24 23.7 Q22.3 24.2 20.6 23.7 Z" fill="#c9776a"/>' +
-          '<path d="M21.1 23.9 Q22.3 24.2 23.5 23.9" fill="none" stroke="#7a3f3a" stroke-width="0.3" opacity="0.7"/>' +
-          '<ellipse cx="22.4" cy="24.1" rx="0.8" ry="0.3" fill="#e8a693" opacity="0.6"/>' +
-          // --- hair: swept-back blonde, layered with strands ---
-          '<path d="M17.6 18.4 Q16.2 9.4 22.6 8.8 Q30 9.4 28.2 18 Q27.6 13.4 25.8 11.8 Q26.8 13.8 25.6 15 Q24 11.4 21.4 12 Q18.4 12.6 17.4 15.4 Q16.8 16.9 17.6 18.4 Z" fill="#d9b85a"/>' +
-          '<path d="M18 17.8 Q17.2 11.2 21.4 9.5 Q19 11.9 18.6 15 Q18.2 16.4 18 17.8 Z" fill="#ecd27a"/>' +
-          '<path d="M22.6 9 Q27 9.6 28 13.8 Q26.4 11.4 23.6 11.4 Q25.2 10 22.6 9 Z" fill="#f4e29a"/>' +
-          '<g fill="none" stroke="#b8923f" stroke-width="0.3" opacity="0.7"><path d="M18.4 15 Q21 11.6 25.2 12"/><path d="M18 16.4 Q22 12.6 26.4 13.8"/><path d="M19 13.6 Q22 11.4 25 12"/></g>' +
-          '<g fill="none" stroke="#f9edb8" stroke-width="0.3" opacity="0.8"><path d="M22.4 12.4 Q25 11.9 27 14"/><path d="M20.4 13.2 Q23.4 11.9 26.4 13"/></g>' +
-        '</g>' +
+      // dark-red poster, no border frame
+      '<rect x="1" y="1" width="42" height="56" rx="3" fill="url(#' + u + 'bg)" stroke="#1c0406" stroke-width="2"/>' +
+      '<ellipse cx="19" cy="22" rx="19" ry="21" fill="url(#' + u + 'glow)"/>' +
+      // ---- the figure: a bold rim-lit silhouette ----
+      // torso (broad, muscular)
+      '<path d="M7 55 C7 42 9.5 36 15 33.6 Q22 30.6 29 33.6 C34.5 36 37 42 37 55 Z" fill="#1a0508"/>' +
+      // warm lit plane on his right side (viewer-left)
+      '<path d="M7 55 C7 42 9.5 36 15 33.6 Q18 32.4 20 32.8 L20 55 Z" fill="url(#' + u + 'skin)" opacity="0.55"/>' +
+      // neck
+      '<path d="M19.4 34.5 L19.4 29.5 Q22 31.2 24.6 29.5 L24.6 34.5 Z" fill="#180407"/>' +
+      // head + hair mass (turned, chin down to his lower-left)
+      '<g transform="rotate(-8 22 21)">' +
+        '<path d="M15.6 22 C14.4 12.6 20 9.4 23 10 C27 10.8 29.2 14.6 28.6 20 C28.3 23 27.2 25.6 24.8 27.2 C22.8 28.4 21 28 19.4 26.6 C17.4 24.9 16 23.6 15.6 22 Z" fill="#170407"/>' +
+        // pointed elf ear (near side)
+        '<path d="M28.2 19.4 L31.4 16.6 L28.6 21.4 Z" fill="#170407"/>' +
+        // swept-back hair volume
+        '<path d="M15 22 C13.4 12 20.4 8.6 24 9.6 C21 10.6 18 12.8 16.8 16.8 C16 19 15.4 20.6 15 22 Z" fill="#120306"/>' +
+        // lit cheek/jaw plane (warm)
+        '<path d="M16.4 20.5 C16.8 23 18 25.2 19.8 26.6 C19.2 24 18.4 21.6 18 19 Z" fill="#7a2528" opacity="0.5"/>' +
+        // --- rim light along the lit edge (his right / viewer-left) ---
+        '<path d="M15 22 C13.6 13 19.6 9 24 9.6" fill="none" stroke="url(#' + u + 'rim)" stroke-width="0.7" stroke-linecap="round"/>' +
+        '<path d="M15.5 22.4 C16 24.6 17.2 26.6 19.2 27.6" fill="none" stroke="url(#' + u + 'rim)" stroke-width="0.9" stroke-linecap="round"/>' +
+        // downcast eye + brow hint catching the light
+        '<path d="M18.2 19.2 Q19.6 18.5 21 19.1" fill="none" stroke="#e8a06a" stroke-width="0.5" stroke-linecap="round" opacity="0.85"/>' +
+        '<circle cx="19.5" cy="20.1" r="0.5" fill="#f0c090" opacity="0.8"/>' +
+        '<path d="M23.4 18.9 Q24.7 18.3 25.9 19" fill="none" stroke="#b56a4a" stroke-width="0.45" stroke-linecap="round" opacity="0.7"/>' +
+        // nose & lips, softly lit
+        '<path d="M20.4 19.6 Q19.9 21.6 19.3 22.8" fill="none" stroke="#c98a5a" stroke-width="0.4" stroke-linecap="round" opacity="0.6"/>' +
+        '<path d="M19.6 24.4 Q21 25 22.4 24.4" fill="none" stroke="#c76a6a" stroke-width="0.6" stroke-linecap="round" opacity="0.7"/>' +
       '</g>' +
-      // ---- decorative frame on top ----
-      // gold beaded heart around the portrait
-      '<path d="M22 12.5 C11.5 3 2 17 22 42.5 C42 17 32.5 3 22 12.5 Z" fill="none" stroke="#e0a83a" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="0.3 1.7"/>' +
-      '<path d="M22 12.5 C11.5 3 2 17 22 42.5 C42 17 32.5 3 22 12.5 Z" fill="none" stroke="#f6d879" stroke-width="0.5" opacity="0.7"/>' +
-      // kawaii stars (top-left & bottom-right) + scattered pink stars
-      kstar(7.5, 11, 3.4) + kstar(36.5, 41, 3.4) +
-      '<circle cx="12" cy="30" r="0.7" fill="#ff9ec2"/><circle cx="32" cy="16" r="0.7" fill="#ff9ec2"/><circle cx="30" cy="34" r="0.6" fill="#ffd86b"/><circle cx="14" cy="15" r="0.6" fill="#ffd86b"/>' +
-      // music notes top & bottom
-      note(25, 8.5) + note(29.5, 9.5) + note(13, 46) + note(17.5, 47) +
-      // caption band
-      '<rect x="3" y="49.5" width="38" height="5.5" fill="rgba(120,45,20,0.82)"/>' +
-      '<text x="22" y="53.6" text-anchor="middle" font-size="3.5" fill="#ffe6cf" font-family="Georgia, serif" letter-spacing="1.2" font-style="italic">Half-Elf Heart</text>' +
+      // shoulder & arm rim light (his right / viewer-left)
+      '<path d="M7.6 55 C7.6 42.6 10 36.7 15 34.2" fill="none" stroke="url(#' + u + 'rim)" stroke-width="1.1" stroke-linecap="round"/>' +
+      // muscular definition (subtle warm strokes)
+      '<path d="M15 36.5 Q22 38.6 29 36.5" fill="none" stroke="#5a1418" stroke-width="0.7" opacity="0.8"/>' +   // collarbones
+      '<path d="M22 39 L22 49" fill="none" stroke="#0f0305" stroke-width="0.8" opacity="0.7"/>' +               // sternum
+      '<path d="M14.5 41 Q22 46.5 29.5 41" fill="none" stroke="#0f0305" stroke-width="0.8" opacity="0.6"/>' +   // pec line
+      '<path d="M18 45 h8 M18 48.5 h8" stroke="#0f0305" stroke-width="0.6" opacity="0.5"/>' +                   // abs
+      '<path d="M20 40 Q22 41 24 40" fill="none" stroke="#e8a06a" stroke-width="0.5" opacity="0.4"/>' +          // chest sheen
+      // soft corner vignette for drama
+      '<path d="M1 1 L14 1 Q4 8 1 20 Z" fill="#12060a" opacity="0.5"/>' +
+      '<path d="M43 57 L30 57 Q40 50 43 38 Z" fill="#12060a" opacity="0.5"/>' +
+      // small elegant title
+      '<text x="22" y="54" text-anchor="middle" font-size="3.4" fill="#e8b56a" font-family="Georgia, serif" letter-spacing="1.5" font-style="italic" opacity="0.9">Half-Elf Heart</text>' +
       '</svg>';
   }
   function pdSVG(w, h) {

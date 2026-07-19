@@ -1348,6 +1348,149 @@
     background: rgba(0,0,0,.5); padding: 2px 9px; border-radius: 999px; animation: doorhint 2.2s ease-in-out infinite; }
   .br-label { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); z-index: 4;
     font-size: 11px; font-weight: 700; color: rgba(255,250,210,.5); letter-spacing: 2px; pointer-events: none; }
+  /* ---- Level 0 hub: a long receding corridor with branching portals ---- */
+  .br-perpceil { position: absolute; left: 0; right: 0; top: 0; height: 30%; z-index: 1;
+    background: linear-gradient(180deg,#9a8638,#b3a047); clip-path: polygon(0 0,100% 0,60% 100%,40% 100%);
+    box-shadow: inset 0 -8px 16px rgba(0,0,0,.35); }
+  .br-perpfloor { position: absolute; left: 0; right: 0; bottom: 0; height: 46%; z-index: 1;
+    background: repeating-linear-gradient(90deg,#7c6a2c 0 3px,#6f5f27 3px 6px);
+    clip-path: polygon(0 100%,100% 100%,60% 0,40% 0); box-shadow: inset 0 12px 26px rgba(0,0,0,.45); }
+  .br-farwall { position: absolute; left: 40%; right: 40%; top: 30%; height: 24%; z-index: 1;
+    background: linear-gradient(180deg,#8a762e,#6f5f24); box-shadow: inset 0 0 22px rgba(0,0,0,.7); }
+  .br-farwall::after { content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, rgba(0,0,0,.06) 0 1px, transparent 1px 9px); }
+  /* receding ceiling tubes (placed & sized inline) */
+  .br-rtube { position: absolute; z-index: 2; border-radius: 2px;
+    background: linear-gradient(180deg,#fffde4,#efe6a0); box-shadow: 0 0 16px 4px rgba(255,250,190,.5);
+    animation: brflick 5s steps(1) infinite; }
+  /* portal doors down the hall */
+  .br-door { position: absolute; z-index: 3; cursor: pointer; }
+  .br-door .leaf { position: absolute; inset: 0; background: linear-gradient(180deg,#6a5c24,#453b16);
+    border: 3px solid #38300f; border-radius: 3px; box-shadow: inset 0 0 0 2px rgba(0,0,0,.22), 0 6px 16px rgba(0,0,0,.55); }
+  .br-door .knob { position: absolute; top: 52%; right: 6px; width: 6px; height: 6px; border-radius: 50%; background: #cdbf7a; }
+  .br-door .num { position: absolute; top: -19px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+    font-size: 12px; font-weight: 800; color: #1a1608; background: #d8c46a; border: 1px solid #9a8630;
+    padding: 1px 7px; border-radius: 3px; box-shadow: 0 2px 3px rgba(0,0,0,.4); }
+  .br-door:hover .leaf { filter: brightness(1.25); }
+  /* the hole in the floor — Slide #1 */
+  .br-slide { position: absolute; z-index: 3; cursor: pointer; }
+  .br-slide .hole { position: absolute; inset: 0; border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 38%, #000 42%, #17130a 78%);
+    box-shadow: inset 0 7px 16px rgba(0,0,0,.95), 0 0 0 3px rgba(60,48,15,.85), 0 4px 8px rgba(0,0,0,.5);
+    animation: brslidepulse 4s ease-in-out infinite; }
+  .br-slide .num { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+    font-size: 11px; font-weight: 800; color: #d8c46a; text-shadow: 0 1px 2px #000;
+    background: rgba(0,0,0,.55); padding: 1px 8px; border-radius: 999px; }
+  .br-slide:hover .hole { box-shadow: inset 0 7px 16px #000, 0 0 16px 5px rgba(120,90,200,.45), 0 0 0 3px rgba(60,48,15,.85); }
+  @keyframes brslidepulse { 0%,100% { transform: scale(1);} 50% { transform: scale(1.04);} }
+
+  /* ==== LEVEL 33 — the Poolrooms (nostalgic indoor pool, humid & wrong) ==== */
+  #room[data-room="br33"] { background: linear-gradient(180deg,#cdeaea,#a9d2d4); }
+  #room[data-room="br33"] .floor { display: none; }
+  #room[data-room="br33"] .avatar, #room[data-room="br33"] .pet { display: none; }
+  .p33-only { display: none; } #room[data-room="br33"] .p33-only { display: block; }
+  .pr-wall { position: absolute; inset: 0; z-index: 0;
+    background:
+      repeating-linear-gradient(90deg, rgba(120,160,165,.5) 0 1px, transparent 1px 30px),
+      repeating-linear-gradient(0deg, rgba(120,160,165,.5) 0 1px, transparent 1px 30px),
+      linear-gradient(180deg,#dff0f0,#bfe0e1 55%,#a7ced0); }
+  .pr-water { position: absolute; left: 0; right: 0; bottom: 0; height: 40%; z-index: 1;
+    background: linear-gradient(180deg,#7fc7cf,#3f97a6);
+    box-shadow: inset 0 6px 20px rgba(0,0,0,.25), inset 0 0 0 4px #cfeaea; }
+  .pr-water::before { content: ""; position: absolute; inset: 0; opacity: .5;
+    background: repeating-linear-gradient(96deg, rgba(255,255,255,.35) 0 2px, transparent 2px 16px);
+    animation: prripple 7s linear infinite; }
+  @keyframes prripple { from { background-position: 0 0;} to { background-position: 80px 0;} }
+  .pr-ladder { position: absolute; z-index: 2; width: 18px;
+    background: linear-gradient(90deg,transparent 6px,#cfd8da 6px 12px,transparent 12px);
+    box-shadow: 0 0 0 1px rgba(0,0,0,.1); }
+  .pr-ladder::after { content: ""; position: absolute; left: 3px; right: 3px; top: 0; bottom: 0;
+    background: repeating-linear-gradient(0deg, #cfd8da 0 2px, transparent 2px 12px); }
+  .pr-lane { position: absolute; height: 4px; z-index: 2; border-radius: 3px;
+    background: repeating-linear-gradient(90deg,#e06b6b 0 8px,#efe6c8 8px 16px); opacity: .8; }
+  .pr-vig { position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    background: radial-gradient(120% 100% at 50% 44%, transparent 50%, rgba(20,40,42,.5)); }
+
+  /* ==== LEVEL 12 — the Arcade (dark, humming cabinets, dead-mall neon) ==== */
+  #room[data-room="br12"] { background: #120a20; }
+  #room[data-room="br12"] .floor { display: none; }
+  #room[data-room="br12"] .avatar, #room[data-room="br12"] .pet { display: none; }
+  .p12-only { display: none; } #room[data-room="br12"] .p12-only { display: block; }
+  .ar-carpet { position: absolute; left: 0; right: 0; bottom: 0; height: 34%; z-index: 1;
+    background:
+      conic-gradient(from 210deg at 50% 0, #3a1c6a 0 30deg, transparent 0) 0 0/60px 34px repeat-x,
+      conic-gradient(from 210deg at 50% 0, #6a2c8a 0 30deg, transparent 0) 30px 0/60px 34px repeat-x,
+      linear-gradient(180deg,#1a1030,#0e0820);
+    box-shadow: inset 0 8px 20px rgba(0,0,0,.6); }
+  .ar-cab { position: absolute; bottom: 34%; z-index: 2; border-radius: 5px 5px 0 0;
+    background: linear-gradient(180deg,#24173a,#160d26); box-shadow: 0 0 0 1px rgba(0,0,0,.5), 0 6px 14px rgba(0,0,0,.6); }
+  .ar-cab .scr { position: absolute; top: 14px; left: 14%; right: 14%; height: 34px; border-radius: 3px; }
+  .ar-cab.a .scr { background: linear-gradient(180deg,#7affc9,#1fa0c0); box-shadow: 0 0 14px 3px rgba(80,220,240,.6);
+    animation: arflick1 3.4s steps(1) infinite; }
+  .ar-cab.b .scr { background: linear-gradient(180deg,#ff9ec2,#c0407a); box-shadow: 0 0 14px 3px rgba(255,120,180,.6);
+    animation: arflick2 4.1s steps(1) infinite; }
+  .ar-cab.c .scr { background: linear-gradient(180deg,#ffe08a,#e0a020); box-shadow: 0 0 14px 3px rgba(255,210,90,.55);
+    animation: arflick1 5s steps(1) infinite; }
+  @keyframes arflick1 { 0%,92%,100% { opacity: 1;} 94% { opacity: .3;} 96% { opacity: .8;} }
+  @keyframes arflick2 { 0%,88%,100% { opacity: 1;} 90% { opacity: .35;} }
+  .ar-cab .cpanel { position: absolute; bottom: 30%; left: 8%; right: 8%; height: 10px; border-radius: 3px;
+    background: linear-gradient(180deg,#3a2a52,#241634); }
+  .ar-glow { position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    background: radial-gradient(120% 100% at 50% 60%, transparent 46%, rgba(4,2,12,.72)); }
+
+  /* ==== SLIDE #1 — the Playroom (pastel nursery gone quiet & wrong) ==== */
+  #room[data-room="brslide"] { background: linear-gradient(180deg,#e9d7c4,#d8c0a8); }
+  #room[data-room="brslide"] .floor { display: none; }
+  #room[data-room="brslide"] .avatar, #room[data-room="brslide"] .pet { display: none; }
+  .slide-only { display: none; } #room[data-room="brslide"] .slide-only { display: block; }
+  .pl-wall { position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(9px 9px at 30px 40px, rgba(200,150,160,.3) 0 45%, transparent 48%) 0 0/86px 86px,
+      radial-gradient(7px 7px at 66px 74px, rgba(150,180,200,.3) 0 45%, transparent 48%) 0 0/86px 86px,
+      linear-gradient(180deg,#f0e0cf,#e2cbb4 60%,#cdb295); }
+  .pl-floor { position: absolute; left: 0; right: 0; bottom: 0; height: 30%; z-index: 1;
+    background:
+      repeating-conic-gradient(#c98f7a 0 25%, #b8a06a 0 50%) 0 0/44px 44px;
+    box-shadow: inset 0 8px 18px rgba(0,0,0,.32); opacity: .85; }
+  .pl-mat { position: absolute; bottom: 30%; z-index: 2; border-radius: 6px;
+    background: repeating-conic-gradient(#d9564e 0 25%, #4f8ad9 0 50%) 0 0/26px 26px; opacity: .55; box-shadow: 0 4px 8px rgba(0,0,0,.3); }
+  .pl-block { position: absolute; z-index: 2; border-radius: 3px;
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,.18), 0 4px 6px rgba(0,0,0,.3);
+    color: #3a2a18; font-weight: 800; font-size: 13px; text-align: center; }
+  .pl-ballpit { position: absolute; bottom: 30%; z-index: 2; border-radius: 10px 10px 4px 4px;
+    background: linear-gradient(180deg,#b7d0e0,#8fb0c8); box-shadow: inset 0 6px 10px rgba(0,0,0,.25); }
+  .pl-ballpit::after { content: ""; position: absolute; inset: 6px 6px 0; border-radius: 8px;
+    background:
+      radial-gradient(6px 6px at 12px 14px,#e0574e 0 48%,transparent 50%),
+      radial-gradient(6px 6px at 30px 10px,#f2c94a 0 48%,transparent 50%),
+      radial-gradient(6px 6px at 46px 16px,#4f9ad9 0 48%,transparent 50%),
+      radial-gradient(6px 6px at 64px 11px,#5cb46a 0 48%,transparent 50%),
+      radial-gradient(6px 6px at 22px 22px,#c06ad0 0 48%,transparent 50%),
+      radial-gradient(6px 6px at 54px 24px,#e0574e 0 48%,transparent 50%); }
+  .pl-horse { position: absolute; bottom: 30%; z-index: 2; width: 84px; height: 78px; }
+  .pl-horse .body { position: absolute; bottom: 16px; left: 8px; width: 66px; height: 34px; border-radius: 22px 30px 18px 18px;
+    background: linear-gradient(180deg,#e8ddc8,#cbb896); box-shadow: inset 0 -4px 6px rgba(0,0,0,.15); }
+  .pl-horse .head { position: absolute; top: 6px; right: 4px; width: 30px; height: 26px; border-radius: 14px 10px 10px 6px;
+    background: linear-gradient(180deg,#e8ddc8,#cbb896); }
+  .pl-horse .rock { position: absolute; bottom: 0; left: 0; width: 82px; height: 14px; border-radius: 0 0 50% 50%;
+    background: linear-gradient(180deg,#a0714a,#7a5230); }
+  .pl-horse .mane { position: absolute; top: 4px; right: 22px; width: 8px; height: 26px; border-radius: 4px; background: #b06a4a; }
+  .pl-scribble { position: absolute; z-index: 1; pointer-events: none; }
+  .pl-vig { position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    background: radial-gradient(120% 100% at 50% 46%, transparent 48%, rgba(30,18,10,.55)); }
+  #room[data-room="brslide"] .br-tube, #room[data-room="br33"] .br-tube, #room[data-room="br12"] .br-tube { display: none; }
+
+  /* shared: a plain exit door back to the hub, tinted per room */
+  .lim-exit { position: absolute; bottom: 30%; left: 6%; width: 60px; height: 146px; z-index: 3; cursor: pointer; }
+  .lim-exit .leaf { position: absolute; inset: 0; border-radius: 4px; border: 3px solid rgba(0,0,0,.4);
+    background: linear-gradient(180deg, rgba(40,40,40,.55), rgba(10,10,10,.6)); box-shadow: inset 0 0 0 2px rgba(0,0,0,.2), 0 4px 12px rgba(0,0,0,.5); }
+  .lim-exit .knob { position: absolute; top: 52%; right: 8px; width: 7px; height: 7px; border-radius: 50%; background: #cdbf9a; }
+  .lim-exit .sign { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+    font-size: 11px; font-weight: 800; color: #f2ecd6; text-shadow: 0 1px 2px rgba(0,0,0,.8);
+    background: rgba(0,0,0,.5); padding: 2px 9px; border-radius: 999px; animation: doorhint 2.2s ease-in-out infinite; }
+  .lim-label { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); z-index: 4;
+    font-size: 11px; font-weight: 700; color: rgba(255,255,255,.45); letter-spacing: 2px; pointer-events: none; }
+
   /* the hallway painting you can slip through */
   .h-art.secret { cursor: pointer; pointer-events: auto; }
   .h-art.secret:hover { box-shadow: 0 0 12px 3px rgba(90,60,120,.5), 0 4px 9px rgba(0,0,0,.28), inset 0 0 0 2px #c79436; }
@@ -1799,22 +1942,68 @@
         <div class="plate">🛁 Bath</div><div class="leaf"></div><div class="dpnl"></div><div class="knob"></div><div class="wreath"></div>
       </div>
 
-      <!-- ===== THE BACKROOMS — a secret liminal space behind a painting ===== -->
+      <!-- ===== THE BACKROOMS — Level 0 hub: a long corridor with portals ===== -->
       <div class="br-wall back-only"></div>
-      <div class="br-ceil back-only"></div>
-      <div class="br-tube back-only" style="left:120px"></div>
-      <div class="br-tube b back-only" style="left:360px"></div>
-      <div class="br-tube c back-only" style="left:600px"></div>
-      <div class="br-pil back-only" style="left:250px; height:200px"></div>
-      <div class="br-pil back-only" style="left:470px; height:200px"></div>
-      <div class="br-open back-only" style="left:360px; bottom:30%; width:52px; height:150px"></div>
-      <div class="br-open back-only" style="left:690px; bottom:30%; width:44px; height:130px"></div>
-      <div class="br-floor back-only"></div>
+      <div class="br-perpceil back-only"></div>
+      <div class="br-perpfloor back-only"></div>
+      <div class="br-farwall back-only"></div>
+      <!-- receding ceiling tubes -->
+      <div class="br-rtube back-only" style="left:70px; top:8px; width:120px; height:12px"></div>
+      <div class="br-rtube b back-only" style="left:620px; top:8px; width:120px; height:12px"></div>
+      <div class="br-rtube c back-only" style="left:300px; top:34px; width:70px; height:8px"></div>
+      <div class="br-rtube back-only" style="left:365px; top:58px; width:44px; height:6px"></div>
+      <!-- Door #33 on the left, Door #12 on the right, the hole further down -->
+      <div class="br-door back-only" id="brDoor33" style="left:150px; bottom:30%; width:70px; height:158px" title="Door 33">
+        <div class="num">#&nbsp;33</div><div class="leaf"></div><div class="knob"></div>
+      </div>
+      <div class="br-door back-only" id="brDoor12" style="right:150px; bottom:32%; width:56px; height:128px" title="Door 12">
+        <div class="num">#&nbsp;12</div><div class="leaf"></div><div class="knob"></div>
+      </div>
+      <div class="br-slide back-only" id="brSlide1" style="left:50%; margin-left:-34px; bottom:31%; width:68px; height:30px" title="a hole in the floor">
+        <div class="num">Slide&nbsp;#1</div><div class="hole"></div>
+      </div>
       <div class="br-exit back-only" id="brExit" title="A way out?">
         <div class="sign">← leave</div><div class="leaf"></div><div class="knob"></div>
       </div>
       <div class="br-label back-only">L E V E L &nbsp; 0</div>
       <div class="br-vig back-only"></div>
+
+      <!-- ===== LEVEL 33 — the Poolrooms ===== -->
+      <div class="pr-wall p33-only"></div>
+      <div class="pr-ladder p33-only" style="left:70%; bottom:14%; height:26%"></div>
+      <div class="pr-water p33-only"></div>
+      <div class="pr-lane p33-only" style="left:20%; right:20%; bottom:22%"></div>
+      <div class="pr-lane p33-only" style="left:26%; right:26%; bottom:14%"></div>
+      <div class="lim-exit p33-only" id="p33Exit" title="Back to the hall"><div class="sign">← back</div><div class="leaf"></div><div class="knob"></div></div>
+      <div class="lim-label p33-only">L E V E L &nbsp; 33 &nbsp;·&nbsp; P O O L R O O M S</div>
+      <div class="pr-vig p33-only"></div>
+
+      <!-- ===== LEVEL 12 — the Arcade ===== -->
+      <div class="ar-carpet p12-only"></div>
+      <div class="ar-cab a p12-only" style="left:120px; width:70px; height:150px"><div class="scr"></div><div class="cpanel"></div></div>
+      <div class="ar-cab b p12-only" style="left:330px; width:64px; height:170px"><div class="scr"></div><div class="cpanel"></div></div>
+      <div class="ar-cab c p12-only" style="left:520px; width:70px; height:150px"><div class="scr"></div><div class="cpanel"></div></div>
+      <div class="ar-cab a p12-only" style="left:660px; width:58px; height:134px"><div class="scr"></div><div class="cpanel"></div></div>
+      <div class="lim-exit p12-only" id="p12Exit" title="Back to the hall"><div class="sign">← back</div><div class="leaf"></div><div class="knob"></div></div>
+      <div class="lim-label p12-only">L E V E L &nbsp; 12 &nbsp;·&nbsp; T H E &nbsp; A R C A D E</div>
+      <div class="ar-glow p12-only"></div>
+
+      <!-- ===== SLIDE #1 — the Playroom ===== -->
+      <div class="pl-wall slide-only"></div>
+      <div class="pl-scribble slide-only" style="left:24%; top:20%">
+        <svg width="120" height="60" viewBox="0 0 120 60"><path d="M6 40 Q20 8 34 40 T62 40" fill="none" stroke="#c65a5a" stroke-width="2.4" stroke-linecap="round" opacity="0.5"/><path d="M70 20 l24 22 M94 20 l-24 22" stroke="#5a7ac6" stroke-width="2.4" stroke-linecap="round" opacity="0.45"/></svg>
+      </div>
+      <div class="pl-floor slide-only"></div>
+      <div class="pl-mat slide-only" style="left:40%; width:180px; height:60px"></div>
+      <div class="pl-ballpit slide-only" style="left:300px; width:86px; height:56px"></div>
+      <div class="pl-horse slide-only" style="left:470px"><div class="rock"></div><div class="body"></div><div class="head"></div><div class="mane"></div></div>
+      <div class="pl-block slide-only" style="left:250px; bottom:30%; width:30px; height:30px; background:#e0a83a; line-height:30px">A</div>
+      <div class="pl-block slide-only" style="left:250px; bottom:calc(30% + 30px); width:30px; height:30px; background:#d9564e; line-height:30px">B</div>
+      <div class="pl-block slide-only" style="left:282px; bottom:30%; width:30px; height:30px; background:#4f8ad9; line-height:30px">C</div>
+      <div class="pl-block slide-only" style="left:600px; bottom:30%; width:28px; height:28px; background:#5cb46a; line-height:28px">?</div>
+      <div class="lim-exit slide-only" id="slideExit" title="Back to the hall"><div class="sign">← back</div><div class="leaf"></div><div class="knob"></div></div>
+      <div class="lim-label slide-only">S L I D E &nbsp; # 1 &nbsp;·&nbsp; T H E &nbsp; P L A Y R O O M</div>
+      <div class="pl-vig slide-only"></div>
 
       <!-- ===== THE SNUG — between the wardrobe and the hallway ===== -->
       <div class="snug snug-only">
@@ -4538,7 +4727,7 @@
     room.addEventListener("click", function (e) {
       if (!selectedCharId) return;
       if (e.target.closest("#gardenWorld")) return;
-      if (e.target.closest('.avatar,.pet,.item,.furn,.hdoor,.ss,.h-front,.h-art,.br-exit,.g-arrow,.gdoor,[id^="door"],[id^="stairs"]')) return;
+      if (e.target.closest('.avatar,.pet,.item,.furn,.hdoor,.ss,.h-front,.h-art,.br-exit,.br-door,.br-slide,.lim-exit,.g-arrow,.gdoor,[id^="door"],[id^="stairs"]')) return;
       roomTapWalk(e.clientX, e.clientY);
     });
   }
@@ -4556,8 +4745,12 @@
     two: "🍳 The kitchen — decorate it too! ← hallway · garden →",
     garden: "🌷 The garden — drag to explore · ‹ › or ← for the kitchen.",
     wardrobe: "👗 The Wardrobe — make it yours! Tap → for the landing.",
-    backrooms: "…you're somewhere else now. The lights hum. Tap ← to leave."
+    backrooms: "…you're somewhere else now. A long yellow hall. Two doors, and a hole. 👁️",
+    br33: "🏊 Level 33 · the Poolrooms. Warm water, no people, no exit signs. Tap ← back.",
+    br12: "🕹️ Level 12 · the Arcade. Every machine is on. Nobody's playing. Tap ← back.",
+    brslide: "🧸 Slide #1 · the Playroom. The toys are still warm. Tap ← back."
   };
+  var LIMINAL = { backrooms: 1, br33: 1, br12: 1, brslide: 1 };
   function goToRoom(name) {
     if (state.currentRoom === name) return;
     room.style.opacity = "0";
@@ -4567,10 +4760,10 @@
       renderRoom();              // also applies the room's theme (data-room)
       room.style.opacity = "1";
       save();
-      var longToast = name === "backrooms" ? 5200 : 1900;
+      var longToast = LIMINAL[name] ? 5200 : 1900;
       toast(ROOM_TOASTS[name] || "🚪 A new room to decorate!", longToast);
       if (name === "garden") { panGarden(0); gardenFlourish(); }
-      if (name === "backrooms") Ambient.humStart(); else Ambient.humStop();   // the lights hum only here
+      if (LIMINAL[name]) Ambient.humStart(); else Ambient.humStop();   // the warped music plays throughout the liminal levels
     }, 160);
   }
 
@@ -5463,6 +5656,13 @@
     setTimeout(function () { goToRoom("backrooms"); }, 700);
   });
   $("brExit").addEventListener("click", function () { goToRoom("hall"); });
+  // Level 0 hub → its three branching liminal levels, and each back to the hub
+  $("brDoor33").addEventListener("click", function () { goToRoom("br33"); });
+  $("brDoor12").addEventListener("click", function () { goToRoom("br12"); });
+  $("brSlide1").addEventListener("click", function () { toast("…you slip into the hole. 🕳️"); setTimeout(function () { goToRoom("brslide"); }, 650); });
+  $("p33Exit").addEventListener("click", function () { goToRoom("backrooms"); });
+  $("p12Exit").addEventListener("click", function () { goToRoom("backrooms"); });
+  $("slideExit").addEventListener("click", function () { goToRoom("backrooms"); });
   $("stairsUp").addEventListener("click", function () { goToRoom("landing"); });
   $("stairsDown").addEventListener("click", function () { goToRoom("hall"); });
   $("doorHallL").addEventListener("click", function () { goToRoom("snug"); });

@@ -308,17 +308,30 @@
   .shop-card .lock { position:absolute; top:6px; right:8px; font-size:13px; }
   .shop-card .tag { position:absolute; top:6px; left:8px; font-size:10px; background:#f3e3c6; padding:1px 5px; border-radius:6px; color:#7a5a2a; font-weight:700; }
   /* the Star Cookbook spread — parchment recipe pages to pick from */
-  .recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-  .rpage { background: linear-gradient(180deg,#fdf6e3,#f1e3c2); border: 2px solid #d8c49a; border-radius: 6px 16px 16px 6px;
-    padding: 12px 13px; position: relative; cursor: pointer; min-height: 158px;
-    box-shadow: 2px 3px 7px rgba(0,0,0,.15), inset 4px 0 0 rgba(180,150,100,.35); }
-  .rpage:hover { transform: translateY(-2px); border-color: var(--accent); }
-  .rpage.faded { opacity: .62; cursor: default; filter: grayscale(.35); }
-  .rpage.faded:hover { transform: none; border-color: #d8c49a; }
-  .rpage .rp-ic { font-size: 26px; }
-  .rpage h4 { margin: 4px 0 6px; font-size: 14px; color: #4a3418; }
-  .rpage .rt { font-size: 11.5px; color: #7a5a2a; line-height: 1.45; font-style: italic; }
-  .rpage .rc { margin-top: 9px; font-weight: 800; font-size: 12px; color: #7a3aa0; }
+  /* the opened Star Cookbook — handwritten recipe pages on ruled paper */
+  .recipe-intro { font-family: "Segoe Print","Bradley Hand","Chalkboard SE","Comic Sans MS",cursive;
+    color: #6a4a2a; font-size: 15px; text-align: center; margin: 2px 0 12px; }
+  .recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(184px, 1fr)); gap: 18px; padding: 2px 4px 6px; }
+  .rpage { --rot: 0deg; position: relative; cursor: pointer; min-height: 220px; padding: 12px 14px 12px 24px;
+    color: #4a3820; font-family: "Segoe Print","Bradley Hand","Chalkboard SE","Comic Sans MS",cursive;
+    background:
+      repeating-linear-gradient(180deg, transparent 0 24px, rgba(96,124,164,.16) 24px 25px),
+      linear-gradient(180deg,#fdf8ea,#f3e8cf);
+    border: 1px solid #d7c69c; border-radius: 3px; transform: rotate(var(--rot));
+    box-shadow: 2px 4px 9px rgba(0,0,0,.2); transition: transform .12s ease; }
+  .rpage::before { content: ""; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 1.5px;
+    background: rgba(198,86,86,.5); }
+  .rpage::after { content: ""; position: absolute; top: 9px; left: 9px; width: 7px; height: 7px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%,#fff,#c7b78e); box-shadow: 0 1px 1px rgba(0,0,0,.2); }
+  .rpage:hover { transform: rotate(var(--rot)) translateY(-3px) scale(1.02); }
+  .rpage.faded { opacity: .72; filter: sepia(.35) grayscale(.15); cursor: default; }
+  .rpage.faded:hover { transform: rotate(var(--rot)); }
+  .rpage .rp-draw { display: block; margin: 2px auto 2px; }
+  .rpage h4 { margin: 0 0 7px; font-size: 17px; font-weight: 700; color: #6a3f18; text-align: center;
+    line-height: 1.15; border-bottom: 1.5px solid rgba(120,80,40,.35); padding-bottom: 4px; }
+  .rpage .rt { font-size: 13.5px; line-height: 1.5; color: #56421f; }
+  .rpage .rc { margin-top: 9px; font-size: 14px; font-weight: 700; color: #7a3aa0; text-align: right;
+    text-decoration: underline; text-decoration-style: wavy; text-underline-offset: 3px; }
   .section-title { font-size: 13px; font-weight: 800; color: #9a7a52; text-transform: uppercase; letter-spacing: .5px; margin: 14px 0 8px; }
   .section-title:first-child { margin-top: 0; }
 
@@ -5537,22 +5550,51 @@
   // ----- The Star Cookbook: tap it and pick a recipe page -----
   function openRecipeBook() {
     var simmering = !!state.cauldron;
-    var html = '<p class="muted">The Star Cookbook falls open. Choose a recipe…</p>' +
+    // loose, sketchy "ink pen" illustrations for each recipe
+    var drawElixir =
+      '<svg class="rp-draw" width="72" height="58" viewBox="0 0 72 58">' +
+        '<path d="M16 30 Q34 26 56 30 Q55 42 47 49 Q36 53 25 49 Q17 42 16 30 Z" fill="#b892d8" opacity="0.45"/>' +
+        '<g fill="none" stroke="#48381f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M15 30 Q13 44 24 50 Q36 54 48 50 Q59 44 57 30"/>' +
+          '<path d="M11 30 Q36 23 61 30"/><ellipse cx="9" cy="34" rx="3.4" ry="4.2"/><ellipse cx="63" cy="34" rx="3.4" ry="4.2"/></g>' +
+        '<g fill="none" stroke="#6a3aa0" stroke-width="1.3"><circle cx="28" cy="20" r="2.6"/><circle cx="39" cy="15" r="1.8"/></g>' +
+        '<path d="M35 4 l1.6 3.4 3.6 .4 -2.6 2.4 .7 3.6 -3.3-1.9 -3.3 1.9 .7-3.6 -2.6-2.4 3.6-.4 Z" fill="#e6b23e" stroke="#8a5a12" stroke-width="0.7"/>' +
+        '<path d="M50 8 l1 2.1 2.3 .3 -1.7 1.5 .4 2.2 -2-1.1 -2 1.1 .4-2.2 -1.7-1.5 2.3-.3 Z" fill="#cda2e6"/>' +
+      '</svg>';
+    var drawFry =
+      '<svg class="rp-draw" width="72" height="58" viewBox="0 0 72 58">' +
+        '<g stroke="#9a8a66" stroke-width="1.3" fill="none" stroke-linecap="round"><path d="M26 22 Q23 17 26 13 Q29 9 26 5"/><path d="M46 22 Q49 17 46 13"/></g>' +
+        '<path d="M18 44 Q13 29 25 25 Q33 20 44 25 Q56 30 50 43 Q40 49 30 48 Q22 48 18 44 Z" fill="#e9b657" stroke="#8a5a1a" stroke-width="1.7" stroke-linejoin="round"/>' +
+        '<g fill="#8a5a1a"><circle cx="27" cy="33" r="1.1"/><circle cx="35" cy="38" r="1.1"/><circle cx="42" cy="31" r="1.1"/><circle cx="33" cy="29" r="1"/></g>' +
+        '<path d="M31 24 Q35 17 42 19 Q37 24 33 26 Z" fill="#d94436" stroke="#a02a22" stroke-width="1.1"/>' +
+        '<path d="M42 19 Q45 15 47 17" stroke="#3f7a48" stroke-width="1.5" fill="none" stroke-linecap="round"/>' +
+        '<ellipse cx="34" cy="50" rx="28" ry="4.5" fill="none" stroke="#48381f" stroke-width="1.7"/>' +
+      '</svg>';
+    var drawCookie =
+      '<svg class="rp-draw" width="72" height="58" viewBox="0 0 72 58">' +
+        '<circle cx="36" cy="30" r="19" fill="#c98b4f" stroke="#7a4a1a" stroke-width="1.9"/>' +
+        '<g stroke="#3a2a1a" stroke-width="0.7">' +
+          '<circle cx="29" cy="23" r="2.6" fill="#e8484f"/><circle cx="43" cy="25" r="2.6" fill="#4f8ad9"/>' +
+          '<circle cx="31" cy="37" r="2.6" fill="#59b46a"/><circle cx="44" cy="37" r="2.3" fill="#d9a441"/>' +
+          '<circle cx="37" cy="30" r="2.3" fill="#b06ad0"/></g>' +
+        '<g stroke="#e0a83a" stroke-width="1.3" stroke-linecap="round"><path d="M60 12 v5 M57.5 14.5 h5"/><path d="M11 40 v4 M9 42 h4"/></g>' +
+      '</svg>';
+    var html = '<p class="recipe-intro">…the Star Cookbook falls open. its pages are soft and spattered. ✎</p>' +
       '<div class="recipe-grid">' +
-      '<div class="rpage" id="rpElixir">' +
-        '<div class="rp-ic">🔮</div><h4>Aqsa\'s Moonlit Elixir</h4>' +
-        '<div class="rt">Seven moonpetals, a spoon of starlight sugar, one whispered secret. Stir counter-clockwise and serve beneath a crescent moon.</div>' +
-        '<div class="rc">' + (simmering ? "already simmering 💜" : "Cook it 🍲") + '</div>' +
+      '<div class="rpage" id="rpElixir" style="--rot:-1.4deg">' +
+        drawElixir + '<h4>Aqsa\'s Moonlit Elixir</h4>' +
+        '<div class="rt">Seven moonpetals, a spoon of starlight sugar, one whispered secret. Stir counter-clockwise &amp; serve beneath a crescent moon.</div>' +
+        '<div class="rc">' + (simmering ? "already simmering 💜" : "cook it →") + '</div>' +
       '</div>' +
-      '<div class="rpage" id="rpFry">' +
-        '<div class="rp-ic">🌶️</div><h4>Jas\'s Deep Fried Chilli Object</h4>' +
-        '<div class="rt">Take one object — any object. Batter it. Add chillies until the smoke alarm shows interest. Deep fry until golden and unrecognisable. Serve with total confidence.</div>' +
-        '<div class="rc">' + (state.fryer ? "already sizzling 🌶️" : "Fry it 🍟") + '</div>' +
+      '<div class="rpage" id="rpFry" style="--rot:1deg">' +
+        drawFry + '<h4>Jas\'s Deep Fried Chilli Object</h4>' +
+        '<div class="rt">Take one object — any object. Batter it. Add chillies till the smoke alarm shows interest. Fry till golden &amp; unrecognisable. Serve with total confidence.</div>' +
+        '<div class="rc">' + (state.fryer ? "already sizzling 🌶️" : "fry it →") + '</div>' +
       '</div>' +
-      '<div class="rpage" id="rpCookie">' +
-        '<div class="rp-ic">🍪</div><h4>Adam\'s Mystery Cookie</h4>' +
-        '<div class="rt">Cocoa, butter, and a fistful of chips in every colour there is. The mystery is what kind — nobody knows until it\'s gone. Bake, and let it go.</div>' +
-        '<div class="rc">Bake it ✨</div>' +
+      '<div class="rpage" id="rpCookie" style="--rot:-0.5deg">' +
+        drawCookie + '<h4>Adam\'s Mystery Cookie</h4>' +
+        '<div class="rt">Cocoa, butter &amp; a fistful of chips in every colour there is. The mystery is what kind — nobody knows till it\'s gone. Bake, &amp; let it go.</div>' +
+        '<div class="rc">bake it →</div>' +
       '</div>' +
       '</div>';
     openPanel("📖 Star Cookbook", html, [{ label: "Close", cls: "primary", onClick: closePanel }]);

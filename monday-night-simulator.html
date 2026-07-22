@@ -2105,8 +2105,8 @@
   <div id="actionbar">
     <button class="btn primary" id="btnNight">🌙 Start Monday Night</button>
     <button class="btn" id="btnPlay">🎲 Mini-games</button>
-    <button class="btn" id="btnShop">🛍️ Shop</button>
-    <button class="btn" id="btnPlant">🌱 Tend</button>
+    <button class="btn" id="btnShop">🧺 Shop</button>
+    <button class="btn" id="btnPlant">🌙 Tend</button>
     <button class="btn ghost" id="btnEnd">✨ Sign off</button>
   </div>
 </div>
@@ -3304,7 +3304,7 @@
               '</div>';
     });
     html += '</div>';
-    openPanel("🛍️ Cozy Shop", html, [{ label: "Done", cls: "primary", onClick: closePanel }]);
+    openPanel("🧺 Cozy Shop", html, [{ label: "Done", cls: "primary", onClick: closePanel }]);
     Array.prototype.slice.call($("gBody").querySelectorAll("[data-cat]")).forEach(function (c) {
       c.addEventListener("click", function () { renderShopCategory(c.dataset.cat); });
     });
@@ -3355,7 +3355,7 @@
       html += '</div>';
     });
     html += '</div>';
-    openPanel("🛍️ " + setName, html, [
+    openPanel("🧺 " + setName, html, [
       { label: "← Categories", onClick: renderShopCategories },
       { label: "Done", cls: "primary", onClick: closePanel }
     ]);
@@ -3517,14 +3517,14 @@
     var friend = wardrobeFriend;
     state.outfits[friend] = state.outfits[friend] || {};
     var owned = ownedClothes();
-    var html = '<p class="muted">Dress your friends in clothes from your wardrobe. Buy more in the 🛍️ Shop’s Outfits set.</p>';
+    var html = '<p class="muted">Dress your friends in clothes from your wardrobe. Buy more in the 🧺 Shop’s Outfits set.</p>';
     html += '<div class="ward-tabs">';
     ["jas", "aqsa", "adam"].forEach(function (id) {
       html += '<button class="ward-tab' + (id === friend ? " on" : "") + '" data-friend="' + id + '" style="--c:var(--' + id + ')">' + FRIEND_NAMES[id] + '</button>';
     });
     html += '</div><div id="wardPrev" class="ward-prev"></div>';
     if (!owned.length) {
-      html += '<p class="muted" style="text-align:center">Your wardrobe is empty — pop to the 🛍️ Shop and buy some outfits first!</p>';
+      html += '<p class="muted" style="text-align:center">Your wardrobe is empty — pop to the 🧺 Shop and buy some outfits first!</p>';
     } else {
       WARD_SLOTS.forEach(function (s) {
         var opts = owned.filter(function (d) { return d.wear.slot === s.key; });
@@ -3771,9 +3771,9 @@
       '<p class="hint-line">' + (sub || "Lovely teamwork.") + '</p>' +
       '<div class="row"><span>Bonus coins</span><b>+' + bonus + ' 🪙</b></div>' +
       '<div class="row"><span>Pocket now</span><b>' + state.coins + ' 🪙</b></div>' +
-      '<p class="hint-line" style="margin-top:10px">Spend them in the 🛍️ Shop to grow your room.</p></div>';
+      '<p class="hint-line" style="margin-top:10px">Spend them in the 🧺 Shop to grow your room.</p></div>';
     openPanel("Coins earned!", html, [
-      { label: "🛍️ Open Shop", onClick: function () { closePanel(); openShop(); } },
+      { label: "🧺 Open Shop", onClick: function () { closePanel(); openShop(); } },
       { label: "Nice", cls: "primary", onClick: closePanel }
     ]);
   }
@@ -3789,25 +3789,63 @@
   // =====================================================================
   //  TEND THE PLANT — a tiny recurring care game that visibly grows.
   // =====================================================================
-  var PLANT_STAGES = ["🌱", "🌿", "🪴", "🌵", "🌳", "🌴"]; // grows over the weeks
+  var PLANT_STAGES = ["a seed", "a sprout", "young leaves", "a fat bud", "opening at dusk", "in full moonlit bloom"];
+  // a moonflower that grows & blooms white under the moon (drawn per stage)
+  function moonflowerSVG(stage, size) {
+    size = size || 100;
+    var s = '<svg width="' + size + '" height="' + size + '" viewBox="0 0 120 120">';
+    if (stage >= 4) s += '<circle cx="60" cy="40" r="34" fill="#e9ecff" opacity="' + (stage >= 5 ? 0.75 : 0.4) + '"/>';
+    if (stage >= 5) {
+      s += '<path d="M98 18 a13 13 0 1 0 0 24 a10 10 0 1 1 0-24 Z" fill="#fdf3c0" opacity="0.9"/>';
+      s += '<g fill="#fff6da"><path d="M20 30 l1.4 3 3 1.4 -3 1.4 -1.4 3 -1.4-3 -3-1.4 3-1.4Z"/><circle cx="38" cy="15" r="1.6"/><circle cx="88" cy="56" r="1.6"/></g>';
+    }
+    // terracotta pot + soil
+    s += '<path d="M44 108 L40 88 L80 88 L76 108 Z" fill="#c0622f"/>';
+    s += '<rect x="37" y="82" width="46" height="8" rx="2" fill="#d0723a"/>';
+    s += '<ellipse cx="60" cy="86" rx="20" ry="3" fill="#4a3320"/>';
+    var top = stage === 0 ? 74 : Math.max(40, 86 - stage * 10);
+    if (stage >= 1) {
+      s += '<path d="M60 86 L60 ' + top + '" stroke="#3f7a48" stroke-width="3" stroke-linecap="round" fill="none"/>';
+      s += '<path d="M60 72 Q45 65 43 76 Q54 81 60 74 Z" fill="#4e9a58"/>';
+      if (stage >= 2) s += '<path d="M60 62 Q75 55 77 66 Q66 71 60 64 Z" fill="#4e9a58"/>';
+    }
+    if (stage === 0) {
+      s += '<path d="M60 84 Q51 75 57 73 Q62 79 60 84Z" fill="#5cab64"/><path d="M60 84 Q69 75 63 73 Q58 79 60 84Z" fill="#5cab64"/>';
+    } else if (stage === 2) {
+      s += '<path d="M60 ' + top + ' q-6 -11 0 -19 q6 8 0 19 Z" fill="#5fae67"/>';
+    } else if (stage === 3) {
+      s += '<path d="M60 ' + top + ' q-6 -11 0 -19 q6 8 0 19 Z" fill="#6fae67"/>';
+      s += '<path d="M60 ' + (top - 13) + ' q-3 -6 0 -8 q3 2 0 8 Z" fill="#f4f2ff"/>';
+    } else if (stage >= 4) {
+      var cx = 60, cy = top - 4, n = stage >= 5 ? 6 : 5, r = stage >= 5 ? 18 : 12;
+      for (var i = 0; i < n; i++) {
+        var a = -Math.PI / 2 + i * 2 * Math.PI / n;
+        var px = cx + Math.cos(a) * r, py = cy + Math.sin(a) * r;
+        s += '<ellipse cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" rx="' + (r * 0.55).toFixed(1) + '" ry="' + (r * 0.82).toFixed(1) +
+             '" fill="#fbfbff" stroke="#dfe2f5" stroke-width="1" transform="rotate(' + (a * 180 / Math.PI + 90).toFixed(1) + ' ' + px.toFixed(1) + ' ' + py.toFixed(1) + ')"/>';
+      }
+      s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.42).toFixed(1) + '" fill="#f2e6a0"/>';
+      s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.2).toFixed(1) + '" fill="#e6c86a"/>';
+    }
+    return s + '</svg>';
+  }
   function openPlant() {
     var stage = Math.min(state.plant, PLANT_STAGES.length - 1);
-    var emoji = PLANT_STAGES[stage];
     var maxed = state.plant >= PLANT_STAGES.length - 1;
     var html = '<div class="nightcard">' +
-      '<div style="font-size:72px">' + emoji + '</div>' +
-      '<div class="big">Your plant</div>' +
-      '<p class="hint-line">Stage ' + (stage + 1) + ' of ' + PLANT_STAGES.length + '. Water it together each Monday to watch it grow over the months.</p>' +
+      '<div style="margin:4px auto 0">' + moonflowerSVG(stage, 116) + '</div>' +
+      '<div class="big">Your moonflower</div>' +
+      '<p class="hint-line">Stage ' + (stage + 1) + ' of ' + PLANT_STAGES.length + ' — ' + PLANT_STAGES[stage] + '. Water it together each Monday; it blooms pale white under the moon.</p>' +
       '</div>';
     var foot = [];
     if (!maxed) foot.push({ label: "💧 Water it (+1 stage)", cls: "primary", onClick: function () {
       state.plant++; addCoins(1); save();
-      toast("It grew a little! 🌿  +1 🪙");
+      toast(state.plant >= PLANT_STAGES.length - 1 ? "It opens under the moon at last! 🌙  +1 🪙" : "It grew a little! 🌱  +1 🪙");
       closePanel(); openPlant();
     }});
-    else foot.push({ label: "🌴 Fully grown!", onClick: closePanel });
+    else foot.push({ label: "🌙 In full bloom!", onClick: closePanel });
     foot.push({ label: "Close", onClick: closePanel });
-    openPanel("🌱 Tend the plant", html, foot);
+    openPanel("🌙 Tend your moonflower", html, foot);
   }
 
   // =====================================================================

@@ -76,6 +76,7 @@
   }
   .btn:active { transform: translateY(2px); box-shadow: 0 0 0 #cbb088; }
   .btn.primary { background: linear-gradient(180deg, #ffd089, #ffb866); color: #5a3315; box-shadow: 0 2px 0 #d98f4a; }
+  .btn.primary.done { background: linear-gradient(180deg, #cdbfa4, #b6a488); color: #4a3a24; box-shadow: 0 2px 0 #9a876a; opacity: .9; }
   .btn.ghost { background: rgba(255,255,255,0.10); color: #f3e9ff; box-shadow: none; border: 1px solid rgba(255,255,255,0.18); }
   .btn.small { padding: 5px 9px; font-size: 12px; }
 
@@ -2321,7 +2322,9 @@
   var SAVE_KEY = "mondayNightSim.v1";
   var DEFAULT_STATE = {
     version: 1,
-    sessions: 0,            // total Mondays played (the heart of continuity)
+    sessions: 0,            // week number — advances by real Mondays (see syncWeeks)
+    weekMonday: "",         // the Monday (YYYY-MM-DD) the current week is anchored to
+    playedThisWeek: false,  // has this week's "Start Monday Night" ritual been done?
     coins: 20,             // a little starter pocket money
     // a starter (removable) pink bed in the bedroom
     placed: [{ uid: "bed_start", itemId: "bed_pink", x: 27.5, y: 82, room: "main", scale: 1 }],
@@ -3084,6 +3087,7 @@
   function updateHud() {
     weekChip.textContent = "Week " + Math.max(1, state.sessions || 1);
     setCoins(state.coins);
+    updateNightBtn();
   }
 
   function itemDef(id) {
@@ -3899,23 +3903,65 @@
   // =====================================================================
   //  THE MONDAY LOOP — Arrive → play → decorate → sign off
   // =====================================================================
-  function startNight() {
-    state.sessions = (state.sessions || 0) + 1;
-    // weekly stipend so there's always something to do
-    addCoins(5);
-    checkAreaUnlock();
-    save();
-    updateHud();
+  // ---- Real-world weeks: one Monday-night cycle == one real week ----------
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  function mondayKey(d) {                 // the Monday (local) of d's week, as YYYY-MM-DD
+    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));   // getDay: 0=Sun..6=Sat
+    return x.getFullYear() + "-" + pad2(x.getMonth() + 1) + "-" + pad2(x.getDate());
+  }
+  function keyToDate(k) { var p = k.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function weeksBetween(a, b) { return Math.round((keyToDate(b) - keyToDate(a)) / (7 * 864e5)); }
+  // On load, advance the week counter by however many real Mondays have passed
+  // since the last visit — so each Monday-night cycle is one real week.
+  function syncWeeks() {
+    var cur = mondayKey(new Date());
+    if (!state.weekMonday) {              // first ever run, or migrating an old save
+      state.weekMonday = cur;
+      if (!state.sessions) state.sessions = 1;
+      save();
+      return;
+    }
+    var passed = weeksBetween(state.weekMonday, cur);
+    if (passed > 0) {                    // one or more Mondays have gone by
+      state.sessions = (state.sessions || 1) + passed;
+      state.weekMonday = cur;
+      state.playedThisWeek = false;      // a fresh Monday night is ready
+      checkAreaUnlock();
+      save();
+      setTimeout(function () {
+        toast(passed === 1
+          ? "🌙 A new Monday night has come around — welcome to week " + state.sessions + ". 💛"
+          : "🌙 " + passed + " Mondays have slipped by — welcome to week " + state.sessions + ". 💛", 5000);
+      }, 800);
+    }
+  }
+  function updateNightBtn() {
+    var btn = $("btnNight"); if (!btn) return;
+    if (state.playedThisWeek) { btn.classList.add("done"); btn.textContent = "🌙 Settled in ✓"; }
+    else { btn.classList.remove("done"); btn.textContent = "🌙 Start Monday Night"; }
+  }
 
-    var week = state.sessions;
+  function startNight() {
+    var firstThisWeek = !state.playedThisWeek;
+    if (firstThisWeek) {
+      addCoins(5);                       // the stipend is once per real week now
+      state.playedThisWeek = true;
+      checkAreaUnlock();
+      save();
+      updateHud();
+    }
+    updateNightBtn();
+
+    var week = Math.max(1, state.sessions || 1);
     var avaRow = '<div class="ava-row">' + FRIENDS.map(function (f) {
       return '<div class="a"><div class="dot" style="background:' + f.color + '">' + f.face + '</div><div class="nm">' + f.name + '</div></div>';
     }).join("") + '</div>';
 
-    // Callback to last week (TODO(personalise): warmer, more specific copy).
     var callback;
-    if (week === 1) callback = "Your very first Monday together. The room's a little bare — let's start making it yours. 💛";
-    else if (state.lastItem) callback = "Last Monday you added the " + state.lastItem + ". Welcome back!";
+    if (week === 1 && firstThisWeek) callback = "Your very first Monday together. The room's a little bare — let's start making it yours. 💛";
+    else if (!firstThisWeek) callback = "You've already settled into week " + week + " — but stay a while. The next 🪙 arrives with next Monday. 💛";
+    else if (state.lastItem) callback = "Last week you added the " + state.lastItem + ". Welcome back!";
     else callback = "Welcome back to Monday night — week " + week + " together.";
 
     var s = currentSeason();
@@ -3924,7 +3970,8 @@
       '<div class="big">Monday Night · Week ' + week + '</div>' +
       avaRow +
       '<p class="hint-line">' + callback + '</p>' +
-      '<p class="hint-line">Outside the window: a ' + s.label.toLowerCase().replace(/^[^ ]+ /, "") + ' evening ' + s.scene + ' · +5 🪙 just for showing up.</p>' +
+      '<p class="hint-line">Outside the window: a ' + s.label.toLowerCase().replace(/^[^ ]+ /, "") + ' evening ' + s.scene +
+        (firstThisWeek ? ' · +5 🪙 just for showing up.' : '.') + '</p>' +
       '</div>';
     openPanel("Welcome back 💛", html, [
       { label: "🎲 Play a game", onClick: function () { closePanel(); openGames(); } },
@@ -5987,6 +6034,8 @@
 
   function boot() {
     state.currentRoom = "main";   // every session starts in Jas's bedroom
+    var freshPlayer = !state.weekMonday && !state.sessions;
+    syncWeeks();                  // advance the week by any real Mondays gone by
     renderSeason();
     fitRoom();
     renderRoom();
@@ -6001,7 +6050,7 @@
     Pet.init();
     Ambient.updateBtn();
     // Gentle first-time welcome.
-    if (!state.sessions) {
+    if (freshPlayer) {
       setTimeout(function () {
         toast("Tap 🌙 Start Monday Night to begin your first night together.");
       }, 600);

@@ -638,12 +638,16 @@
   .ava-prev .pbody { width: 42px; height: 48px; margin: 0 auto; position: relative;
     border-radius: 22px 22px 16px 16px; box-shadow: inset 0 -6px 0 rgba(0,0,0,0.12); }
   .ava-prev .pface { position: absolute; top: 12px; left: 0; right: 0; text-align: center; font-size: 16px; }
-  .ward-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; margin-bottom: 6px; }
-  .ward-card { background: rgba(255,255,255,.06); border: 2px solid transparent; border-radius: 12px;
-    padding: 8px 4px; text-align: center; cursor: pointer; }
-  .ward-card.on { border-color: #ffd86b; background: rgba(255,216,107,.14); }
-  .ward-card .ic { font-size: 24px; height: 40px; display: flex; align-items: center; justify-content: center; }
-  .ward-card .nm { font-size: 11px; margin-top: 2px; }
+  .ward-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: 10px; margin-bottom: 6px; }
+  /* trial: each item sits in its own separated grey square */
+  .ward-card { background: #cacace; border: 1px solid #a6a6ad; border-radius: 10px;
+    padding: 6px 4px; text-align: center; cursor: pointer; aspect-ratio: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; color: #3a3a44;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 1px 3px rgba(0,0,0,.28); transition: background .1s, box-shadow .1s; }
+  .ward-card:hover { background: #d6d6db; }
+  .ward-card.on { border-color: #e0a83a; background: #ffe7ac; box-shadow: 0 0 0 2px #ffd86b, inset 0 1px 0 rgba(255,255,255,.5); }
+  .ward-card .ic { font-size: 26px; height: 38px; display: flex; align-items: center; justify-content: center; }
+  .ward-card .nm { font-size: 10.5px; margin-top: 1px; line-height: 1.12; color: #4a4a54; }
   .shop-card.owned { opacity: .65; }
 
   /* Shop categories (first screen of the shop) */
@@ -3219,6 +3223,7 @@
         window.removeEventListener("touchend", up);
         if (moved) { save(); toast("Moved it. ✨"); }
         else if (id === "desk") ComputerGame.open();   // a tap on the computer
+        else if (id === "wardrobe") openWardrobe();     // a tap on the bedroom wardrobe
       }
       el.addEventListener("mousedown", down);
       el.addEventListener("touchstart", down, { passive: false });

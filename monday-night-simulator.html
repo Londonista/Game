@@ -638,16 +638,39 @@
   .ava-prev .pbody { width: 42px; height: 48px; margin: 0 auto; position: relative;
     border-radius: 22px 22px 16px 16px; box-shadow: inset 0 -6px 0 rgba(0,0,0,0.12); }
   .ava-prev .pface { position: absolute; top: 12px; left: 0; right: 0; text-align: center; font-size: 16px; }
-  .ward-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: 10px; margin-bottom: 6px; }
-  /* trial: each item sits in its own separated grey square */
+  /* ---- Wardrobe editor (avatar-editor style layout) ---- */
+  .ward2-tabs { display: flex; gap: 6px; justify-content: center; margin-bottom: 12px; }
+  .ward2-tab { border: 2px solid rgba(255,255,255,.22); background: rgba(255,255,255,.06); color: #fff;
+    border-radius: 8px; padding: 5px 14px; font-weight: 700; font-size: 13px; cursor: pointer; }
+  .ward2-tab.on { background: var(--c); color: #2a2238; border-color: var(--c); }
+  .ward2-body { display: flex; gap: 10px; align-items: flex-start; }
+  .ward2-cats { display: flex; flex-direction: column; gap: 8px; flex: 0 0 auto; }
+  .ward2-cat { width: 46px; height: 46px; border: 2px solid #a6a6ad; background: #cacace; border-radius: 10px;
+    font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.5); }
+  .ward2-cat.on { border-color: #5fbf5a; background: #fff; box-shadow: 0 0 0 2px #5fbf5a; }
+  .ward2-grid { flex: 1 1 auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;
+    align-content: start; max-height: 296px; overflow-y: auto; padding: 2px; }
+  .ward2-empty { grid-column: 1 / -1; text-align: center; padding: 12px 6px; }
+  /* each item sits in its own separated grey square */
   .ward-card { background: #cacace; border: 1px solid #a6a6ad; border-radius: 10px;
-    padding: 6px 4px; text-align: center; cursor: pointer; aspect-ratio: 1;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; color: #3a3a44;
+    text-align: center; cursor: pointer; aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center; color: #3a3a44;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 1px 3px rgba(0,0,0,.28); transition: background .1s, box-shadow .1s; }
-  .ward-card:hover { background: #d6d6db; }
-  .ward-card.on { border-color: #e0a83a; background: #ffe7ac; box-shadow: 0 0 0 2px #ffd86b, inset 0 1px 0 rgba(255,255,255,.5); }
-  .ward-card .ic { font-size: 26px; height: 38px; display: flex; align-items: center; justify-content: center; }
-  .ward-card .nm { font-size: 10.5px; margin-top: 1px; line-height: 1.12; color: #4a4a54; }
+  .ward-card:hover { background: #dcdce1; }
+  .ward-card.on { border-color: #5fbf5a; background: #fff; box-shadow: 0 0 0 2px #5fbf5a; }
+  .ward-card .ic { font-size: 26px; display: flex; align-items: center; justify-content: center; }
+  .ward-card.x .ic { color: #b85454; font-weight: 800; }
+  .ward2-prev { flex: 0 0 auto; width: 116px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .ward2-stage { width: 116px; height: 176px; border-radius: 12px; border: 1px solid rgba(255,255,255,.16);
+    background: linear-gradient(180deg, rgba(190,190,200,.28), rgba(120,120,132,.32));
+    display: flex; align-items: flex-end; justify-content: center; padding-bottom: 16px;
+    box-shadow: inset 0 0 26px rgba(0,0,0,.32); }
+  .ward2-arrows { display: flex; align-items: center; gap: 6px; }
+  .ward2-arrow { width: 34px; height: 30px; border-radius: 8px; border: 1px solid rgba(255,255,255,.25);
+    background: rgba(110,165,235,.28); color: #cfe6ff; font-size: 18px; font-weight: 800; cursor: pointer; line-height: 1; }
+  .ward2-arrow:active { background: rgba(110,165,235,.45); }
+  .ward2-who { font-size: 12px; font-weight: 700; color: #fff; min-width: 42px; text-align: center; }
   .shop-card.owned { opacity: .65; }
 
   /* Shop categories (first screen of the shop) */
@@ -3447,6 +3470,7 @@
   var FRIEND_NAMES = { jas: "Jas", aqsa: "Aqsa", adam: "Adam" };
   var FRIEND_FACES = { jas: "^‿^", aqsa: "◕‿◕", adam: "•ᴗ•" };
   var wardrobeFriend = "jas";
+  var wardrobeSlot = "hat";
 
   function ownedClothes() {
     return (state.closet || []).map(itemDef).filter(function (d) { return d && d.wear; });
@@ -3521,45 +3545,70 @@
     return wrap;
   }
 
-  var WARD_SLOTS = [{ key: "hat", label: "Hats" }, { key: "glasses", label: "Glasses" }];
+  var WARD_SLOTS = [{ key: "hat", label: "Hats", ic: "🧢" }, { key: "glasses", label: "Glasses", ic: "🕶️" }];
   function openWardrobe() {
     var friend = wardrobeFriend;
     state.outfits[friend] = state.outfits[friend] || {};
     var owned = ownedClothes();
-    var html = '<p class="muted">Dress your friends in clothes from your wardrobe. Buy more in the 🧺 Shop’s Outfits set.</p>';
-    html += '<div class="ward-tabs">';
+    var slot = wardrobeSlot;
+    var qsa = function (sel) { return Array.prototype.slice.call($("gBody").querySelectorAll(sel)); };
+
+    var html = '<div class="ward2">';
+    // top tabs — which friend you're dressing
+    html += '<div class="ward2-tabs">';
     ["jas", "aqsa", "adam"].forEach(function (id) {
-      html += '<button class="ward-tab' + (id === friend ? " on" : "") + '" data-friend="' + id + '" style="--c:var(--' + id + ')">' + FRIEND_NAMES[id] + '</button>';
+      html += '<button class="ward2-tab' + (id === friend ? " on" : "") + '" data-friend="' + id + '" style="--c:var(--' + id + ')">' + FRIEND_NAMES[id] + '</button>';
     });
-    html += '</div><div id="wardPrev" class="ward-prev"></div>';
+    html += '</div>';
+
+    html += '<div class="ward2-body">';
+    // left — slot categories
+    html += '<div class="ward2-cats">';
+    WARD_SLOTS.forEach(function (sdef) {
+      html += '<button class="ward2-cat' + (sdef.key === slot ? " on" : "") + '" data-cat="' + sdef.key + '" title="' + sdef.label + '">' + sdef.ic + '</button>';
+    });
+    html += '</div>';
+    // centre — grey-square item grid for the active slot
+    html += '<div class="ward2-grid">';
     if (!owned.length) {
-      html += '<p class="muted" style="text-align:center">Your wardrobe is empty — pop to the 🧺 Shop and buy some outfits first!</p>';
+      html += '<p class="muted ward2-empty">Your wardrobe is empty — pop to the 🧺 Shop and buy some outfits first!</p>';
     } else {
-      WARD_SLOTS.forEach(function (s) {
-        var opts = owned.filter(function (d) { return d.wear.slot === s.key; });
-        if (!opts.length) return;
-        var worn = state.outfits[friend][s.key] || null;
-        html += '<div class="section-title">' + s.label + '</div><div class="ward-grid">';
-        html += '<div class="ward-card' + (!worn ? " on" : "") + '" data-slot="' + s.key + '" data-cloth=""><div class="ic">🚫</div><div class="nm">None</div></div>';
-        opts.forEach(function (d) {
-          html += '<div class="ward-card' + (worn === d.id ? " on" : "") + '" data-slot="' + s.key + '" data-cloth="' + d.id + '"><div class="ic">' + d.wear.emoji + '</div><div class="nm">' + d.name + '</div></div>';
-        });
-        html += '</div>';
+      var opts = owned.filter(function (d) { return d.wear.slot === slot; });
+      var worn = state.outfits[friend][slot] || null;
+      html += '<div class="ward-card x' + (!worn ? " on" : "") + '" data-slot="' + slot + '" data-cloth="" title="None"><div class="ic">✕</div></div>';
+      opts.forEach(function (d) {
+        html += '<div class="ward-card' + (worn === d.id ? " on" : "") + '" data-slot="' + slot + '" data-cloth="' + d.id + '" title="' + d.name + '"><div class="ic">' + d.wear.emoji + '</div></div>';
       });
+      if (!opts.length) html += '<p class="muted ward2-empty">No ' + slot + ' items yet — buy some in the 🧺 Shop.</p>';
     }
-    openPanel("👗 Wardrobe — " + FRIEND_NAMES[friend] + "’s outfit", html, [
-      { label: "Shop for clothes", cls: "", onClick: function () { closePanel(); openShop(); } },
-      { label: "Done", cls: "primary", onClick: closePanel }
+    html += '</div>';
+    // right — preview stage + rotate arrows (cycle friends)
+    html += '<div class="ward2-prev">' +
+      '<div class="ward2-stage" id="wardStage"></div>' +
+      '<div class="ward2-arrows"><button class="ward2-arrow" data-nav="-1" title="Previous">‹</button>' +
+      '<span class="ward2-who">' + FRIEND_NAMES[friend] + '</span>' +
+      '<button class="ward2-arrow" data-nav="1" title="Next">›</button></div>' +
+      '</div>';
+    html += '</div></div>';
+
+    openPanel("👗 Wardrobe", html, [
+      { label: "🧺 Shop for clothes", onClick: function () { closePanel(); openShop(); } },
+      { label: "✓ Save", cls: "primary", onClick: closePanel }
     ]);
-    $("wardPrev").appendChild(outfitPreview(friend));
-    Array.prototype.slice.call($("gBody").querySelectorAll("[data-friend]")).forEach(function (t) {
-      t.addEventListener("click", function () { wardrobeFriend = t.dataset.friend; openWardrobe(); });
-    });
-    Array.prototype.slice.call($("gBody").querySelectorAll("[data-slot]")).forEach(function (c) {
+    $("wardStage").appendChild(outfitPreview(friend));
+    qsa("[data-friend]").forEach(function (t) { t.addEventListener("click", function () { wardrobeFriend = t.dataset.friend; openWardrobe(); }); });
+    qsa("[data-cat]").forEach(function (c) { c.addEventListener("click", function () { wardrobeSlot = c.dataset.cat; openWardrobe(); }); });
+    qsa("[data-slot]").forEach(function (c) {
       c.addEventListener("click", function () {
         state.outfits[friend][c.dataset.slot] = c.dataset.cloth || null;
         save(); applyOutfits(); openWardrobe();
         Ambient.blip(620, 0.05);
+      });
+    });
+    qsa("[data-nav]").forEach(function (a) {
+      a.addEventListener("click", function () {
+        var order = ["jas", "aqsa", "adam"], i = (order.indexOf(wardrobeFriend) + (+a.dataset.nav) + 3) % 3;
+        wardrobeFriend = order[i]; openWardrobe();
       });
     });
   }

@@ -2156,7 +2156,7 @@
           <div class="gm-title">★ GAMES ★</div>
           <button class="gm-btn" data-game="starcatcher">⭐ Star Catcher</button>
           <button class="gm-btn" data-game="laundromat">🧺 Aqsa's Laundromat</button>
-          <button class="gm-btn" data-game="anticap">🏙️ Anti-Capitalism</button>
+          <button class="gm-btn" data-game="anticap">🚇 Mind the Gap</button>
           <button class="gm-btn" id="gmScores">🏆 High Scores</button>
           <div class="gm-hint">pick a game to play</div>
         </div></div>
@@ -3665,9 +3665,9 @@
   // =====================================================================
   //  HIGH SCORES — a leaderboard per computer mini-game, saved with a name.
   // =====================================================================
-  var GAME_LABELS = { starcatcher: "⭐ Star Catcher", laundromat: "🧺 Aqsa's Laundromat", anticap: "🏙️ Anti-Capitalism" };
+  var GAME_LABELS = { starcatcher: "⭐ Star Catcher", laundromat: "🧺 Aqsa's Laundromat", anticap: "🚇 Mind the Gap" };
   function escHtml(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
-  function scoreText(gameId, n) { return (gameId === "laundromat" || gameId === "anticap") ? "$" + n : n + " pts"; }
+  function scoreText(gameId, n) { return gameId === "laundromat" ? "$" + n : gameId === "anticap" ? "\u00A3" + n : n + " pts"; }
   function topScores(gameId) { return (state.scores && state.scores[gameId]) || []; }
   function qualifies(gameId, score) {
     if (score <= 0) return false;
@@ -5765,38 +5765,39 @@
       };
     }
 
-    // ===== Game 3: Anti-Capitalism — a vintage runner about "making it" =====
-    // A stressed man in a shirt and tie runs at a tower with a dollar on it.
+    // ===== Game 3: Mind the Gap — a vintage runner about "getting on" =====
+    // A stressed man in a shirt and tie runs at a London tower with a pound on it.
     // WORKER MODE makes you earn every inch of the climb; RIGGED MODE hands it
     // to you. The joke is that only one of them is difficult.
     function AntiCap(onOver) {
       var GROUND = 190, PX = 56, PW = 16, PH = 30;
       var scr, mode, lv, tick, money, dist, spawnT, items, py, vy, hurtT, over, awarded, msg, msgT, phase, flashT;
       var LEVELS = [
-        { title: "LEVEL 1 — EDUCATION",
-          lines: ["Across the street: a tower with a dollar on it.",
-                  "You want in. First, they say, get an education.",
-                  "Collect the pay. Outrun the tuition."],
+        { title: "LEVEL 1 — THE DEGREE",
+          lines: ["Across the river: a tower with a pound on it.",
+                  "You want in. First, they say, get a degree.",
+                  "Mind the tuition. Mind the fares."],
           goal: 2200, drain: 0.038, gap: 66, spd: 2.6,
-          haz: ["TUITION", "POTHOLE", "LATE BUS", "TEXTBOOK $400"] },
+          haz: ["TUITION £9,250", "RAIL REPLACEMENT", "TEXTBOOK £60", "OVERDRAFT"] },
         { title: "LEVEL 2 — THE JOB HUNT",
-          lines: ["Degree in hand. The tower looks no closer.",
+          lines: ["Degree in hand. The tower looks no nearer.",
                   "Nine hundred applications. Four replies.",
-                  "Mind the rejections — the unpaid ones bite."],
+                  "Dodge the rejections — the unpaid ones bite."],
           goal: 2600, drain: 0.052, gap: 58, spd: 2.9,
-          haz: ["REJECTED", "UNPAID INTERN", "NO EXPERIENCE", "GHOSTED"] },
+          haz: ["UNPAID INTERN", "GHOSTED", "NO EXPERIENCE", "GRAD SCHEME: NO"] },
         { title: "LEVEL 3 — THE GRIND",
-          lines: ["You're inside the tower! On the ground floor.",
-                  "The rent climbs faster than you do.",
-                  "Keep running. The lift needs a keycard."],
+          lines: ["You're in the tower! On the ground floor.",
+                  "Rent rises rather faster than you do.",
+                  "Keep running. The lift needs a pass."],
           goal: 3000, drain: 0.066, gap: 50, spd: 3.2,
-          haz: ["RENT +30%", "MEDICAL BILL", "OVERTIME", "INFLATION"] }
+          haz: ["RENT +30%", "ZONE 1 FARE", "ENERGY BILL", "COUNCIL TAX"] }
       ];
       var RIGGED = { title: "RIGGED MODE — THE SHORTCUT",
-        lines: ["You began on the top floor. You always were.",
-                "The obstacles step aside. The money comes to you.",
+        lines: ["You started on the top floor. You always were.",
+                "Doors open. Fares are somebody else's problem.",
                 "Enjoy the run. It was never a race."],
-        goal: 2200, drain: 0, gap: 70, spd: 4.2, haz: ["TAX BREAK", "BAILOUT", "LOOPHOLE", "INHERITANCE"] };
+        goal: 2200, drain: 0, gap: 70, spd: 4.2,
+        haz: ["TAX BREAK", "NON-DOM", "TRUST FUND", "THE RIGHT SCHOOL"] };
 
       function conf() { return mode === "rigged" ? RIGGED : LEVELS[lv]; }
       function rnd1(n) { var x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); }
@@ -5827,10 +5828,52 @@
       function sky() {
         var g = ctx.createLinearGradient(0, 0, 0, GROUND);
         if (mode === "rigged") { g.addColorStop(0, "#2b1c50"); g.addColorStop(0.55, "#8a4f86"); g.addColorStop(1, "#e8a05c"); }
-        else { g.addColorStop(0, "#1d2350"); g.addColorStop(0.5, "#6b4a76"); g.addColorStop(1, "#d98a5a"); }
+        else { g.addColorStop(0, "#1b2338"); g.addColorStop(0.5, "#4c4a6a"); g.addColorStop(1, "#c98a6a"); }
         ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-        ctx.fillStyle = "rgba(255,236,190,.55)";                       // a low vintage sun
+        // sun for the lucky, a hazy streetlight moon for everyone else
+        ctx.fillStyle = mode === "rigged" ? "rgba(255,236,190,.55)" : "rgba(226,226,236,.3)";
         ctx.beginPath(); ctx.arc(W * 0.72, GROUND - 54, 26, 0, 7); ctx.fill();
+      }
+      // a few London silhouettes drifting behind everything
+      function landmarks(off, base, col) {
+        var set = [[10, "shard"], [120, "gherkin"], [212, "stpauls"], [330, "bigben"]], span = 430;
+        ctx.fillStyle = col;
+        for (var i = 0; i < set.length; i++) {
+          for (var rep = 0; rep < 2; rep++) {
+            var x = ((set[i][0] - off) % span + span) % span - 70 + rep * span;
+            if (x < -80 || x > W + 40) continue;
+            var t = set[i][1];
+            if (t === "shard") {
+              ctx.beginPath(); ctx.moveTo(x, base); ctx.lineTo(x + 8, base - 92);
+              ctx.lineTo(x + 12, base - 104); ctx.lineTo(x + 16, base - 92); ctx.lineTo(x + 24, base);
+              ctx.closePath(); ctx.fill();
+            } else if (t === "gherkin") {
+              ctx.beginPath(); ctx.moveTo(x, base);
+              ctx.quadraticCurveTo(x - 3, base - 42, x + 10, base - 66);
+              ctx.quadraticCurveTo(x + 23, base - 42, x + 20, base); ctx.closePath(); ctx.fill();
+            } else if (t === "stpauls") {
+              ctx.fillRect(x, base - 26, 36, 26);
+              ctx.beginPath(); ctx.arc(x + 18, base - 28, 13, Math.PI, 0); ctx.fill();
+              ctx.fillRect(x + 16, base - 52, 3.5, 10); ctx.fillRect(x + 13, base - 48, 9, 3);
+            } else {
+              ctx.fillRect(x, base - 72, 14, 72);
+              ctx.beginPath(); ctx.moveTo(x - 1.5, base - 72); ctx.lineTo(x + 7, base - 90);
+              ctx.lineTo(x + 15.5, base - 72); ctx.closePath(); ctx.fill();
+              var keep = ctx.fillStyle;
+              ctx.fillStyle = "rgba(240,224,160,.75)";
+              ctx.beginPath(); ctx.arc(x + 7, base - 60, 4.2, 0, 7); ctx.fill();
+              ctx.fillStyle = keep;
+            }
+          }
+        }
+      }
+      function drizzle(t) {                                            // it is, of course, raining
+        ctx.strokeStyle = "rgba(206,222,255,.26)"; ctx.lineWidth = 1;
+        for (var i = 0; i < 44; i++) {
+          var rx = (i * 61 + t * 4.5) % (W + 40) - 20;
+          var ry = (i * 43 + t * 12) % (H + 30) - 15;
+          ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx - 3, ry + 9); ctx.stroke();
+        }
       }
       function skyline(off, base, tall, col, seed, lit) {
         ctx.fillStyle = col;
@@ -5854,7 +5897,7 @@
         for (var wy = base - h + 10; wy < base - 8; wy += 11)
           for (var wx = x + 5; wx < x + w - 6; wx += 9) ctx.fillRect(wx, wy, 4, 5);
         ctx.fillStyle = "#e8b45c"; ctx.font = "bold 22px monospace"; ctx.textAlign = "center";
-        ctx.fillText("$", x + w / 2, base - h + 24);
+        ctx.fillText("\u00A3", x + w / 2, base - h + 24);
       }
       function road(off) {
         ctx.fillStyle = "#2a2436"; ctx.fillRect(0, GROUND, W, H - GROUND);
@@ -5916,8 +5959,8 @@
       function inBtn(x, y, bx) { return x > bx && x < bx + BW.w && y > BW.y && y < BW.y + BW.h; }
 
       return {
-        title: "🏙️ Anti-Capitalism",
-        hint: "Tap / space to jump. Collect the pay, dodge the costs — and see how the two modes differ.",
+        title: "🚇 Mind the Gap",
+        hint: "Tap / space to jump. Collect the pay, dodge the costs — and note how the two modes differ.",
         init: reset,
         update: function () {
           tick++;
@@ -5966,15 +6009,16 @@
           // ---------- TITLE ----------
           if (scr === "title") {
             mode = null; sky();
+            landmarks(tick * 0.07, GROUND, "#2f2750");
             skyline(tick * 0.12, GROUND, 74, "#2b2244", 1.7, true);
             skyline(tick * 0.3, GROUND, 44, "#1b1630", 3.1, false);
-            road(tick * 0.6);
+            road(tick * 0.6); drizzle(tick);
             drawGuy(96, GROUND + 22, 1.1, true, 1.5);                  // paused mid-stride, stressed
             panel(28, 46);
-            ctx.textAlign = "center"; ctx.fillStyle = "#e8b45c"; ctx.font = "bold 21px monospace";
-            ctx.fillText("ANTI-CAPITALISM", W / 2, 52);
+            ctx.textAlign = "center"; ctx.fillStyle = "#e8b45c"; ctx.font = "bold 22px monospace";
+            ctx.fillText("MIND THE GAP", W / 2, 52);
             ctx.fillStyle = "#cfc0a0"; ctx.font = "9px monospace";
-            ctx.fillText("a game about the climb  ·  est. 1984", W / 2, 66);
+            ctx.fillText("getting on in london  ·  est. 1984", W / 2, 66);
             btn(BL, BW.y, BW.w, BW.h, "WORKER MODE", false);
             btn(BR, BW.y, BW.w, BW.h, "RIGGED MODE", false);
             ctx.fillStyle = "#cfc0a0"; ctx.font = "9px monospace";
@@ -5985,11 +6029,13 @@
           if (scr === "brief") {
             var c = conf(), BB = 148;                                   // kerb line, above the caption
             sky();
+            landmarks(20, BB, "#2f2750");
             skyline(40, BB, 58, "#2b2244", 1.7, true);
             tower(206, BB, 116, 58);                                    // the tower with the dollar
             ctx.fillStyle = "#2a2436"; ctx.fillRect(0, BB, W, 150 - BB);
             ctx.fillStyle = "#3a3348"; ctx.fillRect(0, BB, W, 2);
             drawGuy(74, BB, 0.35, true, 1.15);                          // looking up at it
+            if (mode !== "rigged") drizzle(tick);
             panel(150, 90);
             ctx.textAlign = "center"; ctx.fillStyle = "#e8b45c"; ctx.font = "bold 12px monospace";
             ctx.fillText(c.title, W / 2, 166);
@@ -6002,6 +6048,7 @@
           // ---------- PLAY ----------
           var c2 = conf();
           sky();
+          landmarks(dist * 0.06, GROUND, "#2f2750");
           skyline(dist * 0.12, GROUND, 74, "#2b2244", 1.7, true);
           var tx = W - (dist / c2.goal) * (W + 90) + 40;                // the goal tower draws nearer
           tower(tx, GROUND, 150, 66);
@@ -6012,7 +6059,7 @@
               ctx.fillStyle = "#8fd08a"; ctx.fillRect(it.x, it.y, it.w, it.h);
               ctx.strokeStyle = "#3f7a48"; ctx.lineWidth = 1; ctx.strokeRect(it.x + .5, it.y + .5, it.w - 1, it.h - 1);
               ctx.fillStyle = "#2f5f3a"; ctx.font = "bold 8px monospace"; ctx.textAlign = "center";
-              ctx.fillText("$", it.x + it.w / 2, it.y + it.h - 3);
+              ctx.fillText("\u00A3", it.x + it.w / 2, it.y + it.h - 3);
             } else {
               ctx.fillStyle = "#c0392b"; ctx.fillRect(it.x, it.y, it.w, it.h);
               ctx.fillStyle = "#f3e6c8"; ctx.fillRect(it.x + 3, it.y + 4, it.w - 6, 2); ctx.fillRect(it.x + 3, it.y + 9, it.w - 6, 2);
@@ -6021,11 +6068,12 @@
             }
           });
           if (hurtT <= 0 || Math.floor(tick / 4) % 2 === 0) drawGuy(PX + PW / 2, py + PH, phase, money < 40 || hurtT > 0, 1);
+          if (mode !== "rigged") drizzle(tick);
           // HUD
           panel(0, 22);
           ctx.textAlign = "left"; ctx.font = "bold 11px monospace";
           ctx.fillStyle = money < 30 ? "#ff6b6b" : "#8fd08a";
-          ctx.fillText("$" + Math.max(0, Math.round(money)), 6, 15);
+          ctx.fillText("\u00A3" + Math.max(0, Math.round(money)), 6, 15);
           ctx.textAlign = "center"; ctx.fillStyle = "#e8b45c"; ctx.font = "bold 9px monospace";
           ctx.fillText(mode === "rigged" ? "RIGGED" : "LEVEL " + (lv + 1), W / 2, 14);
           ctx.fillStyle = "rgba(243,230,200,.3)"; ctx.fillRect(W - 96, 8, 88, 7);
@@ -6043,20 +6091,20 @@
               ctx.fillStyle = "#f3e6c8"; ctx.font = "10px monospace";
               ctx.fillText("You were never running.", W / 2, 104);
               ctx.fillText("The floor moved for you.", W / 2, 120);
-              ctx.fillText("Final worth: $" + Math.round(money).toLocaleString(), W / 2, 142);
+              ctx.fillText("Final worth: \u00A3" + Math.round(money).toLocaleString(), W / 2, 142);
             } else if (scr === "win") {
               ctx.fillStyle = "#e8b45c"; ctx.font = "bold 15px monospace"; ctx.fillText("TOP FLOOR", W / 2, 70);
               ctx.fillStyle = "#f3e6c8"; ctx.font = "10px monospace";
               ctx.fillText("You made it. The door is glass.", W / 2, 96);
-              ctx.fillText("Behind it: a keycard you cannot buy,", W / 2, 112);
-              ctx.fillText("and someone who never had to run.", W / 2, 128);
+              ctx.fillText("Behind it: a pass you cannot buy,", W / 2, 112);
+              ctx.fillText("and a man who took the lift.", W / 2, 128);
               ctx.fillStyle = "#8fd08a"; ctx.font = "bold 11px monospace";
-              ctx.fillText("You kept $" + Math.max(0, Math.round(money)), W / 2, 152);
+              ctx.fillText("You kept \u00A3" + Math.max(0, Math.round(money)), W / 2, 152);
             } else {
-              ctx.fillStyle = "#ff6b6b"; ctx.font = "bold 16px monospace"; ctx.fillText("BROKE", W / 2, 80);
+              ctx.fillStyle = "#ff6b6b"; ctx.font = "bold 16px monospace"; ctx.fillText("SKINT", W / 2, 80);
               ctx.fillStyle = "#f3e6c8"; ctx.font = "10px monospace";
               ctx.fillText("The costs caught up on level " + (lv + 1) + ".", W / 2, 106);
-              ctx.fillText("They'll say you should have tried harder.", W / 2, 122);
+              ctx.fillText("Someone will mention avocado toast.", W / 2, 122);
             }
             ctx.fillStyle = "#cfeecb"; ctx.font = "10px monospace";
             ctx.fillText("tap / space for the title screen", W / 2, 186);

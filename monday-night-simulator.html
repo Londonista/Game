@@ -5772,37 +5772,79 @@
     function AntiCap(onOver) {
       var GROUND = 190, PX = 56, PW = 16, PH = 30;
       var scr, mode, lv, tick, money, dist, spawnT, items, py, vy, hurtT, over, awarded, msg, msgT, phase, flashT;
-      var cut, cutT, cutLine;
+      var cut, cutT, cutLine, ceilHit, ceilCracks;
       var LEVELS = [
         { title: "LEVEL 1 — THE DEGREE",
           lines: ["Across the river: a tower with a pound on it.",
                   "You want in. First, they say, get a degree.",
                   "Mind the tuition. Mind the fares."],
-          goal: 2200, drain: 0.038, gap: 66, spd: 2.6,
+          goal: 2200, drain: 0.038, gap: 66, spd: 2.6, coin: 14,
           haz: ["TUITION £9,250", "RAIL REPLACEMENT", "TEXTBOOK £60", "OVERDRAFT"] },
         { title: "LEVEL 2 — THE JOB HUNT",
           lines: ["Degree in hand. The tower looks no nearer.",
                   "Nine hundred applications. Four replies.",
                   "Dodge the rejections — the unpaid ones bite."],
-          goal: 2600, drain: 0.052, gap: 58, spd: 2.9,
+          goal: 2600, drain: 0.052, gap: 58, spd: 2.9, coin: 14,
           haz: ["UNPAID INTERN", "GHOSTED", "NO EXPERIENCE", "GRAD SCHEME: NO"] },
-        { title: "LEVEL 3 — THE GRIND",
-          lines: ["You're in the tower! On the ground floor.",
-                  "Rent rises rather faster than you do.",
-                  "Keep running. The lift needs a pass."],
-          goal: 3000, drain: 0.066, gap: 50, spd: 3.2,
-          haz: ["RENT +30%", "ZONE 1 FARE", "ENERGY BILL", "COUNCIL TAX"] }
+        { title: "LEVEL 3 — THE OFFER",
+          lines: ["An offer! Below advertised, but an offer.",
+                  "Sign here, here, and here. And here.",
+                  "Rent rises rather faster than you do."],
+          goal: 2800, drain: 0.066, gap: 52, spd: 3.1, coin: 13,
+          haz: ["RENT +30%", "ZONE 1 FARE", "ENERGY BILL", "COUNCIL TAX"] },
+        { title: "FLOOR I — THE COMMUTE",
+          inscr: "\u201cthrough me the way into the suffering city\u201d",
+          lines: ["You're in. The tower is across the city.",
+                  "Ninety minutes each way, unpaid.",
+                  "The ferryman now takes contactless."],
+          goal: 2900, drain: 0.07, gap: 50, spd: 3.2, coin: 12,
+          haz: ["RUSH HOUR", "TRAFFIC JAM", "SIGNAL FAILURE", "DELAYED 42 MIN", "NO SEATS"] },
+        { title: "FLOOR II — ONBOARDING",
+          inscr: "\u201cabandon hope, all ye who onboard here\u201d",
+          lines: ["HR would like a quick informal chat.",
+                  "It is neither quick nor informal.",
+                  "Virgil from IT says just nod along."],
+          goal: 3000, drain: 0.075, gap: 48, spd: 3.3, coin: 12, interior: true, goalArt: "lift",
+          haz: ["HR 'QUICK CHAT'", "CULTURE FIT", "COMPULSORY FUN", "SIGN THE NDA", "MANDATORY SMILE"] },
+        { title: "FLOOR III — MIDDLE MANAGEMENT",
+          inscr: "\u201chere the incompetent and the cunning are mixed together\u201d",
+          lines: ["One manager cannot work the projector.",
+                  "The other remembers everything you say.",
+                  "Both agree you are 'not quite ready'."],
+          goal: 3100, drain: 0.08, gap: 46, spd: 3.4, coin: 11, interior: true, goalArt: "lift",
+          haz: ["QUICK CATCH-UP", "LET'S CIRCLE BACK", "WE'RE A FAMILY", "CREDIT TAKEN", "6PM 'URGENT'"] },
+        { title: "FLOOR IV — THE OPEN PLAN",
+          inscr: "\u201cno walls, and therefore nowhere to hide\u201d",
+          lines: ["Hot desks. Cold comments. Warm lager after.",
+                  "Everything is fine and everyone is lovely,",
+                  "and you are asked where you're really from."],
+          goal: 3200, drain: 0.085, gap: 44, spd: 3.5, coin: 10, interior: true, goalArt: "lift",
+          haz: ["'WHERE ARE YOU FROM?'", "'CALM DOWN'", "'SO ARTICULATE'", "NAME MISPRONOUNCED", "'JUST BANTER'"] },
+        { title: "FLOOR V — THE RESTRUCTURE",
+          inscr: "\u201cthe firm is not making cuts; it is becoming agile\u201d",
+          lines: ["An all-hands has appeared in your calendar.",
+                  "The slide says SYNERGY. Nobody is smiling.",
+                  "Keep running. Hand your laptop in on the way."],
+          goal: 3300, drain: 0.09, gap: 42, spd: 3.6, coin: 10, interior: true, goalArt: "lift",
+          haz: ["RIGHT-SIZING", "ALL-HANDS 4PM", "LAPTOP RETURNED", "'EXCITING NEWS'", "SYNERGY"] },
+        { title: "FLOOR VI — THE GLASS CEILING",
+          inscr: "\u201cand thence we came forth, to see \u2014 no, we did not\u201d",
+          lines: ["The top floor is directly above you.",
+                  "You can see it. That is the entire point.",
+                  "Jump all you like. The glass is load-bearing."],
+          goal: 3200, drain: 0.082, gap: 48, spd: 3.5, coin: 12, interior: true, goalArt: "lift", ceil: 112,
+          haz: ["'NOT READY YET'", "'NEXT CYCLE'", "'BE PATIENT'", "'CULTURE FIT'", "'WE PROMOTED DAN'"] }
       ];
       var RIGGED = { title: "RIGGED MODE — THE SHORTCUT",
         lines: ["You started on the top floor. You always were.",
                 "Doors open. Fares are somebody else's problem.",
                 "Enjoy the run. It was never a race."],
-        goal: 2200, drain: 0, gap: 70, spd: 4.2,
+        goal: 2200, drain: 0, gap: 70, spd: 4.2, coin: 14,
         haz: ["TAX BREAK", "NON-DOM", "TRUST FUND", "THE RIGHT SCHOOL"] };
 
       // Between levels the telly comes on and somebody explains your failure.
-      var CUTS = [
-        { tag: "THE SIX O'CLOCK NEWS", kind: "news",
+      var CUTS = {
+        0:        { tag: "THE SIX O'CLOCK NEWS", kind: "news",
           ticker: "HOUSE PRICES UP 14%  ·  WAGES FLAT  ·  MAN WHO INHERITED HOME URGES YOUNG TO TRY HARDER  ·  ",
           lines: [ ["p", "Why can't young people buy a home?"],
                    ["g", "Avocado toast, I'm afraid."],
@@ -5810,14 +5852,22 @@
                    ["g", "Bought my first house at twenty-one."],
                    ["p", "For three thousand pounds, sir."],
                    ["g", "They must simply TRY HARDER!"] ] },
-        { tag: "THE GRINDSET POD  ·  EP. 412", kind: "pod",
+        1: { tag: "THE GRINDSET POD  ·  EP. 412", kind: "pod",
           ticker: "NOT FINANCIAL ADVICE  ·  NOT FINANCIAL ADVICE  ·  NOT FINANCIAL ADVICE  ·  ",
           lines: [ ["h", "Millionaire at twenty-six. Ask me how."],
                    ["h", "4AM. Ice bath. Zero excuses."],
                    ["h", "While you slept, I bought SIGMACOIN."],
                    ["h", "Anyone can do this. It's a mindset."],
-                   ["s", "* seed capital: dad's second flat"] ] }
-      ];
+                   ["s", "* seed capital: dad's second flat"] ] },
+        7: { tag: "ALL-HANDS  ·  LIVE FROM THE 40TH FLOOR", kind: "news",
+          ticker: "RECORD PROFITS  ·  HEADCOUNT OPTIMISED  ·  CEO PAY UP 41%  ·  FREE PASTRIES FRIDAY  ·  ",
+          lines: [ ["p", "Is the company in trouble?"],
+                   ["g", "Quite the opposite — record profits!"],
+                   ["g", "Which is why we must all sacrifice."],
+                   ["g", "Some of you are being freed up."],
+                   ["p", "You mean made redundant."],
+                   ["g", "We mean there'll be pastries on Friday."] ] }
+      };
       var CUT_HOLD = 116;                                              // frames per line
 
       function conf() { return mode === "rigged" ? RIGGED : LEVELS[lv]; }
@@ -5827,7 +5877,7 @@
       function beginLevel() {
         var c = conf();
         tick = 0; dist = 0; spawnT = 30; items = [];
-        py = GROUND - PH; vy = 0; hurtT = 0; flashT = 0; msg = ""; msgT = 0;
+        py = GROUND - PH; vy = 0; hurtT = 0; flashT = 0; msg = ""; msgT = 0; ceilHit = 0; ceilCracks = 0;
         money = mode === "rigged" ? 1000000 : 120;
         scr = "play";
       }
@@ -5919,6 +5969,71 @@
           for (var wx = x + 5; wx < x + w - 6; wx += 9) ctx.fillRect(wx, wy, 4, 5);
         ctx.fillStyle = "#e8b45c"; ctx.font = "bold 22px monospace"; ctx.textAlign = "center";
         ctx.fillText("\u00A3", x + w / 2, base - h + 24);
+      }
+      // inside the tower: strip lights, partitions, and encouragement
+      var POSTERS = ["SYNERGY", "HUSTLE", "ONE TEAM", "OWN IT", "THRIVE", "LEAN IN"];
+      function office(off) {
+        var g = ctx.createLinearGradient(0, 0, 0, GROUND);
+        g.addColorStop(0, "#39405a"); g.addColorStop(1, "#252a3c");
+        ctx.fillStyle = g; ctx.fillRect(0, 0, W, GROUND);
+        ctx.fillStyle = "#1f2334"; ctx.fillRect(0, 0, W, 36);          // suspended ceiling
+        for (var t = -(off * 0.9 % 46); t < W; t += 46) {              // ceiling tile joins
+          ctx.fillStyle = "#2b3145"; ctx.fillRect(t, 0, 1.5, 36);
+        }
+        for (var L = -(off * 0.9 % 92); L < W; L += 92) {              // strip lights, clear of the HUD
+          ctx.fillStyle = "#f6f2d8"; ctx.fillRect(L + 18, 26, 44, 5);
+          ctx.fillStyle = "rgba(246,242,216,.18)"; ctx.fillRect(L + 12, 31, 56, 14);
+        }
+        for (var wx = -(off * 0.55 % 150); wx < W; wx += 150) {        // windows onto the night
+          ctx.fillStyle = "#151a2e"; ctx.fillRect(wx + 16, 44, 62, 40);
+          ctx.fillStyle = "#3a4468"; ctx.fillRect(wx + 16, 44, 62, 2);
+          ctx.fillStyle = "rgba(255,214,140,.5)";
+          for (var q = 0; q < 7; q++) ctx.fillRect(wx + 21 + (q * 8) % 54, 52 + (q % 3) * 10, 3, 4);
+          ctx.fillStyle = "#2b3145"; ctx.fillRect(wx + 46, 44, 2, 40);
+        }
+        for (var px2 = -(off * 0.55 % 150); px2 < W; px2 += 150) {     // motivational posters
+          var pt = POSTERS[Math.abs(Math.round((px2 + off * 0.55) / 150)) % POSTERS.length];
+          ctx.fillStyle = "#e8e2d2"; ctx.fillRect(px2 + 104, 50, 34, 26);
+          ctx.fillStyle = "#c0392b"; ctx.font = "bold 6px monospace"; ctx.textAlign = "center";
+          ctx.fillText(pt, px2 + 121, 66);
+        }
+        for (var pz = -(off % 118); pz < W; pz += 118) {                // cubicle partitions
+          ctx.fillStyle = "#4a5168"; ctx.fillRect(pz, GROUND - 52, 54, 52);
+          ctx.fillStyle = "#3d4459"; ctx.fillRect(pz, GROUND - 52, 54, 4);
+          ctx.fillStyle = "#20364a"; ctx.fillRect(pz + 10, GROUND - 40, 20, 14);   // a monitor, glowing
+          ctx.fillStyle = "rgba(120,200,220,.5)"; ctx.fillRect(pz + 12, GROUND - 38, 16, 10);
+        }
+      }
+      function lift(x, base, h, w) {                                   // the lift you need a pass for
+        ctx.fillStyle = "#2f3548"; ctx.fillRect(x - 6, base - h - 8, w + 12, h + 8);
+        ctx.fillStyle = "#9aa4b8"; ctx.fillRect(x, base - h, w, h);
+        ctx.fillStyle = "#7c869c"; ctx.fillRect(x + w / 2 - 1, base - h, 2, h);
+        ctx.fillStyle = "#161a26"; ctx.fillRect(x + w / 2 - 16, base - h - 20, 32, 13);
+        ctx.fillStyle = "#e8b45c"; ctx.font = "bold 9px monospace"; ctx.textAlign = "center";
+        ctx.fillText("\u25B2 40", x + w / 2, base - h - 10);
+        ctx.fillStyle = "#c0392b"; ctx.fillRect(x + w - 14, base - h / 2 - 6, 10, 12);   // the card reader
+      }
+      function glassCeiling(y, cracks) {
+        ctx.fillStyle = "rgba(180,225,235,.22)"; ctx.fillRect(0, y - 12, W, 12);
+        ctx.fillStyle = "rgba(230,250,255,.5)"; ctx.fillRect(0, y - 1.5, W, 1.5);
+        ctx.fillStyle = "rgba(255,255,255,.1)"; ctx.fillRect(0, y - 12, W, 2);
+        ctx.strokeStyle = "rgba(255,255,255,.75)"; ctx.lineWidth = 1;
+        for (var i = 0; i < cracks; i++) {                              // it does crack. it does not break.
+          var cx = 34 + i * 39 + rnd1(i * 5.3) * 14, cy = y - 2;
+          ctx.beginPath();
+          for (var s = 0; s < 5; s++) {                                 // an impact star, splayed under the pane
+            var a = -Math.PI / 2 + (s - 2) * 0.62 + (rnd1(i * 9 + s) - 0.5) * 0.4;
+            var r = 5 + rnd1(i * 3 + s * 7) * 6;
+            var mx = cx + Math.cos(a) * r * 0.55, my = cy + Math.sin(a) * r * 0.55;
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(mx, my);
+            ctx.lineTo(mx + Math.cos(a + 0.4) * r * 0.5, my + Math.sin(a + 0.4) * r * 0.5);
+          }
+          ctx.stroke();
+        }
+        ctx.fillStyle = "rgba(12,20,26,.75)"; ctx.fillRect(W / 2 - 46, y - 30, 92, 14);
+        ctx.fillStyle = "#bfe3ea"; ctx.font = "7px monospace"; ctx.textAlign = "center";
+        ctx.fillText("PROMOTION PENDING", W / 2, y - 20);
       }
       function road(off) {
         ctx.fillStyle = "#2a2436"; ctx.fillRect(0, GROUND, W, H - GROUND);
@@ -6116,6 +6231,11 @@
           if (msgT > 0) msgT--;
           vy += 0.34; py += vy;                                        // gravity
           if (py > GROUND - PH) { py = GROUND - PH; vy = 0; }
+          if (c.ceil && py < c.ceil) {                                 // the glass ceiling holds
+            py = c.ceil; vy = 0;                                       // you hang against it a moment, then slide back
+            if (ceilHit <= 0) { ceilHit = 26; ceilCracks = Math.min(7, ceilCracks + 1); say("CLUNK."); Ambient.blip(240, 0.07, "square"); }
+          }
+          if (ceilHit > 0) ceilHit--;
           if (--spawnT <= 0) {                                         // spawn the road ahead
             spawnT = c.gap + Math.floor(Math.random() * 26);
             if (Math.random() < 0.62) items.push({ k: "cash", x: W + 10, y: Math.random() < 0.45 ? GROUND - 62 : GROUND - 26, w: 15, h: 11 });
@@ -6134,7 +6254,7 @@
             var hit = it.x < PX + PW && it.x + it.w > PX && it.y < py + PH && it.y + it.h > py;
             if (!hit) continue;
             if (it.k === "cash") {
-              money += mode === "rigged" ? 25000 : 14; items.splice(i, 1);
+              money += mode === "rigged" ? 25000 : (c.coin || 14); items.splice(i, 1);
               Ambient.blip(880, 0.05, "triangle");
             } else if (hurtT <= 0) {
               money -= 22; hurtT = 40; flashT = 12; items.splice(i, 1);
@@ -6144,7 +6264,8 @@
           if (money <= 0 && mode !== "rigged") { finish(false); return; }
           if (dist >= c.goal) {
             if (mode === "rigged" || lv >= LEVELS.length - 1) finish(true);
-            else { cut = lv; cutT = 0; cutLine = 0; scr = "cut"; }
+            else if (CUTS[lv]) { cut = lv; cutT = 0; cutLine = 0; scr = "cut"; }
+            else { lv++; scr = "brief"; }
           }
         },
         draw: function () {
@@ -6172,32 +6293,53 @@
           // ---------- BRIEFING ----------
           if (scr === "brief") {
             var c = conf(), BB = 148;                                   // kerb line, above the caption
-            sky();
-            landmarks(20, BB, "#2f2750");
-            skyline(40, BB, 58, "#2b2244", 1.7, true);
-            tower(206, BB, 116, 58);                                    // the tower with the dollar
-            ctx.fillStyle = "#2a2436"; ctx.fillRect(0, BB, W, 150 - BB);
-            ctx.fillStyle = "#3a3348"; ctx.fillRect(0, BB, W, 2);
+            if (c.interior) {
+              office(30);
+              lift(212, BB, 104, 52);
+              ctx.fillStyle = "#3a3f52"; ctx.fillRect(0, BB, W, 150 - BB);
+              ctx.fillStyle = "#4a5168"; ctx.fillRect(0, BB, W, 2);
+            } else {
+              sky();
+              landmarks(20, BB, "#2f2750");
+              skyline(40, BB, 58, "#2b2244", 1.7, true);
+              tower(206, BB, 116, 58);                                  // the tower with the pound
+              ctx.fillStyle = "#2a2436"; ctx.fillRect(0, BB, W, 150 - BB);
+              ctx.fillStyle = "#3a3348"; ctx.fillRect(0, BB, W, 2);
+            }
             drawGuy(74, BB, 0.35, true, 1.15);                          // looking up at it
-            if (mode !== "rigged") drizzle(tick);
+            if (mode !== "rigged" && !c.interior) drizzle(tick);
             panel(150, 90);
             ctx.textAlign = "center"; ctx.fillStyle = "#e8b45c"; ctx.font = "bold 12px monospace";
-            ctx.fillText(c.title, W / 2, 166);
+            ctx.fillText(c.title, W / 2, 165);
+            var ly = 183;
+            if (c.inscr) {                                              // the gate above each circle
+              ctx.fillStyle = "#c9a24a"; ctx.font = "italic 8px monospace";
+              ctx.fillText(c.inscr, W / 2, 178); ly = 192;
+            }
             ctx.fillStyle = "#f3e6c8"; ctx.font = "10px monospace";
-            for (var i = 0; i < c.lines.length; i++) ctx.fillText(c.lines[i], W / 2, 184 + i * 14);
+            for (var i = 0; i < c.lines.length; i++) ctx.fillText(c.lines[i], W / 2, ly + i * 13);
             ctx.fillStyle = "#9be36b"; ctx.font = "bold 10px monospace";
-            ctx.fillText("tap / space to begin", W / 2, 232);
+            ctx.fillText("tap / space to begin", W / 2, 233);
             crt(); return;
           }
           // ---------- PLAY ----------
           var c2 = conf();
-          sky();
-          landmarks(dist * 0.06, GROUND, "#2f2750");
-          skyline(dist * 0.12, GROUND, 74, "#2b2244", 1.7, true);
-          var tx = W - (dist / c2.goal) * (W + 90) + 40;                // the goal tower draws nearer
-          tower(tx, GROUND, 150, 66);
-          skyline(dist * 0.34, GROUND, 40, "#1b1630", 3.1, false);
-          road(dist);
+          var tx = W - (dist / c2.goal) * (W + 90) + 40;                // the goal draws nearer
+          if (c2.interior) {
+            office(dist);
+            lift(tx, GROUND, 128, 58);
+            ctx.fillStyle = "#3a3f52"; ctx.fillRect(0, GROUND, W, H - GROUND);   // carpet tiles
+            ctx.fillStyle = "#333849";
+            for (var cx2 = -(dist % 34); cx2 < W; cx2 += 34) ctx.fillRect(cx2, GROUND, 1, H - GROUND);
+            ctx.fillStyle = "#4a5168"; ctx.fillRect(0, GROUND, W, 3);
+          } else {
+            sky();
+            landmarks(dist * 0.06, GROUND, "#2f2750");
+            skyline(dist * 0.12, GROUND, 74, "#2b2244", 1.7, true);
+            tower(tx, GROUND, 150, 66);
+            skyline(dist * 0.34, GROUND, 40, "#1b1630", 3.1, false);
+            road(dist);
+          }
           items.forEach(function (it) {
             if (it.k === "cash") {
               ctx.fillStyle = "#8fd08a"; ctx.fillRect(it.x, it.y, it.w, it.h);
@@ -6212,14 +6354,15 @@
             }
           });
           if (hurtT <= 0 || Math.floor(tick / 4) % 2 === 0) drawGuy(PX + PW / 2, py + PH, phase, money < 40 || hurtT > 0, 1);
-          if (mode !== "rigged") drizzle(tick);
+          if (c2.ceil) glassCeiling(c2.ceil, ceilCracks);
+          if (mode !== "rigged" && !c2.interior) drizzle(tick);
           // HUD
           panel(0, 22);
           ctx.textAlign = "left"; ctx.font = "bold 11px monospace";
           ctx.fillStyle = money < 30 ? "#ff6b6b" : "#8fd08a";
           ctx.fillText("\u00A3" + Math.max(0, Math.round(money)), 6, 15);
           ctx.textAlign = "center"; ctx.fillStyle = "#e8b45c"; ctx.font = "bold 9px monospace";
-          ctx.fillText(mode === "rigged" ? "RIGGED" : "LEVEL " + (lv + 1), W / 2, 14);
+          ctx.fillText(mode === "rigged" ? "RIGGED" : (c2.interior || lv >= 3 ? "FLOOR " + ["I","II","III","IV","V","VI"][Math.min(5, lv - 3)] : "LEVEL " + (lv + 1)), W / 2, 14);
           ctx.fillStyle = "rgba(243,230,200,.3)"; ctx.fillRect(W - 96, 8, 88, 7);
           ctx.fillStyle = "#e8b45c"; ctx.fillRect(W - 96, 8, 88 * Math.min(1, dist / c2.goal), 7);
           if (msgT > 0) {
@@ -6237,18 +6380,25 @@
               ctx.fillText("The floor moved for you.", W / 2, 120);
               ctx.fillText("Final worth: \u00A3" + Math.round(money).toLocaleString(), W / 2, 142);
             } else if (scr === "win") {
-              ctx.fillStyle = "#e8b45c"; ctx.font = "bold 15px monospace"; ctx.fillText("TOP FLOOR", W / 2, 70);
+              ctx.fillStyle = "#e8b45c"; ctx.font = "bold 15px monospace"; ctx.fillText("THE CEILING HOLDS", W / 2, 66);
               ctx.fillStyle = "#f3e6c8"; ctx.font = "10px monospace";
-              ctx.fillText("You made it. The door is glass.", W / 2, 96);
-              ctx.fillText("Behind it: a pass you cannot buy,", W / 2, 112);
-              ctx.fillText("and a man who took the lift.", W / 2, 128);
+              ctx.fillText("You reached the top of the tower.", W / 2, 92);
+              ctx.fillText("The last floor is glass. You can see it:", W / 2, 108);
+              ctx.fillText("a pass you cannot buy, a man who took", W / 2, 124);
+              ctx.fillText("the lift, and " + ceilCracks + " cracks under review.", W / 2, 140);
               ctx.fillStyle = "#8fd08a"; ctx.font = "bold 11px monospace";
-              ctx.fillText("You kept \u00A3" + Math.max(0, Math.round(money)), W / 2, 152);
+              ctx.fillText("You kept \u00A3" + Math.max(0, Math.round(money)), W / 2, 160);
             } else {
               ctx.fillStyle = "#ff6b6b"; ctx.font = "bold 16px monospace"; ctx.fillText("SKINT", W / 2, 80);
               ctx.fillStyle = "#f3e6c8"; ctx.font = "10px monospace";
-              ctx.fillText("The costs caught up on level " + (lv + 1) + ".", W / 2, 106);
-              ctx.fillText("Someone will mention avocado toast.", W / 2, 122);
+              if (lv >= 3) {
+                ctx.fillText("The costs caught up on floor " + ["I","II","III","IV","V","VI"][Math.min(5, lv - 3)] + ".", W / 2, 106);
+                ctx.fillText("Your access card has been deactivated.", W / 2, 122);
+                ctx.fillText("Someone from HR will be in touch. Or not.", W / 2, 138);
+              } else {
+                ctx.fillText("The costs caught up on level " + (lv + 1) + ".", W / 2, 106);
+                ctx.fillText("Someone will mention avocado toast.", W / 2, 122);
+              }
             }
             ctx.fillStyle = "#cfeecb"; ctx.font = "10px monospace";
             ctx.fillText("tap / space for the title screen", W / 2, 186);

@@ -5772,6 +5772,7 @@
     function AntiCap(onOver) {
       var GROUND = 190, PX = 56, PW = 16, PH = 30;
       var scr, mode, lv, tick, money, dist, spawnT, items, py, vy, hurtT, over, awarded, msg, msgT, phase, flashT;
+      var cut, cutT, cutLine;
       var LEVELS = [
         { title: "LEVEL 1 — THE DEGREE",
           lines: ["Across the river: a tower with a pound on it.",
@@ -5798,6 +5799,26 @@
                 "Enjoy the run. It was never a race."],
         goal: 2200, drain: 0, gap: 70, spd: 4.2,
         haz: ["TAX BREAK", "NON-DOM", "TRUST FUND", "THE RIGHT SCHOOL"] };
+
+      // Between levels the telly comes on and somebody explains your failure.
+      var CUTS = [
+        { tag: "THE SIX O'CLOCK NEWS", kind: "news",
+          ticker: "HOUSE PRICES UP 14%  ·  WAGES FLAT  ·  MAN WHO INHERITED HOME URGES YOUNG TO TRY HARDER  ·  ",
+          lines: [ ["p", "Why can't young people buy a home?"],
+                   ["g", "Avocado toast, I'm afraid."],
+                   ["g", "In my day, one simply worked."],
+                   ["g", "Bought my first house at twenty-one."],
+                   ["p", "For three thousand pounds, sir."],
+                   ["g", "They must simply TRY HARDER!"] ] },
+        { tag: "THE GRINDSET POD  ·  EP. 412", kind: "pod",
+          ticker: "NOT FINANCIAL ADVICE  ·  NOT FINANCIAL ADVICE  ·  NOT FINANCIAL ADVICE  ·  ",
+          lines: [ ["h", "Millionaire at twenty-six. Ask me how."],
+                   ["h", "4AM. Ice bath. Zero excuses."],
+                   ["h", "While you slept, I bought SIGMACOIN."],
+                   ["h", "Anyone can do this. It's a mindset."],
+                   ["s", "* seed capital: dad's second flat"] ] }
+      ];
+      var CUT_HOLD = 116;                                              // frames per line
 
       function conf() { return mode === "rigged" ? RIGGED : LEVELS[lv]; }
       function rnd1(n) { var x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); }
@@ -5958,12 +5979,133 @@
       var BW = { w: 116, h: 26, y: 196 }, BL = 22, BR = 182;
       function inBtn(x, y, bx) { return x > bx && x < bx + BW.w && y > BW.y && y < BW.y + BW.h; }
 
+      // ---------- the telly ----------
+      function tvBezel() {                                             // an old set with dials
+        ctx.fillStyle = "#241d19";                                     // frame only — never the picture
+        ctx.fillRect(0, 0, W, 8); ctx.fillRect(0, H - 15, W, 15);
+        ctx.fillRect(0, 0, 4, H); ctx.fillRect(W - 4, 0, 4, H);
+        ctx.fillStyle = "#2f2721"; ctx.fillRect(0, 0, W, 3); ctx.fillRect(0, H - 15, W, 3);
+        ctx.fillStyle = "#3a312a";
+        ctx.beginPath(); ctx.arc(W - 14, H - 8, 4, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.arc(W - 30, H - 8, 4, 0, 7); ctx.fill();
+        ctx.fillStyle = "#7a6a58"; ctx.font = "bold 7px monospace"; ctx.textAlign = "left";
+        ctx.fillText("TELEVISOR", 8, H - 5);
+      }
+      function crackle(t) {
+        for (var i = 0; i < 80; i++) {                                 // static
+          ctx.fillStyle = Math.random() < 0.5 ? "rgba(255,255,255,.07)" : "rgba(0,0,0,.07)";
+          ctx.fillRect(Math.random() * W, 8 + Math.random() * (H - 26), 1.7, 1.4);
+        }
+        var by = (t * 1.7) % (H + 70) - 35;                            // rolling bright band
+        var g = ctx.createLinearGradient(0, by, 0, by + 28);
+        g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(0.5, "rgba(255,255,255,.09)");
+        g.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = g; ctx.fillRect(0, by, W, 28);
+        ctx.fillStyle = "rgba(0,0,0,.16)";                             // heavy scanlines
+        for (var y = 8; y < H - 15; y += 3) ctx.fillRect(0, y, W, 1);
+      }
+      function head(x, y, r, skin, hair, hairCol, brow, talk) {
+        ctx.fillStyle = skin; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+        ctx.fillStyle = hairCol;
+        if (hair === "swept") { ctx.beginPath(); ctx.arc(x, y - 1.5, r, Math.PI, 0); ctx.fill(); ctx.fillRect(x - r, y - 2, r * 0.55, r * 0.7); }
+        else if (hair === "thin") { ctx.beginPath(); ctx.arc(x, y - 1, r * 0.98, Math.PI * 1.06, Math.PI * 1.94); ctx.fill(); }
+        else { ctx.beginPath(); ctx.arc(x, y - 1, r, Math.PI, 0); ctx.fill(); }
+        ctx.fillStyle = "#241a14";
+        ctx.fillRect(x - r * 0.45, y - r * 0.12, 1.9, 2);
+        ctx.fillRect(x + r * 0.24, y - r * 0.12, 1.9, 2);
+        if (brow) {                                                     // a sceptical eyebrow
+          ctx.strokeStyle = "#241a14"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(x - r * 0.6, y - r * 0.42); ctx.lineTo(x - r * 0.18, y - r * 0.3);
+          ctx.moveTo(x + r * 0.14, y - r * 0.34); ctx.lineTo(x + r * 0.6, y - r * 0.5); ctx.stroke();
+        }
+        ctx.fillStyle = "#3a201c";
+        if (talk) { ctx.beginPath(); ctx.ellipse(x, y + r * 0.42, 2.4, 1.9, 0, 0, 7); ctx.fill(); }
+        else ctx.fillRect(x - 2.2, y + r * 0.4, 4.4, 1.3);
+      }
+      function drawCut() {
+        var c = CUTS[cut], ln = c.lines[cutLine], who = ln[0], talkA = Math.floor(cutT / 6) % 2 === 0;
+        ctx.save();
+        ctx.translate(0, Math.random() < 0.06 ? (Math.random() * 3 - 1.5) : 0);   // vertical hold slips
+        if (c.kind === "news") {
+          var g = ctx.createLinearGradient(0, 8, 0, H - 15);
+          g.addColorStop(0, "#132a4a"); g.addColorStop(1, "#0b1830");
+          ctx.fillStyle = g; ctx.fillRect(0, 8, W, H - 23);
+          ctx.fillStyle = "rgba(90,140,200,.22)";                       // studio skyline graphic
+          for (var i = 0; i < 8; i++) ctx.fillRect(18 + i * 36, 96 - (i % 3) * 16, 24, 60);
+          ctx.fillStyle = "#7a1f2a"; ctx.fillRect(0, 150, W, 46);       // the desk
+          ctx.fillStyle = "#9a2b36"; ctx.fillRect(0, 150, W, 4);
+          // presenter (left) and guest (right)
+          ctx.fillStyle = "#20304e"; ctx.fillRect(66, 118, 46, 34);
+          ctx.fillStyle = "#e8e4da"; ctx.fillRect(84, 120, 10, 32);
+          head(89, 104, 13, "#e8b98d", "swept", "#3a2a1c", false, who === "p" && talkA);
+          ctx.fillStyle = "#1c2740"; ctx.fillRect(200, 116, 52, 36);    // pinstripe suit
+          ctx.strokeStyle = "rgba(200,210,230,.35)"; ctx.lineWidth = 1;
+          for (var px = 204; px < 250; px += 5) { ctx.beginPath(); ctx.moveTo(px, 116); ctx.lineTo(px, 152); ctx.stroke(); }
+          ctx.fillStyle = "#e8e4da"; ctx.fillRect(220, 118, 12, 34);
+          ctx.fillStyle = "#b03030"; ctx.fillRect(224, 120, 4, 22);     // red tie
+          head(226, 100, 14, "#f0c4a4", "thin", "#d8d4cc", true, who === "g" && talkA);
+          ctx.fillStyle = "rgba(220,120,120,.35)";                      // ruddy cheeks
+          ctx.beginPath(); ctx.arc(218, 104, 3.4, 0, 7); ctx.arc(234, 104, 3.4, 0, 7); ctx.fill();
+          ctx.fillStyle = "#c0392b"; ctx.fillRect(6, 14, 62, 13);       // BREAKING flag
+          ctx.fillStyle = "#fff"; ctx.font = "bold 8px monospace"; ctx.textAlign = "left";
+          ctx.fillText("BREAKING", 10, 23);
+          ctx.fillStyle = "rgba(240,238,230,.9)"; ctx.font = "7px monospace";
+          ctx.fillText(c.tag, 74, 23);
+        } else {
+          ctx.fillStyle = "#150d20"; ctx.fillRect(0, 8, W, H - 23);
+          var lg = ctx.createLinearGradient(0, 8, W, H);                 // LED strip glow
+          lg.addColorStop(0, "rgba(190,40,120,.35)"); lg.addColorStop(1, "rgba(60,40,190,.3)");
+          ctx.fillStyle = lg; ctx.fillRect(0, 8, W, H - 23);
+          ctx.fillStyle = "rgba(255,90,160,.5)"; ctx.fillRect(0, 34, W, 3);
+          ctx.fillStyle = "rgba(255,255,255,.08)"; ctx.fillRect(200, 52, 96, 62);   // a chart, only going up
+          ctx.strokeStyle = "#6bf0a0"; ctx.lineWidth = 2; ctx.beginPath();
+          ctx.moveTo(204, 110); ctx.lineTo(224, 96); ctx.lineTo(244, 100); ctx.lineTo(264, 72); ctx.lineTo(292, 58);
+          ctx.stroke();
+          ctx.fillStyle = "#2a1f38"; ctx.fillRect(58, 122, 60, 40);     // podcaster
+          head(88, 104, 14, "#dda878", "crop", "#2a2018", false, who === "h" && talkA);
+          ctx.strokeStyle = "#e8e4da"; ctx.lineWidth = 3;               // headphones
+          ctx.beginPath(); ctx.arc(88, 104, 16, Math.PI * 1.08, Math.PI * 1.92); ctx.stroke();
+          ctx.fillStyle = "#2b2b34"; ctx.fillRect(70, 100, 6, 10); ctx.fillRect(100, 100, 6, 10);
+          ctx.fillStyle = "#3a3a46"; ctx.fillRect(126, 108, 7, 44);     // mic stand
+          ctx.fillStyle = "#1c1c24"; ctx.beginPath(); ctx.ellipse(129, 104, 9, 12, 0, 0, 7); ctx.fill();
+          ctx.fillStyle = "rgba(255,255,255,.16)"; ctx.beginPath(); ctx.ellipse(126, 100, 3, 5, 0, 0, 7); ctx.fill();
+          ctx.fillStyle = "#ff5aa0"; ctx.fillRect(6, 14, 10, 10);       // REC dot
+          ctx.fillStyle = "rgba(240,238,230,.9)"; ctx.font = "7px monospace"; ctx.textAlign = "left";
+          ctx.fillText(c.tag, 22, 22);
+        }
+        // caption / lower third
+        ctx.fillStyle = "rgba(8,8,14,.86)"; ctx.fillRect(0, 184, W, 26);
+        ctx.fillStyle = who === "s" ? "#9aa0b0" : "#e8b45c"; ctx.fillRect(0, 184, W, 1.5);
+        ctx.textAlign = "center";
+        ctx.font = who === "s" ? "8px monospace" : "bold 10px monospace";
+        ctx.fillStyle = "rgba(255,60,60,.5)"; ctx.fillText(ln[1], W / 2 - 1, 201);   // colour fringe
+        ctx.fillStyle = "rgba(60,200,255,.5)"; ctx.fillText(ln[1], W / 2 + 1, 201);
+        ctx.fillStyle = who === "s" ? "#c8ccd8" : "#f3e6c8"; ctx.fillText(ln[1], W / 2, 201);
+        // ticker — kept clear of the bezel
+        ctx.fillStyle = "rgba(120,20,28,.9)"; ctx.fillRect(0, 210, W, 13);
+        ctx.save(); ctx.beginPath(); ctx.rect(0, 210, W, 13); ctx.clip();
+        ctx.fillStyle = "#f3e6c8"; ctx.font = "8px monospace"; ctx.textAlign = "left";
+        var tw = ctx.measureText(c.ticker).width, off = (cutT * 1.1) % tw;
+        ctx.fillText(c.ticker, -off, 219); ctx.fillText(c.ticker, tw - off, 219);
+        ctx.restore();
+        ctx.restore();
+        crackle(cutT);
+        tvBezel();
+        ctx.fillStyle = "rgba(243,230,200,.5)"; ctx.font = "7px monospace"; ctx.textAlign = "right";
+        ctx.fillText("tap to continue", W - 44, H - 5);
+      }
+
       return {
         title: "🚇 Mind the Gap",
         hint: "Tap / space to jump. Collect the pay, dodge the costs — and note how the two modes differ.",
         init: reset,
         update: function () {
           tick++;
+          if (scr === "cut") {
+            cutT++;
+            if (cutT % CUT_HOLD === 0 && cutLine < CUTS[cut].lines.length - 1) cutLine++;
+            return;
+          }
           if (scr !== "play") { phase += 0.14; return; }
           var c = conf(), spd = c.spd;
           phase += 0.3;
@@ -6002,7 +6144,7 @@
           if (money <= 0 && mode !== "rigged") { finish(false); return; }
           if (dist >= c.goal) {
             if (mode === "rigged" || lv >= LEVELS.length - 1) finish(true);
-            else { lv++; scr = "brief"; }
+            else { cut = lv; cutT = 0; cutLine = 0; scr = "cut"; }
           }
         },
         draw: function () {
@@ -6025,6 +6167,8 @@
             ctx.fillText("choose your circumstances", W / 2, 234);
             crt(); return;
           }
+          // ---------- CUTSCENE ----------
+          if (scr === "cut") { drawCut(); return; }
           // ---------- BRIEFING ----------
           if (scr === "brief") {
             var c = conf(), BB = 148;                                   // kerb line, above the caption
@@ -6118,6 +6262,11 @@
             else if (inBtn(x, y, BR)) { mode = "rigged"; lv = 0; scr = "brief"; Ambient.blip(880, 0.06, "triangle"); }
             return;
           }
+          if (scr === "cut") {
+            if (cutLine < CUTS[cut].lines.length - 1) { cutLine++; cutT = 0; }
+            else { lv++; scr = "brief"; }
+            return;
+          }
           if (scr === "brief") { beginLevel(); return; }
           if (scr === "win" || scr === "bust") { reset(); return; }
           jump();
@@ -6126,6 +6275,10 @@
           if (e.key !== " " && e.code !== "Space" && e.key !== "Enter" && e.key !== "ArrowUp") return;
           e.preventDefault();
           if (scr === "title") { mode = "worker"; lv = 0; scr = "brief"; }
+          else if (scr === "cut") {
+            if (cutLine < CUTS[cut].lines.length - 1) { cutLine++; cutT = 0; }
+            else { lv++; scr = "brief"; }
+          }
           else if (scr === "brief") beginLevel();
           else if (scr === "win" || scr === "bust") reset();
           else jump();

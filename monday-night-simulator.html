@@ -295,7 +295,8 @@
   /* the flower crown shows its real woven art in the shop, scaled up */
   .shop-card .ic-crown { display: inline-block; transform: scale(1.6); transform-origin: center; margin: 12px 0 8px; }
   .shop-card .ic-hair { display: inline-block; transform: scale(1.05); transform-origin: center; margin: 2px 0; }
-  .shop-card .ic-hair svg, .ward-card .ic svg { display: block; }
+  .shop-card .ic-hat { display: inline-block; transform: scale(1.1); transform-origin: center; margin: 4px 0 2px; }
+  .shop-card .ic-hair svg, .shop-card .ic-hat svg, .ward-card .ic svg { display: block; }
   .ward-card .ic svg { max-width: 46px; max-height: 40px; }
   /* colour minibar: tap a multi-colour item and pick your shade */
   .shop-card .vbar { display: none; flex-wrap: wrap; gap: 7px; justify-content: center;
@@ -632,6 +633,8 @@
   .worn-hair { position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
     line-height: 0; pointer-events: none; z-index: 1; }
   .worn-hat svg, .worn-glasses svg, .worn-hair svg { display: block; }
+  /* the witch hat is tall — lift it so its brim sits where every other brim does */
+  .worn-hat svg.witch-hat { margin-top: -20px; }
 
   /* Wardrobe chooser modal */
   .ward-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
@@ -2280,6 +2283,11 @@
     { id: "hat_sun",     name: "Sun Hat",      ic: "👒", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "👒", art: "sunhat" }, bl: "For garden strolls under the moon." },
     { id: "hat_flower",  name: "Flower Crown", ic: "🌸", price: 9,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🌸", art: "flower" }, bl: "Garden-party royalty, all three of you." },
     { id: "hat_cap",     name: "Beanie",       ic: "🧢", price: 8,  unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🧢", art: "beanie" }, bl: "Adam's signature look, probably." },
+    { id: "hat_witch",   name: "Witch Hat",         ic: "🔮", price: 12, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🔮", art: "witch",       bigArt: true }, vgroup: "hat_witch", vname: "Witch Hat", vcol: "#6a4d92", bl: "Pointed, buckled, and slightly too big. Perfect." },
+    { id: "hat_witchn",  name: "Midnight Witch Hat", ic: "🔮", price: 12, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🔮", art: "witch_night", bigArt: true }, vgroup: "hat_witch", vname: "Witch Hat", vcol: "#3c3849" },
+    { id: "hat_witchm",  name: "Moss Witch Hat",     ic: "🔮", price: 12, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🔮", art: "witch_moss",  bigArt: true }, vgroup: "hat_witch", vname: "Witch Hat", vcol: "#4e7a52" },
+    { id: "hat_witchp",  name: "Mulled Wine Witch Hat", ic: "🔮", price: 12, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🔮", art: "witch_plum", bigArt: true }, vgroup: "hat_witch", vname: "Witch Hat", vcol: "#94414a" },
+    { id: "hat_witchs",  name: "Storm Witch Hat",    ic: "🔮", price: 12, unlockAt: 0, set: "Outfits", wear: { slot: "hat", emoji: "🔮", art: "witch_storm", bigArt: true }, vgroup: "hat_witch", vname: "Witch Hat", vcol: "#41628f" },
     { id: "gl_shades",   name: "Sunglasses",   ic: "🕶️", price: 7,  unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "🕶️", art: "shades" }, bl: "Indoors. At night. Iconic." },
     { id: "gl_reading",  name: "Reading Glasses", ic: "👓", price: 7, unlockAt: 0, set: "Outfits", wear: { slot: "glasses", emoji: "👓", art: "reading" }, bl: "For looking wise during book club." },
     // --- Hairstyles (worn under hats) ---
@@ -3313,6 +3321,7 @@
          : it.render === "beanbag" ? bbIcon(it.tint)
          : it.render === "sideboard" ? SIDEBOARD_ICON
          : it.wear && it.wear.art === "flower" ? '<span class="ic-crown">' + wearSVG("flower") + '</span>'
+         : it.wear && it.wear.bigArt ? '<span class="ic-hat">' + wearSVG(it.wear.art) + '</span>'
          : it.wear && it.wear.slot === "hair" ? '<span class="ic-hair">' + wearSVG(it.wear.art) + '</span>'
          : it.ic;
   }
@@ -3523,8 +3532,31 @@
         '<circle cx="25.5" cy="7.5" r="6" fill="rgba(255,255,255,.16)" stroke="#3a2e22" stroke-width="1.7"/>' +
         '<path d="M14.5 7.5 L19.5 7.5" stroke="#3a2e22" stroke-width="1.7"/></svg>';
     }
+    if (WITCH[art]) return witchSVG(art);
     if (HAIR[art]) return hairSVG(art);
     return "";
+  }
+  // ---- witch hats: one drawn shape, five colourways ----
+  // [cone, brim, band, outline, metal, metal shadow]
+  var WITCH = {
+    witch:        ["#6a4d92", "#5a4080", "#2e1f4d", "#33244d", "#e6c14a", "#b08c2c"],   // classic purple
+    witch_night:  ["#3c3849", "#312e3d", "#17151f", "#141220", "#cfd4e0", "#9299a8"],   // midnight, silver buckle
+    witch_moss:   ["#4e7a52", "#416847", "#223a26", "#1e3322", "#e6c14a", "#b08c2c"],   // moss green
+    witch_plum:   ["#94414a", "#7d3640", "#4a1c25", "#40161e", "#e6c14a", "#b08c2c"],   // mulled wine
+    witch_storm:  ["#41628f", "#35527c", "#1b2c47", "#182740", "#cfd4e0", "#9299a8"]    // storm blue
+  };
+  function witchSVG(art) {
+    var w = WITCH[art] || WITCH.witch;
+    var cone = w[0], brim = w[1], band = w[2], line = w[3], metal = w[4], metalSh = w[5];
+    return '<svg class="witch-hat" width="60" height="48" viewBox="0 0 60 48">' +
+      '<ellipse cx="30" cy="42" rx="27" ry="5" fill="' + brim + '" stroke="' + line + '" stroke-width="1.4"/>' +
+      '<path d="M13 42 C16 24 26 13 47 4 C44 20 45 33 47 42 Z" fill="' + cone + '" stroke="' + line + '" stroke-width="1.4" stroke-linejoin="round"/>' +
+      '<path d="M18.5 38 C20.5 26 28 16 41 8 C33.5 20 26 30 24.5 38 Z" fill="#fff" opacity=".15"/>' +   // sheen down the cone
+      '<path d="M14 35 Q30 39.6 46.2 35 L46.8 40.6 Q30 45.2 13.4 40.6 Z" fill="' + band + '"/>' +
+      '<rect x="26" y="36.4" width="8" height="6.6" rx="1.2" fill="' + metal + '" stroke="' + metalSh + '" stroke-width="1"/>' +
+      '<rect x="28.3" y="38.4" width="3.4" height="2.8" fill="' + line + '"/>' +                        // buckle
+      '<path d="M53 11 L54.1 14 L57.1 15.1 L54.1 16.2 L53 19.2 L51.9 16.2 L48.9 15.1 L51.9 14 Z" fill="#ffe9a8"/>' +
+      '<path d="M8 26 L8.7 27.9 L10.6 28.6 L8.7 29.3 L8 31.2 L7.3 29.3 L5.4 28.6 L7.3 27.9 Z" fill="#ffe9a8" opacity=".8"/></svg>';
   }
   // ---- hairstyles: one drawn shape per style, tinted per colourway ----
   var HAIR = {
@@ -3624,8 +3656,8 @@
       var worn = state.outfits[friend][slot] || null;
       html += '<div class="ward-card x' + (!worn ? " on" : "") + '" data-slot="' + slot + '" data-cloth="" title="None"><div class="ic">✕</div></div>';
       opts.forEach(function (d) {
-        // hairstyles all share one emoji, so draw the actual style instead
-        var ic = d.wear.slot === "hair" ? wearSVG(d.wear.art) : d.wear.emoji;
+        // hairstyles all share one emoji, and some hats have no emoji worth the name
+        var ic = (d.wear.slot === "hair" || d.wear.bigArt) ? wearSVG(d.wear.art) : d.wear.emoji;
         html += '<div class="ward-card' + (worn === d.id ? " on" : "") + '" data-slot="' + slot + '" data-cloth="' + d.id + '" title="' + d.name + '"><div class="ic">' + ic + '</div></div>';
       });
       if (!opts.length) html += '<p class="muted ward2-empty">No ' + slot + ' items yet — buy some in the 🧺 Shop.</p>';

@@ -1960,7 +1960,33 @@
   .vb-price { font-size: 12px; font-weight: 700; margin-top: 5px; color: #7a5a2a; }
   .vb-price.owned { color: #3f8a4a; }
 
-  /* --- world vibes: a wash over every room, cozy first --- */
+  /* --- the light switch on the wall of every room --- */
+  /* Hidden by default; the room-scoped rule below turns it on. That rule is
+     more specific (id + attribute + class), so it wins whatever the order. */
+  .lightsw { display: none; position: absolute; width: 26px; height: 36px; z-index: 12; cursor: pointer;
+    transform: translate(-50%, -50%); transition: transform .1s ease; }
+  .lightsw:active { transform: translate(-50%, -50%) scale(.93); }
+  .lightsw .plate { position: absolute; inset: 0; border-radius: 4px;
+    background: linear-gradient(160deg,#fdf8ee,#dccfba);
+    box-shadow: 0 2px 5px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.9); }
+  .lightsw .rock { position: absolute; left: 6px; right: 6px; top: 7px; height: 22px; border-radius: 3px;
+    background: linear-gradient(180deg,#fffdf8,#e6dccb); box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+  .lightsw .rock::after { content: ""; position: absolute; left: 0; right: 0; height: 11px; border-radius: 3px;
+    background: linear-gradient(180deg,#f6efe0,#cdbfa6); transition: top .12s ease, bottom .12s ease; top: 0; }
+  .lightsw.off .rock::after { top: auto; bottom: 0; }
+  /* a pilot light so you can find it in a dark room */
+  .lightsw .pilot { position: absolute; left: 50%; transform: translateX(-50%); bottom: -7px;
+    width: 5px; height: 5px; border-radius: 50%; background: var(--pc, #ffd479);
+    box-shadow: 0 0 8px 2px var(--pc, #ffd479); opacity: .85; }
+  #room[data-room="main"] .lightsw, #room[data-room="two"] .lightsw,
+  #room[data-room="snug"] .lightsw, #room[data-room="hall"] .lightsw,
+  #room[data-room="landing"] .lightsw, #room[data-room="bed2"] .lightsw,
+  #room[data-room="bed3"] .lightsw, #room[data-room="wardrobe"] .lightsw { display: block; }
+
+  /* the switch panel's swatch list */
+  .ls-note { font-size: 11.5px; font-style: italic; color: #9a7a52; text-align: center; margin: 2px 0 8px; }
+
+  /* --- room vibes: the light each room is lit by --- */
   /* `color` blend takes hue & saturation from the wash but keeps the room's
      own light and shadow, so the house is recoloured rather than fogged. */
   #room[data-vibe="neon"]::after, #room[data-vibe="sakura"]::after,
@@ -1973,6 +1999,10 @@
   #room[data-vibe="amber"]::after { background: linear-gradient(150deg, #ff9a30, #c4531c 82%); }
   #room[data-vibe="deepsea"]::after { background: linear-gradient(150deg, #21c2e8, #0f3a96 82%); }
   #room[data-vibe="witching"]::after { background: linear-gradient(150deg, #a24dff, #3d1470 82%); }
+  /* lights out: not black — just late, and lit only by the window */
+  #room[data-vibe="out"]::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 30;
+    background: radial-gradient(ellipse at 50% 22%, rgba(10,14,34,.42), rgba(4,6,18,.84) 76%); }
   /* the market writes its own light — the wash would only muddy it */
   #room[data-room="market"]::after { display: none; }
 
@@ -2401,6 +2431,11 @@
         <div class="sign">landing →</div>
       </div>
 
+      <!-- the light switch — tap it to change what this room is lit by -->
+      <div class="lightsw" id="lightSw" title="Light switch">
+        <div class="plate"></div><div class="rock"></div><div class="pilot"></div>
+      </div>
+
       <!-- a hearth glow that lingers after a bowl of midnight noodles -->
       <div class="warm-glow" id="warmGlow"></div>
 
@@ -2643,6 +2678,17 @@
   //  STATE + SAVE/LOAD
   // =====================================================================
   var SAVE_KEY = "mondayNightSim.v1";
+  // Rooms with four walls and therefore a light switch. The garden is
+  // outdoors (it has seasons and the moon instead), the market lights
+  // itself, and the liminal levels are not yours to redecorate.
+  var LIT_ROOMS = ["main", "two", "snug", "hall", "landing", "bed2", "bed3", "wardrobe"];
+  // Where the switch plate sits on each room's wall (x/y % of the room).
+  var SWITCH_POS = {
+    main:     { x: 92, y: 44 }, two:     { x: 40, y: 34 }, snug:  { x: 90, y: 40 },
+    hall:     { x: 92, y: 40 }, landing: { x: 50, y: 17 }, bed2:  { x: 92, y: 42 },
+    bed3:     { x: 92, y: 42 }, wardrobe: { x: 90, y: 34 }
+  };
+
   var DEFAULT_STATE = {
     version: 1,
     sessions: 0,            // week number — advances by real Mondays (see syncWeeks)
@@ -2679,8 +2725,8 @@
     scores: { starcatcher: [], laundromat: [], anticap: [] },   // mini-game leaderboards
     // --- the Night Market, at the far end of the garden ---
     marketFound: false,    // has the gate at the end of the garden been walked through?
-    vibe: "moonlit",       // which world-vibe is dressing the whole house
-    vibes: ["moonlit"],    // vibes you've bought from the Neon Atelier
+    roomVibes: {},         // room id -> which light that room is lit by (see LIGHTS)
+    vibes: ["moonlit"],    // lights you've bought from the Neon Atelier
     warmth: 0,             // bowls of noodles eaten tonight — a cozy glow, resets each night
     reading: null,         // { day, cards:[..] } — the Cartomancer reads once a day
     readings: 0,           // how many readings you've had, ever
@@ -2733,11 +2779,17 @@
     }
     // --- Night Market fields (older saves predate the gate) ---
     if (typeof s.marketFound !== "boolean") s.marketFound = false;
-    if (!s.vibe) s.vibe = "moonlit";
     if (!Array.isArray(s.vibes) || !s.vibes.length) s.vibes = ["moonlit"];
-    if (s.vibes.indexOf(s.vibe) < 0) s.vibes.push(s.vibe);
     if (typeof s.warmth !== "number") s.warmth = 0;
     if (typeof s.readings !== "number") s.readings = 0;
+    // lights used to be one setting for the whole house; they're per-room now,
+    // so carry whatever was set across to every room and drop the old field.
+    if (!s.roomVibes || typeof s.roomVibes !== "object") s.roomVibes = {};
+    if (s.vibe) {
+      if (s.vibe !== "moonlit") LIT_ROOMS.forEach(function (r) { if (!s.roomVibes[r]) s.roomVibes[r] = s.vibe; });
+      if (s.vibes.indexOf(s.vibe) < 0) s.vibes.push(s.vibe);
+      delete s.vibe;
+    }
   }
 
   function load() {
@@ -5617,27 +5669,79 @@
   // =====================================================================
   var MARKET_W = 2600, marketScroll = 0, marketBuilt = false;
 
-  // ---- world vibes: a whole-house restyle you buy with coins ----
+  // ---- lights: what a room is lit by. Bought at the market, fitted room
+  // by room at each room's own switch. ----
   var VIBES = [
-    { id: "moonlit",  name: "Moonlit",     price: 0,  sw: "linear-gradient(150deg,#4a3a63,#6b5184)",
+    { id: "moonlit",  name: "Moonlit",     price: 0,  pilot: "#c9b6ea", sw: "linear-gradient(150deg,#4a3a63,#6b5184)",
       bl: "How the house has always looked. Quiet, purple, yours." },
-    { id: "neon",     name: "Neon Bloom",  price: 30, sw: "linear-gradient(150deg,#ff5ab4,#5a96ff)",
+    { id: "out",      name: "Lights Out",  price: 0,  pilot: "#3b4668", sw: "linear-gradient(150deg,#161a2e,#05070f)",
+      bl: "Off. Just the window and whatever the moon is doing." },
+    { id: "neon",     name: "Neon Bloom",  price: 30, pilot: "#ff5ab4", sw: "linear-gradient(150deg,#ff5ab4,#5a96ff)",
       bl: "You brought the market home with you." },
-    { id: "sakura",   name: "Sakura",      price: 30, sw: "linear-gradient(150deg,#ffbed7,#fff0f4)",
+    { id: "sakura",   name: "Sakura",      price: 30, pilot: "#ffbed7", sw: "linear-gradient(150deg,#ffbed7,#fff0f4)",
       bl: "Everything softens. Petals get everywhere." },
-    { id: "amber",    name: "Amber Hour",  price: 30, sw: "linear-gradient(150deg,#ffaf50,#c85a28)",
+    { id: "amber",    name: "Amber Hour",  price: 30, pilot: "#ffaf50", sw: "linear-gradient(150deg,#ffaf50,#c85a28)",
       bl: "Permanently ten past six on an autumn evening." },
-    { id: "deepsea",  name: "Deep Sea",    price: 34, sw: "linear-gradient(150deg,#3cb4dc,#143c8c)",
+    { id: "deepsea",  name: "Deep Sea",    price: 34, pilot: "#3cb4dc", sw: "linear-gradient(150deg,#3cb4dc,#143c8c)",
       bl: "Cool, blue, and very far down. Bring a lamp." },
-    { id: "witching", name: "Witching",    price: 34, sw: "linear-gradient(150deg,#965adc,#281446)",
+    { id: "witching", name: "Witching",    price: 34, pilot: "#965adc", sw: "linear-gradient(150deg,#965adc,#281446)",
       bl: "The hour when the hat starts making sense." }
   ];
   function vibeDef(id) { for (var i = 0; i < VIBES.length; i++) if (VIBES[i].id === id) return VIBES[i]; return VIBES[0]; }
+  function ownsVibe(id) { return id === "moonlit" || id === "out" || (state.vibes || []).indexOf(id) >= 0; }
+  function roomVibe(r) { return (state.roomVibes || {})[r || state.currentRoom] || "moonlit"; }
   function applyVibe() {
     if (!room) return;
-    room.dataset.vibe = state.vibe || "moonlit";
+    var here = state.currentRoom || "main";
+    room.dataset.vibe = roomVibe(here);
     var g = $("warmGlow");
-    if (g) g.classList.toggle("on", (state.warmth || 0) > 0 && state.currentRoom !== "market");
+    if (g) g.classList.toggle("on", (state.warmth || 0) > 0 && here !== "market");
+    // put the switch on this room's wall, and flip the rocker to match
+    var sw = $("lightSw");
+    if (sw) {
+      var pos = SWITCH_POS[here] || { x: 92, y: 42 };
+      sw.style.left = pos.x + "%"; sw.style.top = pos.y + "%";
+      sw.classList.toggle("off", roomVibe(here) === "out");
+      var d = vibeDef(roomVibe(here));
+      sw.style.setProperty("--pc", roomVibe(here) === "out" ? "#3b4668" : (d.pilot || "#ffd479"));
+    }
+  }
+
+  // ---- the light switch: what is this room lit by? ----
+  function openLightSwitch() {
+    var here = state.currentRoom || "main", cur = roomVibe(here);
+    var name = (HOUSE_ROOMS.filter(function (r) { return r.id === here; })[0] || {}).name || "this room";
+    var html = '<p class="muted">Every room gets its own light. This one is ' + name + '.</p>';
+    html += '<div class="vb-grid">';
+    VIBES.forEach(function (v) {
+      var owned = ownsVibe(v.id), on = cur === v.id;
+      html += '<div class="vb-card' + (on ? " on" : "") + '" data-vibe="' + v.id + '">' +
+        '<div class="vb-swatch" style="background:' + v.sw + '"></div>' +
+        '<div class="vb-name">' + v.name + '</div><div class="vb-bl">' + v.bl + '</div>' +
+        '<div class="vb-price' + (owned ? " owned" : "") + '">' +
+        (on ? "✓ fitted here" : owned ? "tap to fit" : "🪙 " + v.price) + '</div></div>';
+    });
+    html += '</div><p class="ls-note">Bulbs you don\'t own yet are sold at the 🎨 Neon Atelier in the Night Market — ' +
+      'or buy one straight from here.</p>';
+    openPanel("💡 Light Switch", html, [{ label: "Done", cls: "primary", onClick: closePanel }]);
+    Array.prototype.slice.call($("gBody").querySelectorAll("[data-vibe]")).forEach(function (card) {
+      card.addEventListener("click", function () {
+        var v = vibeDef(card.dataset.vibe);
+        if (!ownsVibe(v.id)) {
+          if (state.coins < v.price) { toast("Not enough coins yet 🪙"); return; }
+          addCoins(-v.price); state.vibes.push(v.id); Ambient.chaching();
+          toast("💡 " + v.name + " is yours.", 2400);
+        } else Ambient.blip(v.id === "out" ? 240 : 620, 0.05, "square");   // a switch clack
+        state.roomVibes[here] = v.id; save(); applyVibe(); openLightSwitch();
+      });
+    });
+  }
+  function initLightSwitch() {
+    var sw = $("lightSw"); if (!sw) return;
+    sw.addEventListener("click", function (e) { e.stopPropagation(); openLightSwitch(); });
+    // don't let a tap on the switch start a room drag / send a friend walking
+    sw.addEventListener("mousedown", function (e) { e.stopPropagation(); });
+    sw.addEventListener("touchstart", function (e) { e.stopPropagation(); }, { passive: true });
   }
 
   function buildMarketScene() {
@@ -5908,29 +6012,31 @@
     openPanel("🔮 The Cartomancer", html, [{ label: "Thank her", cls: "primary", onClick: closePanel }]);
   }
 
-  // ---- The Neon Atelier — buy a mood for the whole house ---------------
+  // ---- The Neon Atelier — the shop that sells the bulbs ----------------
   function openAtelier() {
-    var html = '<p class="muted">A whole house is a thing you are allowed to restyle. Pick a light to live in — ' +
-      'it follows you into every room.</p><div class="vb-grid">';
+    var fitted = {};
+    LIT_ROOMS.forEach(function (r) { var v = roomVibe(r); fitted[v] = (fitted[v] || 0) + 1; });
+    var html = '<p class="muted">She sells light by the bulb. Buy one here, then flick the switch in whichever ' +
+      'room you want it — every room in the house takes its own.</p><div class="vb-grid">';
     VIBES.forEach(function (v) {
-      var owned = (state.vibes || []).indexOf(v.id) >= 0, on = state.vibe === v.id;
-      html += '<div class="vb-card' + (on ? " on" : "") + '" data-vibe="' + v.id + '">' +
+      if (v.id === "out") return;                     // you don't have to buy the dark
+      var owned = ownsVibe(v.id), n = fitted[v.id] || 0;
+      html += '<div class="vb-card' + (owned ? " on" : "") + '" data-vibe="' + v.id + '">' +
         '<div class="vb-swatch" style="background:' + v.sw + '"></div>' +
         '<div class="vb-name">' + v.name + '</div><div class="vb-bl">' + v.bl + '</div>' +
         '<div class="vb-price' + (owned ? " owned" : "") + '">' +
-        (on ? "✓ wearing it" : owned ? "tap to wear" : "🪙 " + v.price) + '</div></div>';
+        (owned ? (n ? "✓ in " + n + " room" + (n === 1 ? "" : "s") : "✓ owned") : "🪙 " + v.price) + '</div></div>';
     });
-    html += '</div>';
+    html += '</div><p class="ls-note">Fit them at the 💡 switch on any room\'s wall.</p>';
     openPanel("🎨 Neon Atelier", html, [{ label: "Done", cls: "primary", onClick: closePanel }]);
     Array.prototype.slice.call($("gBody").querySelectorAll("[data-vibe]")).forEach(function (card) {
       card.addEventListener("click", function () {
-        var v = vibeDef(card.dataset.vibe), owned = (state.vibes || []).indexOf(v.id) >= 0;
-        if (!owned) {
-          if (state.coins < v.price) { toast("Not enough coins yet 🪙"); return; }
-          addCoins(-v.price); state.vibes.push(v.id); Ambient.chaching();
-          toast("🎨 " + v.name + " is yours.", 2400);
-        } else Ambient.blip(660, 0.06, "triangle");
-        state.vibe = v.id; save(); applyVibe(); openAtelier();
+        var v = vibeDef(card.dataset.vibe);
+        if (ownsVibe(v.id)) { toast("Already on your shelf — fit it at a light switch 💡"); return; }
+        if (state.coins < v.price) { toast("Not enough coins yet 🪙"); return; }
+        addCoins(-v.price); state.vibes.push(v.id); save(); Ambient.chaching();
+        toast("🎨 " + v.name + " is yours. Flick a switch to fit it.", 3200);
+        openAtelier();
       });
     });
   }
@@ -7601,6 +7707,7 @@
     initGardenDoorDrag();
     initGardenPan();
     initMarketPan();
+    initLightSwitch();
     initMoonbeam();
     updateHud();
     Pet.init();
@@ -7616,7 +7723,7 @@
 
   // expose a tiny debug handle (handy while building / personalising)
   window.MNS = { state: state, save: save, Ambient: Ambient,
-    go: goToRoom, market: marketTap, vibes: VIBES, applyVibe: applyVibe,
+    go: goToRoom, market: marketTap, vibes: VIBES, applyVibe: applyVibe, lightSwitch: openLightSwitch,
     reset: function () { localStorage.removeItem(SAVE_KEY); location.reload(); } };
 })();
 </script>

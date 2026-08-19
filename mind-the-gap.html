@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#160f1e">
+<title>Mind the Gap 🚇</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#efe6f2; --ink-dim:#b9a7c9; --plum:#160f1e; --rose:#e77fa4; --moon:#f6ecd2; --amber:#e8b45c; }
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{
+    min-height:100%;
+    background:linear-gradient(180deg,#221533 0%,#1a1026 45%,#100a16 100%);
+    color:var(--ink); font-family:"Cormorant Garamond", Georgia, serif;
+  }
+  body{
+    overflow-x:hidden; position:relative;
+    padding:calc(env(safe-area-inset-top,0px) + 18px) 14px calc(env(safe-area-inset-bottom,0px) + 28px);
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .stars{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.45;
+    background-image:
+      radial-gradient(1.5px 1.5px at 12% 18%, #efe6f2 50%, transparent 51%),
+      radial-gradient(1px 1px at 68% 9%,  #efe6f2 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 84% 26%, #efe6f2 50%, transparent 51%),
+      radial-gradient(1px 1px at 35% 7%,  #efe6f2 50%, transparent 51%),
+      radial-gradient(1px 1px at 52% 22%, #efe6f2 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 22% 34%, #efe6f2 50%, transparent 51%);
+    animation:twinkle 3.4s ease-in-out infinite alternate; }
+  @keyframes twinkle{ from{opacity:.2} to{opacity:.55} }
+
+  header{ z-index:1; text-align:center; margin-bottom:14px; }
+  .fleuron{ color:var(--rose); letter-spacing:8px; font-size:15px; }
+  h1{ font-family:"IM Fell English", Georgia, serif; font-weight:400;
+    font-size:clamp(28px,8vw,40px); color:var(--moon); text-shadow:0 0 18px rgba(246,236,210,.3); margin:6px 0 2px; }
+  header p{ font-style:italic; color:var(--ink-dim); font-size:16px; }
+
+  /* the cabinet the game sits in */
+  .cab{ z-index:1; width:100%; max-width:520px;
+    background:linear-gradient(170deg, rgba(36,23,51,.94), rgba(20,12,29,.96));
+    border:1px solid rgba(231,127,164,.32); border-radius:16px;
+    padding:14px; box-shadow:0 10px 40px rgba(0,0,0,.55); }
+  .screen-wrap{ position:relative; border-radius:8px; overflow:hidden; background:#07140e;
+    box-shadow:inset 0 0 22px rgba(0,0,0,.75); }
+  canvas{ display:block; width:100%; height:auto; image-rendering:pixelated; background:#0b0714; }
+  .scan{ position:absolute; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px); }
+
+  .hint{ text-align:center; font-style:italic; color:var(--ink-dim); font-size:15px; margin-top:10px; line-height:1.35; }
+  .bar{ display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap; justify-content:center; }
+  .best{ font-family:"IM Fell English", Georgia, serif; color:var(--amber); font-size:17px; }
+  button.b{ font-family:"Cormorant Garamond", Georgia, serif; font-size:16px; cursor:pointer;
+    color:var(--ink); background:rgba(231,127,164,.12); border:1px solid rgba(231,127,164,.34);
+    border-radius:999px; padding:5px 15px 6px; transition:transform .1s ease, background .12s; }
+  button.b:hover{ background:rgba(231,127,164,.22); }
+  button.b:active{ transform:scale(.96); }
+
+  a.back{ z-index:1; margin-top:20px; color:var(--ink-dim); text-decoration:none;
+    font-style:italic; font-size:16px; border-bottom:1px dotted rgba(185,167,201,.5); }
+  a.back:hover{ color:var(--moon); }
+  footer{ z-index:1; margin-top:16px; text-align:center; font-style:italic;
+    color:rgba(185,167,201,.6); font-size:13px; max-width:460px; line-height:1.45; }
+</style>
+</head>
+<body>
+  <div class="stars"></div>
+
+  <header>
+    <div class="fleuron">❦ 🚇 ❦</div>
+    <h1>Mind the Gap</h1>
+    <p>getting on in london &middot; est. 1984</p>
+  </header>
+
+  <div class="cab">
+    <div class="screen-wrap">
+      <canvas id="gameCanvas" width="320" height="240"></canvas>
+      <div class="scan"></div>
+    </div>
+    <p class="hint" id="hint">Tap / space to jump. Collect the pay, dodge the costs &mdash; and note how the two modes differ.</p>
+    <div class="bar">
+      <span class="best" id="best">best &pound;0</span>
+      <button class="b" id="btnMute">&#128266; sound</button>
+      <button class="b" id="btnRestart">&#8635; restart</button>
+    </div>
+  </div>
+
+  <a class="back" href="index.html">&larr; back to the parlour</a>
+  <footer>Nine levels. The last six are a tower, arranged after Dante.<br>Nobody has ever beaten the glass ceiling on the first go.</footer>
+
+<script>
+(function () {
+  "use strict";
+  var canvas = document.getElementById("gameCanvas"), ctx = canvas.getContext("2d");
+  var W = 320, H = 240, game = null, raf = null, running = false, inputBound = false;
+
+  // ---- best score, kept between visits ----
+  var BEST_KEY = "mindTheGap.best";
+  function getBest() { try { return parseInt(localStorage.getItem(BEST_KEY), 10) || 0; } catch (e) { return 0; } }
+  function setBest(n) { try { localStorage.setItem(BEST_KEY, String(n)); } catch (e) {} }
+  function paintBest() { document.getElementById("best").innerHTML = "best &pound;" + getBest().toLocaleString(); }
+
+  // ---- a very small sound box: the game only ever asks for blips ----
+  var Ambient = (function () {
+    var ac = null, muted = false;
+    try { muted = localStorage.getItem("mindTheGap.muted") === "1"; } catch (e) {}
+    function ctxOf() {
+      if (muted) return null;
+      if (!ac) { var C = window.AudioContext || window.webkitAudioContext; if (C) ac = new C(); }
+      if (ac && ac.state === "suspended") ac.resume();
+      return ac;
+    }
+    function blip(freq, dur, type) {
+      var c = ctxOf(); if (!c) return;
+      var t = c.currentTime, o = c.createOscillator(), g = c.createGain();
+      o.type = type || "square"; o.frequency.value = freq || 440;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.16, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + (dur || 0.08));
+      o.connect(g); g.connect(c.destination);
+      o.start(t); o.stop(t + (dur || 0.08) + 0.02);
+    }
+    function toggle() {
+      muted = !muted;
+      try { localStorage.setItem("mindTheGap.muted", muted ? "1" : "0"); } catch (e) {}
+      paintMute();
+    }
+    function paintMute() {
+      document.getElementById("btnMute").innerHTML = muted ? "&#128263; muted" : "&#128266; sound";
+    }
+    return { blip: blip, toggle: toggle, paintMute: paintMute, isMuted: function () { return muted; } };
+  })();
+
+  // In the house this paid out coins. Out here the run is its own reward,
+  // so the only thing kept is how much you walked away with.
+  function award() {}
+  // ===== Game 3: Mind the Gap — a vintage runner about "getting on" =====
+  // A stressed man in a shirt and tie runs at a London tower with a pound on it.
+  // WORKER MODE makes you earn every inch of the climb; RIGGED MODE hands it
+  // to you. The joke is that only one of them is difficult.
+  function AntiCap(onOver) {
+    var GROUND = 190, PX = 56, PW = 16, PH = 30;
+    var scr, mode, lv, tick, money, dist, spawnT, items, py, vy, hurtT, over, awarded, msg, msgT, phase, flashT;
+    var cut, cutT, cutLine, ceilHit, ceilCracks;
+    var LEVELS = [
+      { title: "LEVEL 1 — THE DEGREE",
+        lines: ["Across the river: a tower with a pound on it.",
+                "You want in. First, they say, get a degree.",
+                "Mind the tuition. Mind the fares."],
+        goal: 2200, drain: 0.038, gap: 66, spd: 2.6, coin: 14,
+        haz: ["TUITION £9,250", "RAIL REPLACEMENT", "TEXTBOOK £60", "OVERDRAFT"] },
+      { title: "LEVEL 2 — THE JOB HUNT",
+        lines: ["Degree in hand. The tower looks no nearer.",
+                "Nine hundred applications. Four replies.",
+                "Dodge the rejections — the unpaid ones bite."],
+        goal: 2600, drain: 0.052, gap: 58, spd: 2.9, coin: 14,
+        haz: ["UNPAID INTERN", "GHOSTED", "NO EXPERIENCE", "GRAD SCHEME: NO"] },
+      { title: "LEVEL 3 — THE OFFER",
+        lines: ["An offer! Below advertised, but an offer.",
+                "Sign here, here, and here. And here.",
+                "Rent rises rather faster than you do."],
+        goal: 2800, drain: 0.066, gap: 52, spd: 3.1, coin: 13,
+        haz: ["RENT +30%", "ZONE 1 FARE", "ENERGY BILL", "COUNCIL TAX"] },
+      { title: "FLOOR I — THE COMMUTE",
+        inscr: "\u201cthrough me the way into the suffering city\u201d",
+        lines: ["You're in. The tower is across the city.",
+                "Ninety minutes each way, unpaid.",
+                "The ferryman now takes contactless."],
+        goal: 2900, drain: 0.07, gap: 50, spd: 3.2, coin: 12,
+        haz: ["RUSH HOUR", "TRAFFIC JAM", "SIGNAL FAILURE", "DELAYED 42 MIN", "NO SEATS"] },
+      { title: "FLOOR II — ONBOARDING",
+        inscr: "\u201cabandon hope, all ye who onboard here\u201d",
+        lines: ["HR would like a quick informal chat.",
+                "It is neither quick nor informal.",
+                "Virgil from IT says just nod along."],
+        goal: 3000, drain: 0.075, gap: 48, spd: 3.3, coin: 12, interior: true, goalArt: "lift",
+        haz: ["HR 'QUICK CHAT'", "CULTURE FIT", "COMPULSORY FUN", "SIGN THE NDA", "MANDATORY SMILE"] },
+      { title: "FLOOR III — MIDDLE MANAGEMENT",
+        inscr: "\u201chere the incompetent and the cunning are mixed together\u201d",
+        lines: ["One manager cannot work the projector.",
+                "The other remembers everything you say.",
+                "Both agree you are 'not quite ready'."],
+        goal: 3100, drain: 0.08, gap: 46, spd: 3.4, coin: 11, interior: true, goalArt: "lift",
+        haz: ["QUICK CATCH-UP", "LET'S CIRCLE BACK", "WE'RE A FAMILY", "CREDIT TAKEN", "6PM 'URGENT'"] },
+      { title: "FLOOR IV — THE OPEN PLAN",
+        inscr: "\u201cno walls, and therefore nowhere to hide\u201d",
+        lines: ["Hot desks. Cold comments. Warm lager after.",
+                "Everything is fine and everyone is lovely,",
+                "and you are asked where you're really from."],
+        goal: 3200, drain: 0.085, gap: 44, spd: 3.5, coin: 10, interior: true, goalArt: "lift",
+        haz: ["'WHERE ARE YOU FROM?'", "'CALM DOWN'", "'SO ARTICULATE'", "NAME MISPRONOUNCED", "'JUST BANTER'"] },
+      { title: "FLOOR V — THE RESTRUCTURE",
+        inscr: "\u201cthe firm is not making cuts; it is becoming agile\u201d",
+        lines: ["An all-hands has appeared in your calendar.",
+                "The slide says SYNERGY. Nobody is smiling.",
+                "Keep running. Hand your laptop in on the way."],
+        goal: 3300, drain: 0.09, gap: 42, spd: 3.6, coin: 10, interior: true, goalArt: "lift",
+        haz: ["RIGHT-SIZING", "ALL-HANDS 4PM", "LAPTOP RETURNED", "'EXCITING NEWS'", "SYNERGY"] },
+      { title: "FLOOR VI — THE GLASS CEILING",
+        inscr: "\u201cand thence we came forth, to see \u2014 no, we did not\u201d",
+        lines: ["The top floor is directly above you.",
+                "You can see it. That is the entire point.",
+                "Jump all you like. The glass is load-bearing."],
+        goal: 3200, drain: 0.082, gap: 48, spd: 3.5, coin: 12, interior: true, goalArt: "lift", ceil: 112,
+        haz: ["'NOT READY YET'", "'NEXT CYCLE'", "'BE PATIENT'", "'CULTURE FIT'", "'WE PROMOTED DAN'"] }
+    ];
+    var RIGGED = { title: "RIGGED MODE — THE SHORTCUT",
+      lines: ["You started on the top floor. You always were.",
+              "Doors open. Fares are somebody else's problem.",
+              "Enjoy the run. It was never a race."],
+      goal: 2200, drain: 0, gap: 70, spd: 4.2, coin: 14,
+      haz: ["TAX BREAK", "NON-DOM", "TRUST FUND", "THE RIGHT SCHOOL"] };
+  
+    // Between levels the telly comes on and somebody explains your failure.
+    var CUTS = {
+      0:        { tag: "THE SIX O'CLOCK NEWS", kind: "news",
+        ticker: "HOUSE PRICES UP 14%  ·  WAGES FLAT  ·  MAN WHO INHERITED HOME URGES YOUNG TO TRY HARDER  ·  ",
+        lines: [ ["p", "Why can't young people buy a home?"],
+                 ["g", "Avocado toast, I'm afraid."],
+                 ["g", "In my day, one simply worked."],
+                 ["g", "Bought my first house at twenty-one."],
+                 ["p", "For three thousand pounds, sir."],
+                 ["g", "They must simply TRY HARDER!"] ] },
+      1: { tag: "THE GRINDSET POD  ·  EP. 412", kind: "pod",
+        ticker: "NOT FINANCIAL ADVICE  ·  NOT FINANCIAL ADVICE  ·  NOT FINANCIAL ADVICE  ·  ",
+        lines: [ ["h", "Millionaire at twenty-six. Ask me how."],
+                 ["h", "4AM. Ice bath. Zero excuses."],
+                 ["h", "While you slept, I bought SIGMACOIN."],
+                 ["h", "Anyone can do this. It's a mindset."],
+                 ["s", "* seed capital: dad's second flat"] ] },
+      7: { tag: "ALL-HANDS  ·  LIVE FROM THE 40TH FLOOR", kind: "news",
+        ticker: "RECORD PROFITS  ·  HEADCOUNT OPTIMISED  ·  CEO PAY UP 41%  ·  FREE PASTRIES FRIDAY  ·  ",
+        lines: [ ["p", "Is the company in trouble?"],
+                 ["g", "Quite the opposite — record profits!"],
+                 ["g", "Which is why we must all sacrifice."],
+                 ["g", "Some of you are being freed up."],
+                 ["p", "You mean made redundant."],
+                 ["g", "We mean there'll be pastries on Friday."] ] }
+    };
+    var CUT_HOLD = 116;                                              // frames per line
+  
+    function conf() { return mode === "rigged" ? RIGGED : LEVELS[lv]; }
+    function rnd1(n) { var x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); }
+  
+    function reset() { scr = "title"; mode = null; lv = 0; tick = 0; over = false; awarded = false; phase = 0; }
+    function beginLevel() {
+      var c = conf();
+      tick = 0; dist = 0; spawnT = 30; items = [];
+      py = GROUND - PH; vy = 0; hurtT = 0; flashT = 0; msg = ""; msgT = 0; ceilHit = 0; ceilCracks = 0;
+      money = mode === "rigged" ? 1000000 : 120;
+      scr = "play";
+    }
+    function say(t) { msg = t; msgT = 70; }
+    function jump() {
+      if (py >= GROUND - PH - 0.5) { vy = -6.5; Ambient.blip(420, 0.06, "square"); }
+    }
+    function finish(won) {
+      over = true; scr = won ? "win" : "bust";
+      if (!awarded) {
+        awarded = true;
+        var s = Math.max(0, Math.round(money / (mode === "rigged" ? 1000 : 1)));
+        award(Math.floor(s / 40));
+        if (onOver) onOver("anticap", s);
+      }
+    }
+  
+    // ---------- painting ----------
+    function sky() {
+      var g = ctx.createLinearGradient(0, 0, 0, GROUND);
+      if (mode === "rigged") { g.addColorStop(0, "#2b1c50"); g.addColorStop(0.55, "#8a4f86"); g.addColorStop(1, "#e8a05c"); }
+      else { g.addColorStop(0, "#1b2338"); g.addColorStop(0.5, "#4c4a6a"); g.addColorStop(1, "#c98a6a"); }
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      // sun for the lucky, a hazy streetlight moon for everyone else
+      ctx.fillStyle = mode === "rigged" ? "rgba(255,236,190,.55)" : "rgba(226,226,236,.3)";
+      ctx.beginPath(); ctx.arc(W * 0.72, GROUND - 54, 26, 0, 7); ctx.fill();
+    }
+    // a few London silhouettes drifting behind everything
+    function landmarks(off, base, col) {
+      var set = [[10, "shard"], [120, "gherkin"], [212, "stpauls"], [330, "bigben"]], span = 430;
+      ctx.fillStyle = col;
+      for (var i = 0; i < set.length; i++) {
+        for (var rep = 0; rep < 2; rep++) {
+          var x = ((set[i][0] - off) % span + span) % span - 70 + rep * span;
+          if (x < -80 || x > W + 40) continue;
+          var t = set[i][1];
+          if (t === "shard") {
+            ctx.beginPath(); ctx.moveTo(x, base); ctx.lineTo(x + 8, base - 92);
+            ctx.lineTo(x + 12, base - 104); ctx.lineTo(x + 16, base - 92); ctx.lineTo(x + 24, base);
+            ctx.closePath(); ctx.fill();
+          } else if (t === "gherkin") {
+            ctx.beginPath(); ctx.moveTo(x, base);
+            ctx.quadraticCurveTo(x - 3, base - 42, x + 10, base - 66);
+            ctx.quadraticCurveTo(x + 23, base - 42, x + 20, base); ctx.closePath(); ctx.fill();
+          } else if (t === "stpauls") {
+            ctx.fillRect(x, base - 26, 36, 26);
+            ctx.beginPath(); ctx.arc(x + 18, base - 28, 13, Math.PI, 0); ctx.fill();
+            ctx.fillRect(x + 16, base - 52, 3.5, 10); ctx.fillRect(x + 13, base - 48, 9, 3);
+          } else {
+            ctx.fillRect(x, base - 72, 14, 72);
+            ctx.beginPath(); ctx.moveTo(x - 1.5, base - 72); ctx.lineTo(x + 7, base - 90);
+            ctx.lineTo(x + 15.5, base - 72); ctx.closePath(); ctx.fill();
+            var keep = ctx.fillStyle;
+            ctx.fillStyle = "rgba(240,224,160,.75)";
+            ctx.beginPath(); ctx.arc(x + 7, base - 60, 4.2, 0, 7); ctx.fill();
+            ctx.fillStyle = keep;
+          }
+        }
+      }
+    }
+    function drizzle(t) {                                            // it is, of course, raining
+      ctx.strokeStyle = "rgba(206,222,255,.26)"; ctx.lineWidth = 1;
+      for (var i = 0; i < 44; i++) {
+        var rx = (i * 61 + t * 4.5) % (W + 40) - 20;
+        var ry = (i * 43 + t * 12) % (H + 30) - 15;
+        ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx - 3, ry + 9); ctx.stroke();
+      }
+    }
+    function skyline(off, base, tall, col, seed, lit) {
+      ctx.fillStyle = col;
+      for (var i = -1; i < 12; i++) {
+        var k = i + Math.floor(off / 44), r = rnd1(k * seed);
+        var bw = 22 + Math.floor(r * 16), bh = 26 + r * tall;
+        var bx = i * 44 - (off % 44);
+        ctx.fillRect(bx, base - bh, bw, bh);
+        if (lit) {
+          ctx.fillStyle = "rgba(255,214,140,.5)";
+          for (var wy = base - bh + 6; wy < base - 6; wy += 9)
+            for (var wx = bx + 4; wx < bx + bw - 5; wx += 8)
+              if (rnd1(wx * 3 + wy) > 0.55) ctx.fillRect(wx, wy, 3, 4);
+          ctx.fillStyle = col;
+        }
+      }
+    }
+    function tower(x, base, h, w) {                                  // the tower with the dollar on it
+      ctx.fillStyle = "#241a38"; ctx.fillRect(x, base - h, w, h);
+      ctx.fillStyle = "rgba(255,214,140,.45)";
+      for (var wy = base - h + 10; wy < base - 8; wy += 11)
+        for (var wx = x + 5; wx < x + w - 6; wx += 9) ctx.fillRect(wx, wy, 4, 5);
+      ctx.fillStyle = "#e8b45c"; ctx.font = "bold 22px monospace"; ctx.textAlign = "center";
+      ctx.fillText("\u00A3", x + w / 2, base - h + 24);
+    }
+    // inside the tower: strip lights, partitions, and encouragement
+    var POSTERS = ["SYNERGY", "HUSTLE", "ONE TEAM", "OWN IT", "THRIVE", "LEAN IN"];
+    function office(off) {
+      var g = ctx.createLinearGradient(0, 0, 0, GROUND);
+      g.addColorStop(0, "#39405a"); g.addColorStop(1, "#252a3c");
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, GROUND);
+      ctx.fillStyle = "#1f2334"; ctx.fillRect(0, 0, W, 36);          // suspended ceiling
+      for (var t = -(off * 0.9 % 46); t < W; t += 46) {              // ceiling tile joins
+        ctx.fillStyle = "#2b3145"; ctx.fillRect(t, 0, 1.5, 36);
+      }
+      for (var L = -(off * 0.9 % 92); L < W; L += 92) {              // strip lights, clear of the HUD
+        ctx.fillStyle = "#f6f2d8"; ctx.fillRect(L + 18, 26, 44, 5);
+        ctx.fillStyle = "rgba(246,242,216,.18)"; ctx.fillRect(L + 12, 31, 56, 14);
+      }
+      for (var wx = -(off * 0.55 % 150); wx < W; wx += 150) {        // windows onto the night
+        ctx.fillStyle = "#151a2e"; ctx.fillRect(wx + 16, 44, 62, 40);
+        ctx.fillStyle = "#3a4468"; ctx.fillRect(wx + 16, 44, 62, 2);
+        ctx.fillStyle = "rgba(255,214,140,.5)";
+        for (var q = 0; q < 7; q++) ctx.fillRect(wx + 21 + (q * 8) % 54, 52 + (q % 3) * 10, 3, 4);
+        ctx.fillStyle = "#2b3145"; ctx.fillRect(wx + 46, 44, 2, 40);
+      }
+      for (var px2 = -(off * 0.55 % 150); px2 < W; px2 += 150) {     // motivational posters
+        var pt = POSTERS[Math.abs(Math.round((px2 + off * 0.55) / 150)) % POSTERS.length];
+        ctx.fillStyle = "#e8e2d2"; ctx.fillRect(px2 + 104, 50, 34, 26);
+        ctx.fillStyle = "#c0392b"; ctx.font = "bold 6px monospace"; ctx.textAlign = "center";
+        ctx.fillText(pt, px2 + 121, 66);
+      }
+      for (var pz = -(off % 118); pz < W; pz += 118) {                // cubicle partitions
+        ctx.fillStyle = "#4a5168"; ctx.fillRect(pz, GROUND - 52, 54, 52);
+        ctx.fillStyle = "#3d4459"; ctx.fillRect(pz, GROUND - 52, 54, 4);
+        ctx.fillStyle = "#20364a"; ctx.fillRect(pz + 10, GROUND - 40, 20, 14);   // a monitor, glowing
+        ctx.fillStyle = "rgba(120,200,220,.5)"; ctx.fillRect(pz + 12, GROUND - 38, 16, 10);
+      }
+    }
+    function lift(x, base, h, w) {                                   // the lift you need a pass for
+      ctx.fillStyle = "#2f3548"; ctx.fillRect(x - 6, base - h - 8, w + 12, h + 8);
+      ctx.fillStyle = "#9aa4b8"; ctx.fillRect(x, base - h, w, h);
+      ctx.fillStyle = "#7c869c"; ctx.fillRect(x + w / 2 - 1, base - h, 2, h);
+      ctx.fillStyle = "#161a26"; ctx.fillRect(x + w / 2 - 16, base - h - 20, 32, 13);
+      ctx.fillStyle = "#e8b45c"; ctx.font = "bold 9px monospace"; ctx.textAlign = "center";
+      ctx.fillText("\u25B2 40", x + w / 2, base - h - 10);
+      ctx.fillStyle = "#c0392b"; ctx.fillRect(x + w - 14, base - h / 2 - 6, 10, 12);   // the card reader
+    }
+    function glassCeiling(y, cracks) {
+      ctx.fillStyle = "rgba(180,225,235,.22)"; ctx.fillRect(0, y - 12, W, 12);
+      ctx.fillStyle = "rgba(230,250,255,.5)"; ctx.fillRect(0, y - 1.5, W, 1.5);
+      ctx.fillStyle = "rgba(255,255,255,.1)"; ctx.fillRect(0, y - 12, W, 2);
+      ctx.strokeStyle = "rgba(255,255,255,.75)"; ctx.lineWidth = 1;
+      for (var i = 0; i < cracks; i++) {                              // it does crack. it does not break.
+        var cx = 34 + i * 39 + rnd1(i * 5.3) * 14, cy = y - 2;
+        ctx.beginPath();
+        for (var s = 0; s < 5; s++) {                                 // an impact star, splayed under the pane
+          var a = -Math.PI / 2 + (s - 2) * 0.62 + (rnd1(i * 9 + s) - 0.5) * 0.4;
+          var r = 5 + rnd1(i * 3 + s * 7) * 6;
+          var mx = cx + Math.cos(a) * r * 0.55, my = cy + Math.sin(a) * r * 0.55;
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(mx, my);
+          ctx.lineTo(mx + Math.cos(a + 0.4) * r * 0.5, my + Math.sin(a + 0.4) * r * 0.5);
+        }
+        ctx.stroke();
+      }
+      ctx.fillStyle = "rgba(12,20,26,.75)"; ctx.fillRect(W / 2 - 46, y - 30, 92, 14);
+      ctx.fillStyle = "#bfe3ea"; ctx.font = "7px monospace"; ctx.textAlign = "center";
+      ctx.fillText("PROMOTION PENDING", W / 2, y - 20);
+    }
+    function road(off) {
+      ctx.fillStyle = "#2a2436"; ctx.fillRect(0, GROUND, W, H - GROUND);
+      ctx.fillStyle = "#3a3348"; ctx.fillRect(0, GROUND, W, 3);
+      ctx.fillStyle = "rgba(240,226,190,.5)";
+      for (var x = -(off % 40); x < W; x += 40) ctx.fillRect(x, GROUND + 16, 18, 3);
+    }
+    function drawGuy(x, y, ph, stressed, sc) {                        // y = feet
+      var s = sc || 1, a = Math.sin(ph), b = Math.sin(ph + Math.PI);
+      ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#2b3a6b"; ctx.lineWidth = 4;                 // dark blue trousers/legs
+      ctx.beginPath(); ctx.moveTo(0, -13); ctx.lineTo(a * 7, -2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -13); ctx.lineTo(b * 7, -2); ctx.stroke();
+      ctx.fillStyle = "#15151c";
+      ctx.fillRect(a * 7 - 3.5, -3, 7, 3); ctx.fillRect(b * 7 - 3.5, -3, 7, 3);
+      ctx.fillStyle = "#2b3a6b"; ctx.fillRect(-5, -19, 10, 7);
+      ctx.fillStyle = "#f4f1e8"; ctx.fillRect(-6, -31, 12, 13);       // white shirt
+      ctx.fillStyle = "#c0392b";                                      // tie
+      ctx.beginPath(); ctx.moveTo(0, -31); ctx.lineTo(2.2, -28); ctx.lineTo(0, -20); ctx.lineTo(-2.2, -28); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = "#f4f1e8"; ctx.lineWidth = 3;                 // arms
+      ctx.beginPath(); ctx.moveTo(-5, -29); ctx.lineTo(-5 + b * 6, -21); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(5, -29); ctx.lineTo(11, -22); ctx.stroke();
+      ctx.fillStyle = "#8a5a2a"; ctx.fillRect(8, -22, 12, 9);         // briefcase
+      ctx.strokeStyle = "#4a2e12"; ctx.lineWidth = 1; ctx.strokeRect(8.5, -21.5, 11, 8);
+      ctx.beginPath(); ctx.arc(14, -22, 2.6, Math.PI, 0); ctx.stroke();
+      ctx.fillStyle = "#f0c9a0"; ctx.beginPath(); ctx.arc(0, -37, 5.8, 0, 7); ctx.fill();   // head
+      ctx.fillStyle = "#e6c86a";                                      // blonde hair
+      ctx.beginPath(); ctx.arc(0, -38, 6, Math.PI, 0); ctx.fill(); ctx.fillRect(-6, -38, 2.4, 3.4);
+      ctx.fillStyle = "#2a2018";
+      ctx.fillRect(-2.8, -38, 1.7, 1.8); ctx.fillRect(1.1, -38, 1.7, 1.8);
+      if (stressed) {
+        ctx.strokeStyle = "#2a2018"; ctx.lineWidth = 0.9;             // worried brows
+        ctx.beginPath(); ctx.moveTo(-3.6, -40.2); ctx.lineTo(-1, -39.2); ctx.moveTo(3.6, -40.2); ctx.lineTo(1, -39.2); ctx.stroke();
+        ctx.fillStyle = "#2a2018"; ctx.beginPath(); ctx.ellipse(0, -34, 1.9, 1.3, 0, 0, 7); ctx.fill();
+        ctx.fillStyle = "#9ad8ff"; ctx.beginPath(); ctx.arc(6.6, -39, 1.7, 0, 7); ctx.fill();   // sweat
+      } else { ctx.fillStyle = "#2a2018"; ctx.fillRect(-1.6, -34, 3.4, 1.2); }
+      ctx.restore();
+    }
+    function crt() {                                                  // scanlines + vignette
+      ctx.fillStyle = "rgba(0,0,0,.13)";
+      for (var y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
+      var g = ctx.createRadialGradient(W / 2, H / 2, 60, W / 2, H / 2, 190);
+      g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.45)");
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+    function panel(y, h) {
+      ctx.fillStyle = "rgba(12,8,20,.82)"; ctx.fillRect(0, y, W, h);
+      ctx.fillStyle = "#e8b45c"; ctx.fillRect(0, y, W, 1); ctx.fillRect(0, y + h - 1, W, 1);
+    }
+    function btn(x, y, w, h, label, on) {
+      ctx.fillStyle = on ? "#e8b45c" : "rgba(12,8,20,.8)";
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeStyle = "#e8b45c"; ctx.lineWidth = 1.5; ctx.strokeRect(x + .5, y + .5, w - 1, h - 1);
+      ctx.fillStyle = on ? "#2a1c08" : "#f3e6c8"; ctx.font = "bold 11px monospace"; ctx.textAlign = "center";
+      ctx.fillText(label, x + w / 2, y + h / 2 + 4);
+    }
+    var BW = { w: 116, h: 26, y: 196 }, BL = 22, BR = 182;
+    function inBtn(x, y, bx) { return x > bx && x < bx + BW.w && y > BW.y && y < BW.y + BW.h; }
+  
+    // ---------- the telly ----------
+    function tvBezel() {                                             // an old set with dials
+      ctx.fillStyle = "#241d19";                                     // frame only — never the picture
+      ctx.fillRect(0, 0, W, 8); ctx.fillRect(0, H - 15, W, 15);
+      ctx.fillRect(0, 0, 4, H); ctx.fillRect(W - 4, 0, 4, H);
+      ctx.fillStyle = "#2f2721"; ctx.fillRect(0, 0, W, 3); ctx.fillRect(0, H - 15, W, 3);
+      ctx.fillStyle = "#3a312a";
+      ctx.beginPath(); ctx.arc(W - 14, H - 8, 4, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(W - 30, H - 8, 4, 0, 7); ctx.fill();
+      ctx.fillStyle = "#7a6a58"; ctx.font = "bold 7px monospace"; ctx.textAlign = "left";
+      ctx.fillText("TELEVISOR", 8, H - 5);
+    }
+    function crackle(t) {
+      for (var i = 0; i < 80; i++) {                                 // static
+        ctx.fillStyle = Math.random() < 0.5 ? "rgba(255,255,255,.07)" : "rgba(0,0,0,.07)";
+        ctx.fillRect(Math.random() * W, 8 + Math.random() * (H - 26), 1.7, 1.4);
+      }
+      var by = (t * 1.7) % (H + 70) - 35;                            // rolling bright band
+      var g = ctx.createLinearGradient(0, by, 0, by + 28);
+      g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(0.5, "rgba(255,255,255,.09)");
+      g.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = g; ctx.fillRect(0, by, W, 28);
+      ctx.fillStyle = "rgba(0,0,0,.16)";                             // heavy scanlines
+      for (var y = 8; y < H - 15; y += 3) ctx.fillRect(0, y, W, 1);
+    }
+    function head(x, y, r, skin, hair, hairCol, brow, talk) {
+      ctx.fillStyle = skin; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+      ctx.fillStyle = hairCol;
+      if (hair === "swept") { ctx.beginPath(); ctx.arc(x, y - 1.5, r, Math.PI, 0); ctx.fill(); ctx.fillRect(x - r, y - 2, r * 0.55, r * 0.7); }
+      else if (hair === "thin") { ctx.beginPath(); ctx.arc(x, y - 1, r * 0.98, Math.PI * 1.06, Math.PI * 1.94); ctx.fill(); }
+      else { ctx.beginPath(); ctx.arc(x, y - 1, r, Math.PI, 0); ctx.fill(); }
+      ctx.fillStyle = "#241a14";
+      ctx.fillRect(x - r * 0.45, y - r * 0.12, 1.9, 2);
+      ctx.fillRect(x + r * 0.24, y - r * 0.12, 1.9, 2);
+      if (brow) {                                                     // a sceptical eyebrow
+        ctx.strokeStyle = "#241a14"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x - r * 0.6, y - r * 0.42); ctx.lineTo(x - r * 0.18, y - r * 0.3);
+        ctx.moveTo(x + r * 0.14, y - r * 0.34); ctx.lineTo(x + r * 0.6, y - r * 0.5); ctx.stroke();
+      }
+      ctx.fillStyle = "#3a201c";
+      if (talk) { ctx.beginPath(); ctx.ellipse(x, y + r * 0.42, 2.4, 1.9, 0, 0, 7); ctx.fill(); }
+      else ctx.fillRect(x - 2.2, y + r * 0.4, 4.4, 1.3);
+    }
+    function drawCut() {
+      var c = CUTS[cut], ln = c.lines[cutLine], who = ln[0], talkA = Math.floor(cutT / 6) % 2 === 0;
+      ctx.save();
+      ctx.translate(0, Math.random() < 0.06 ? (Math.random() * 3 - 1.5) : 0);   // vertical hold slips
+      if (c.kind === "news") {
+        var g = ctx.createLinearGradient(0, 8, 0, H - 15);
+        g.addColorStop(0, "#132a4a"); g.addColorStop(1, "#0b1830");
+        ctx.fillStyle = g; ctx.fillRect(0, 8, W, H - 23);
+        ctx.fillStyle = "rgba(90,140,200,.22)";                       // studio skyline graphic
+        for (var i = 0; i < 8; i++) ctx.fillRect(18 + i * 36, 96 - (i % 3) * 16, 24, 60);
+        ctx.fillStyle = "#7a1f2a"; ctx.fillRect(0, 150, W, 46);       // the desk
+        ctx.fillStyle = "#9a2b36"; ctx.fillRect(0, 150, W, 4);
+        // presenter (left) and guest (right)
+        ctx.fillStyle = "#20304e"; ctx.fillRect(66, 118, 46, 34);
+        ctx.fillStyle = "#e8e4da"; ctx.fillRect(84, 120, 10, 32);
+        head(89, 104, 13, "#e8b98d", "swept", "#3a2a1c", false, who === "p" && talkA);
+        ctx.fillStyle = "#1c2740"; ctx.fillRect(200, 116, 52, 36);    // pinstripe suit
+        ctx.strokeStyle = "rgba(200,210,230,.35)"; ctx.lineWidth = 1;
+        for (var px = 204; px < 250; px += 5) { ctx.beginPath(); ctx.moveTo(px, 116); ctx.lineTo(px, 152); ctx.stroke(); }
+        ctx.fillStyle = "#e8e4da"; ctx.fillRect(220, 118, 12, 34);
+        ctx.fillStyle = "#b03030"; ctx.fillRect(224, 120, 4, 22);     // red tie
+        head(226, 100, 14, "#f0c4a4", "thin", "#d8d4cc", true, who === "g" && talkA);
+        ctx.fillStyle = "rgba(220,120,120,.35)";                      // ruddy cheeks
+        ctx.beginPath(); ctx.arc(218, 104, 3.4, 0, 7); ctx.arc(234, 104, 3.4, 0, 7); ctx.fill();
+        ctx.fillStyle = "#c0392b"; ctx.fillRect(6, 14, 62, 13);       // BREAKING flag
+        ctx.fillStyle = "#fff"; ctx.font = "bold 8px monospace"; ctx.textAlign = "left";
+        ctx.fillText("BREAKING", 10, 23);
+        ctx.fillStyle = "rgba(240,238,230,.9)"; ctx.font = "7px monospace";
+        ctx.fillText(c.tag, 74, 23);
+      } else {
+        ctx.fillStyle = "#150d20"; ctx.fillRect(0, 8, W, H - 23);
+        var lg = ctx.createLinearGradient(0, 8, W, H);                 // LED strip glow
+        lg.addColorStop(0, "rgba(190,40,120,.35)"); lg.addColorStop(1, "rgba(60,40,190,.3)");
+        ctx.fillStyle = lg; ctx.fillRect(0, 8, W, H - 23);
+        ctx.fillStyle = "rgba(255,90,160,.5)"; ctx.fillRect(0, 34, W, 3);
+        ctx.fillStyle = "rgba(255,255,255,.08)"; ctx.fillRect(200, 52, 96, 62);   // a chart, only going up
+        ctx.strokeStyle = "#6bf0a0"; ctx.lineWidth = 2; ctx.beginPath();
+        ctx.moveTo(204, 110); ctx.lineTo(224, 96); ctx.lineTo(244, 100); ctx.lineTo(264, 72); ctx.lineTo(292, 58);
+        ctx.stroke();
+        ctx.fillStyle = "#2a1f38"; ctx.fillRect(58, 122, 60, 40);     // podcaster
+        head(88, 104, 14, "#dda878", "crop", "#2a2018", false, who === "h" && talkA);
+        ctx.strokeStyle = "#e8e4da"; ctx.lineWidth = 3;               // headphones
+        ctx.beginPath(); ctx.arc(88, 104, 16, Math.PI * 1.08, Math.PI * 1.92); ctx.stroke();
+        ctx.fillStyle = "#2b2b34"; ctx.fillRect(70, 100, 6, 10); ctx.fillRect(100, 100, 6, 10);
+        ctx.fillStyle = "#3a3a46"; ctx.fillRect(126, 108, 7, 44);     // mic stand
+        ctx.fillStyle = "#1c1c24"; ctx.beginPath(); ctx.ellipse(129, 104, 9, 12, 0, 0, 7); ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,.16)"; ctx.beginPath(); ctx.ellipse(126, 100, 3, 5, 0, 0, 7); ctx.fill();
+        ctx.fillStyle = "#ff5aa0"; ctx.fillRect(6, 14, 10, 10);       // REC dot
+        ctx.fillStyle = "rgba(240,238,230,.9)"; ctx.font = "7px monospace"; ctx.textAlign = "left";
+        ctx.fillText(c.tag, 22, 22);
+      }
+      // caption / lower third
+      ctx.fillStyle = "rgba(8,8,14,.86)"; ctx.fillRect(0, 184, W, 26);
+      ctx.fillStyle = who === "s" ? "#9aa0b0" : "#e8b45c"; ctx.fillRect(0, 184, W, 1.5);
+      ctx.textAlign = "center";
+      ctx.font = who === "s" ? "8px monospace" : "bold 10px monospace";
+      ctx.fillStyle = "rgba(255,60,60,.5)"; ctx.fillText(ln[1], W / 2 - 1, 201);   // colour fringe
+      ctx.fillStyle = "rgba(60,200,255,.5)"; ctx.fillText(ln[1], W / 2 + 1, 201);
+      ctx.fillStyle = who === "s" ? "#c8ccd8" : "#f3e6c8"; ctx.fillText(ln[1], W / 2, 201);
+      // ticker — kept clear of the bezel
+      ctx.fillStyle = "rgba(120,20,28,.9)"; ctx.fillRect(0, 210, W, 13);
+      ctx.save(); ctx.beginPath(); ctx.rect(0, 210, W, 13); ctx.clip();
+      ctx.fillStyle = "#f3e6c8"; ctx.font = "8px monospace"; ctx.textAlign = "left";
+      var tw = ctx.measureText(c.ticker).width, off = (cutT * 1.1) % tw;
+      ctx.fillText(c.ticker, -off, 219); ctx.fillText(c.ticker, tw - off, 219);
+      ctx.restore();
+      ctx.restore();
+      crackle(cutT);
+      tvBezel();
+      ctx.fillStyle = "rgba(243,230,200,.5)"; ctx.font = "7px monospace"; ctx.textAlign = "right";
+      ctx.fillText("tap to continue", W - 44, H - 5);
+    }
+  
+    return {
+      title: "🚇 Mind the Gap",
+      hint: "Tap / space to jump. Collect the pay, dodge the costs — and note how the two modes differ.",
+      init: reset,
+      update: function () {
+        tick++;
+        if (scr === "cut") {
+          cutT++;
+          if (cutT % CUT_HOLD === 0 && cutLine < CUTS[cut].lines.length - 1) cutLine++;
+          return;
+        }
+        if (scr !== "play") { phase += 0.14; return; }
+        var c = conf(), spd = c.spd;
+        phase += 0.3;
+        dist += spd;
+        money -= c.drain;
+        if (hurtT > 0) hurtT--;
+        if (flashT > 0) flashT--;
+        if (msgT > 0) msgT--;
+        vy += 0.34; py += vy;                                        // gravity
+        if (py > GROUND - PH) { py = GROUND - PH; vy = 0; }
+        if (c.ceil && py < c.ceil) {                                 // the glass ceiling holds
+          py = c.ceil; vy = 0;                                       // you hang against it a moment, then slide back
+          if (ceilHit <= 0) { ceilHit = 26; ceilCracks = Math.min(7, ceilCracks + 1); say("CLUNK."); Ambient.blip(240, 0.07, "square"); }
+        }
+        if (ceilHit > 0) ceilHit--;
+        if (--spawnT <= 0) {                                         // spawn the road ahead
+          spawnT = c.gap + Math.floor(Math.random() * 26);
+          if (Math.random() < 0.62) items.push({ k: "cash", x: W + 10, y: Math.random() < 0.45 ? GROUND - 62 : GROUND - 26, w: 15, h: 11 });
+          else items.push({ k: "haz", x: W + 10, y: GROUND - 22, w: 20, h: 22, tag: c.haz[Math.floor(Math.random() * c.haz.length)] });
+        }
+        for (var i = items.length - 1; i >= 0; i--) {
+          var it = items[i];
+          it.x -= spd;
+          if (mode === "rigged") {                                    // the road clears itself for you
+            if (it.k === "haz" && it.x < PX + 90) { it.y += 3; if (it.y > H) { items.splice(i, 1); continue; } }
+            if (it.k === "cash" && it.x < PX + 110) {                 // and the money comes to you
+              it.x += (PX + 4 - it.x) * 0.14; it.y += (py + 8 - it.y) * 0.14;
+            }
+          }
+          if (it.x < -40) { items.splice(i, 1); continue; }
+          var hit = it.x < PX + PW && it.x + it.w > PX && it.y < py + PH && it.y + it.h > py;
+          if (!hit) continue;
+          if (it.k === "cash") {
+            money += mode === "rigged" ? 25000 : (c.coin || 14); items.splice(i, 1);
+            Ambient.blip(880, 0.05, "triangle");
+          } else if (hurtT <= 0) {
+            money -= 22; hurtT = 40; flashT = 12; items.splice(i, 1);
+            say(it.tag + "!"); Ambient.blip(150, 0.14, "square");
+          }
+        }
+        if (money <= 0 && mode !== "rigged") { finish(false); return; }
+        if (dist >= c.goal) {
+          if (mode === "rigged" || lv >= LEVELS.length - 1) finish(true);
+          else if (CUTS[lv]) { cut = lv; cutT = 0; cutLine = 0; scr = "cut"; }
+          else { lv++; scr = "brief"; }
+        }
+      },
+      draw: function () {
+        // ---------- TITLE ----------
+        if (scr === "title") {
+          mode = null; sky();
+          landmarks(tick * 0.07, GROUND, "#2f2750");
+          skyline(tick * 0.12, GROUND, 74, "#2b2244", 1.7, true);
+          skyline(tick * 0.3, GROUND, 44, "#1b1630", 3.1, false);
+          road(tick * 0.6); drizzle(tick);
+          drawGuy(96, GROUND + 22, 1.1, true, 1.5);                  // paused mid-stride, stressed
+          panel(28, 46);
+          ctx.textAlign = "center"; ctx.fillStyle = "#e8b45c"; ctx.font = "bold 22px monospace";
+          ctx.fillText("MIND THE GAP", W / 2, 52);
+          ctx.fillStyle = "#cfc0a0"; ctx.font = "9px monospace";
+          ctx.fillText("getting on in london  ·  est. 1984", W / 2, 66);
+          btn(BL, BW.y, BW.w, BW.h, "WORKER MODE", false);
+          btn(BR, BW.y, BW.w, BW.h, "RIGGED MODE", false);
+          ctx.fillStyle = "#cfc0a0"; ctx.font = "9px monospace";
+          ctx.fillText("choose your circumstances", W / 2, 234);
+          crt(); return;
+        }
+        // ---------- CUTSCENE ----------
+        if (scr === "cut") { drawCut(); return; }
+        // ---------- BRIEFING ----------
+        if (scr === "brief") {
+          var c = conf(), BB = 148;                                   // kerb line, above the caption
+          if (c.interior) {
+            office(30);
+            lift(212, BB, 104, 52);
+            ctx.fillStyle = "#3a3f52"; ctx.fillRect(0, BB, W, 150 - BB);
+            ctx.fillStyle = "#4a5168"; ctx.fillRect(0, BB, W, 2);
+          } else {
+            sky();
+            landmarks(20, BB, "#2f2750");
+            skyline(40, BB, 58, "#2b2244", 1.7, true);
+            tower(206, BB, 116, 58);                                  // the tower with the pound
+            ctx.fillStyle = "#2a2436"; ctx.fillRect(0, BB, W, 150 - BB);
+            ctx.fillStyle = "#3a3348"; ctx.fillRect(0, BB, W, 2);
+          }
+          drawGuy(74, BB, 0.35, true, 1.15);                          // looking up at it
+          if (mode !== "rigged" && !c.interior) drizzle(tick);
+          panel(150, 90);
+          ctx.textAlign = "center"; ctx.fillStyle = "#e8b45c"; ctx.font = "bold 12px monospace";
+          ctx.fillText(c.title, W / 2, 165);
+          var ly = 183;
+          if (c.inscr) {                                              // the gate above each circle
+            ctx.fillStyle = "#c9a24a"; ctx.font = "italic 8px monospace";
+            ctx.fillText(c.inscr, W / 2, 178); ly = 192;
+          }
+          ctx.fillStyle = "#f3e6c8"; ctx.font = "10px monospace";
+          for (var i = 0; i < c.lines.length; i++) ctx.fillText(c.lines[i], W / 2, ly + i * 13);
+          ctx.fillStyle = "#9be36b"; ctx.font = "bold 10px monospace";
+          ctx.fillText("tap / space to begin", W / 2, 233);
+          crt(); return;
+        }
+        // ---------- PLAY ----------
+        var c2 = conf();
+        var tx = W - (dist / c2.goal) * (W + 90) + 40;                // the goal draws nearer
+        if (c2.interior) {
+          office(dist);
+          lift(tx, GROUND, 128, 58);
+          ctx.fillStyle = "#3a3f52"; ctx.fillRect(0, GROUND, W, H - GROUND);   // carpet tiles
+          ctx.fillStyle = "#333849";
+          for (var cx2 = -(dist % 34); cx2 < W; cx2 += 34) ctx.fillRect(cx2, GROUND, 1, H - GROUND);
+          ctx.fillStyle = "#4a5168"; ctx.fillRect(0, GROUND, W, 3);
+        } else {
+          sky();
+          landmarks(dist * 0.06, GROUND, "#2f2750");
+          skyline(dist * 0.12, GROUND, 74, "#2b2244", 1.7, true);
+          tower(tx, GROUND, 150, 66);
+          skyline(dist * 0.34, GROUND, 40, "#1b1630", 3.1, false);
+          road(dist);
+        }
+        items.forEach(function (it) {
+          if (it.k === "cash") {
+            ctx.fillStyle = "#8fd08a"; ctx.fillRect(it.x, it.y, it.w, it.h);
+            ctx.strokeStyle = "#3f7a48"; ctx.lineWidth = 1; ctx.strokeRect(it.x + .5, it.y + .5, it.w - 1, it.h - 1);
+            ctx.fillStyle = "#2f5f3a"; ctx.font = "bold 8px monospace"; ctx.textAlign = "center";
+            ctx.fillText("\u00A3", it.x + it.w / 2, it.y + it.h - 3);
+          } else {
+            ctx.fillStyle = "#c0392b"; ctx.fillRect(it.x, it.y, it.w, it.h);
+            ctx.fillStyle = "#f3e6c8"; ctx.fillRect(it.x + 3, it.y + 4, it.w - 6, 2); ctx.fillRect(it.x + 3, it.y + 9, it.w - 6, 2);
+            ctx.fillStyle = "#f3e6c8"; ctx.font = "bold 7px monospace"; ctx.textAlign = "center";
+            ctx.fillText(it.tag.slice(0, 9), it.x + it.w / 2, it.y - 3);
+          }
+        });
+        if (hurtT <= 0 || Math.floor(tick / 4) % 2 === 0) drawGuy(PX + PW / 2, py + PH, phase, money < 40 || hurtT > 0, 1);
+        if (c2.ceil) glassCeiling(c2.ceil, ceilCracks);
+        if (mode !== "rigged" && !c2.interior) drizzle(tick);
+        // HUD
+        panel(0, 22);
+        ctx.textAlign = "left"; ctx.font = "bold 11px monospace";
+        ctx.fillStyle = money < 30 ? "#ff6b6b" : "#8fd08a";
+        ctx.fillText("\u00A3" + Math.max(0, Math.round(money)), 6, 15);
+        ctx.textAlign = "center"; ctx.fillStyle = "#e8b45c"; ctx.font = "bold 9px monospace";
+        ctx.fillText(mode === "rigged" ? "RIGGED" : (c2.interior || lv >= 3 ? "FLOOR " + ["I","II","III","IV","V","VI"][Math.min(5, lv - 3)] : "LEVEL " + (lv + 1)), W / 2, 14);
+        ctx.fillStyle = "rgba(243,230,200,.3)"; ctx.fillRect(W - 96, 8, 88, 7);
+        ctx.fillStyle = "#e8b45c"; ctx.fillRect(W - 96, 8, 88 * Math.min(1, dist / c2.goal), 7);
+        if (msgT > 0) {
+          ctx.textAlign = "center"; ctx.fillStyle = "#ff9a9a"; ctx.font = "bold 13px monospace";
+          ctx.fillText(msg, W / 2, 60);
+        }
+        if (flashT > 0) { ctx.fillStyle = "rgba(200,50,40," + (flashT / 34) + ")"; ctx.fillRect(0, 0, W, H); }
+        if (scr === "win" || scr === "bust") {
+          ctx.fillStyle = "rgba(8,5,14,.85)"; ctx.fillRect(0, 0, W, H);
+          ctx.textAlign = "center";
+          if (scr === "win" && mode === "rigged") {
+            ctx.fillStyle = "#e8b45c"; ctx.font = "bold 17px monospace"; ctx.fillText("YOU WIN", W / 2, 76);
+            ctx.fillStyle = "#f3e6c8"; ctx.font = "10px monospace";
+            ctx.fillText("You were never running.", W / 2, 104);
+            ctx.fillText("The floor moved for you.", W / 2, 120);
+            ctx.fillText("Final worth: \u00A3" + Math.round(money).toLocaleString(), W / 2, 142);
+          } else if (scr === "win") {
+            ctx.fillStyle = "#e8b45c"; ctx.font = "bold 15px monospace"; ctx.fillText("THE CEILING HOLDS", W / 2, 66);
+            ctx.fillStyle = "#f3e6c8"; ctx.font = "10px monospace";
+            ctx.fillText("You reached the top of the tower.", W / 2, 92);
+            ctx.fillText("The last floor is glass. You can see it:", W / 2, 108);
+            ctx.fillText("a pass you cannot buy, a man who took", W / 2, 124);
+            ctx.fillText("the lift, and " + ceilCracks + " cracks under review.", W / 2, 140);
+            ctx.fillStyle = "#8fd08a"; ctx.font = "bold 11px monospace";
+            ctx.fillText("You kept \u00A3" + Math.max(0, Math.round(money)), W / 2, 160);
+          } else {
+            ctx.fillStyle = "#ff6b6b"; ctx.font = "bold 16px monospace"; ctx.fillText("SKINT", W / 2, 80);
+            ctx.fillStyle = "#f3e6c8"; ctx.font = "10px monospace";
+            if (lv >= 3) {
+              ctx.fillText("The costs caught up on floor " + ["I","II","III","IV","V","VI"][Math.min(5, lv - 3)] + ".", W / 2, 106);
+              ctx.fillText("Your access card has been deactivated.", W / 2, 122);
+              ctx.fillText("Someone from HR will be in touch. Or not.", W / 2, 138);
+            } else {
+              ctx.fillText("The costs caught up on level " + (lv + 1) + ".", W / 2, 106);
+              ctx.fillText("Someone will mention avocado toast.", W / 2, 122);
+            }
+          }
+          ctx.fillStyle = "#cfeecb"; ctx.font = "10px monospace";
+          ctx.fillText("tap / space for the title screen", W / 2, 186);
+        }
+        crt();
+      },
+      pointer: function (x, y, type) {
+        if (type !== "down") return;
+        if (scr === "title") {
+          if (inBtn(x, y, BL)) { mode = "worker"; lv = 0; scr = "brief"; Ambient.blip(660, 0.06, "triangle"); }
+          else if (inBtn(x, y, BR)) { mode = "rigged"; lv = 0; scr = "brief"; Ambient.blip(880, 0.06, "triangle"); }
+          return;
+        }
+        if (scr === "cut") {
+          if (cutLine < CUTS[cut].lines.length - 1) { cutLine++; cutT = 0; }
+          else { lv++; scr = "brief"; }
+          return;
+        }
+        if (scr === "brief") { beginLevel(); return; }
+        if (scr === "win" || scr === "bust") { reset(); return; }
+        jump();
+      },
+      key: function (e) {
+        if (e.key !== " " && e.code !== "Space" && e.key !== "Enter" && e.key !== "ArrowUp") return;
+        e.preventDefault();
+        if (scr === "title") { mode = "worker"; lv = 0; scr = "brief"; }
+        else if (scr === "cut") {
+          if (cutLine < CUTS[cut].lines.length - 1) { cutLine++; cutT = 0; }
+          else { lv++; scr = "brief"; }
+        }
+        else if (scr === "brief") beginLevel();
+        else if (scr === "win" || scr === "bust") reset();
+        else jump();
+      }
+    };
+  }
+
+  // ---- harness: loop and input, lifted from the house's computer ----
+  function loop() { if (!running) return; if (game) { game.update(); game.draw(); } raf = requestAnimationFrame(loop); }
+  function xy(e) {
+    var pt = e.touches ? e.touches[0] : e, r = canvas.getBoundingClientRect();
+    return { x: (pt.clientX - r.left) / r.width * W, y: (pt.clientY - r.top) / r.height * H };
+  }
+  function onMove(e) { if (game && game.pointer) { var p = xy(e); game.pointer(p.x, p.y, "move"); } if (e.cancelable) e.preventDefault(); }
+  function onDown(e) { if (game && game.pointer) { var p = xy(e); game.pointer(p.x, p.y, "down"); } if (e.cancelable) e.preventDefault(); }
+  function onUp() { if (game && game.pointer) game.pointer(0, 0, "up"); }
+  function onKey(e) { if (game && game.key) game.key(e); }
+  function bindInput() {
+    if (inputBound) return; inputBound = true;
+    canvas.addEventListener("mousemove", onMove);
+    canvas.addEventListener("touchmove", onMove, { passive: false });
+    canvas.addEventListener("mousedown", onDown);
+    canvas.addEventListener("touchstart", onDown, { passive: false });
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchend", onUp);
+    window.addEventListener("keydown", onKey);
+  }
+
+  // ---- go ----
+  function start() {
+    if (raf) cancelAnimationFrame(raf);
+    game = AntiCap(function (id, score) {
+      if (score > getBest()) { setBest(score); paintBest(); }
+    });
+    document.getElementById("hint").textContent = game.hint;
+    game.init(); bindInput(); running = true; loop();
+  }
+
+  document.getElementById("btnMute").addEventListener("click", Ambient.toggle);
+  document.getElementById("btnRestart").addEventListener("click", start);
+  // don't let space scroll the page while you're jumping
+  window.addEventListener("keydown", function (e) {
+    if ((e.key === " " || e.code === "Space") && e.target === document.body) e.preventDefault();
+  });
+
+  paintBest();
+  Ambient.paintMute();
+  start();
+})();
+</script>
+</body>
+</html>

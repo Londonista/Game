@@ -6,8 +6,9 @@ one file per game, nothing to install.
 
 | Game | File | In one line |
 |---|---|---|
+| 🚇 **Mind the Gap** | `mind-the-gap.html` | A vintage runner about "getting on" in London. Nine levels: three to get the degree, the job and the offer, then six floors of a corporate tower arranged after Dante — ending at a glass ceiling that cracks but does not break. Worker mode and rigged mode; only one of them is difficult. |
 | 🖤 **Pride, Prejudice & Pestilence** | `pestilence.html` | A cute-goth horror courtship in five nights — gather love letters, dodge baby zambies, a wolfish suitor, a vampire patroness, a ghost governess, a headless captain, and a monstrous nursemaid. Hide in hedges; trust in tea. |
-| 🌙 **Monday Night Simulator** | `monday-night-simulator.html` | A cozy hangout for three — Jas · Aqsa · Adam — with rooms to potter about in and mini-games (Star Catcher, Aqsa's Laundromat). |
+| 🌙 **Monday Night Simulator** | `monday-night-simulator.html` | A cozy hangout for three — Jas · Aqsa · Adam — with rooms to potter about in and mini-games (Star Catcher, Aqsa's Laundromat), a night market at the end of the garden, and a light switch in every room. |
 | 🫘 **Flappy Beans** | `flappy-beans.html` | Tap to flap through the stalks. Two fingers toggle the secret laser eyes. |
 
 The menu lives in **`index.html`**, so the main link always opens the parlour.
@@ -23,6 +24,22 @@ The menu lives in **`index.html`**, so the main link always opens the parlour.
 
 If you ever update the games and the phone still shows an old version, pull
 down to refresh or open the link once in a private tab.
+
+---
+
+## 🚇 Mind the Gap — how to play
+
+- **Tap or press space** to jump. Collect the 💷 pay, dodge the red costs.
+- **Worker mode** makes you earn every inch. **Rigged mode** hands it to you —
+  the road clears itself and the money comes to you. The joke is that only one
+  of them is difficult.
+- Nine levels. The first three are the degree, the job hunt and the offer;
+  the last six are floors of a tower arranged after Dante's circles, each
+  gated by its own inscription — the commute, onboarding, middle management,
+  the open plan, the restructure, and the glass ceiling.
+- Wages fall as the floors rise. Nobody comments on it.
+- Between levels the telly comes on and somebody explains your failure.
+- Your best purse is kept in the browser between visits.
 
 ---
 
@@ -115,6 +132,7 @@ The code is seeded with the three of you and has clearly-marked
 
 ## 🛠️ For the curious
 
-Each game is a single self-contained HTML file (the horror game and Flappy
-Beans draw on a `<canvas>`; Monday Night Simulator uses DOM elements; the
-parlour menu is plain HTML/CSS). No frameworks, no build step, no assets.
+Each game is a single self-contained HTML file (the horror game, Flappy Beans
+and Mind the Gap draw on a `<canvas>`; Monday Night Simulator uses DOM
+elements; the parlour menu is plain HTML/CSS). No frameworks, no build step,
+no assets — every sound is synthesized live in the browser.
